@@ -6,6 +6,9 @@ def pull(git_group='', git_repository='', basedir='.', clean=False):
     """
     Pull application configuration from central configuration management server
     :param clean: Clean pull - i.e. delete fork and local clone
+    :param git_group:
+    :param git_repository:
+    :param basedir:
     """
 
     git_username = gitlab.get_username()
@@ -14,8 +17,6 @@ def pull(git_group='', git_repository='', basedir='.', clean=False):
 
     if clean:
         option_delete_fork = True
-
-    # print(gitlab.get_projects())
 
     # Get id for git repository
     group_id = gitlab.get_group_id(git_group)
@@ -45,7 +46,7 @@ def pull(git_group='', git_repository='', basedir='.', clean=False):
             if option_delete_fork:
                 # Delete fork
                 print("Delete fork")
-                gitlab.print_response = True
+                # gitlab.print_response = True
                 gitlab.delete_project(project['id'])
                 forked_project = None
 
@@ -57,14 +58,24 @@ def pull(git_group='', git_repository='', basedir='.', clean=False):
         # If yes, delete ... or just clone and update ...
 
         # Fork project
+        print('Fork project')
         forked_project = gitlab.fork_project(git_repository_id)
+
+        import time
+        time.sleep(1)
 
     # Change to base directory
     os.chdir(basedir)
 
+    # Clean cloned repository
+    if os.path.isdir(git_repository) and clean:
+        print('Removing local clone')
+        import shutil
+        shutil.rmtree(basedir+'/'+git_repository)
+
     # Check if directory already exsits
     if os.path.isdir(git_repository):
-        print('clone directory already exists')
+        print('Clone already exists')
         # We assume that this is already a clone of a fork
 
         # Change into git repository
@@ -74,6 +85,8 @@ def pull(git_group='', git_repository='', basedir='.', clean=False):
         os.system('git pull upstream master')
 
     else:
+        print('Clone fork')
+
         # Clone repository
         os.system('git clone %s' % (forked_project['ssh_url_to_repo']))
 
@@ -85,6 +98,13 @@ def pull(git_group='', git_repository='', basedir='.', clean=False):
 
 
 def push(git_group='', git_repository='', basedir='.'):
+    """
+    Push changes to fork and create merge request
+    :param git_group:
+    :param git_repository:
+    :param basedir:
+    :return:
+    """
 
     git_username = gitlab.get_username()
 
@@ -110,7 +130,7 @@ def push(git_group='', git_repository='', basedir='.'):
                     return
 
     # We assume that we are in the directory with the forked repository
-    os.chdir(basedir+git_repository)
+    os.chdir(basedir+'/'+git_repository)
 
     # Push changes to forked repository
     print('Push changes to central server')
@@ -127,9 +147,17 @@ def push(git_group='', git_repository='', basedir='.'):
 
 
 def commit(message, git_group='', git_repository='', basedir='.'):
+    """
+    Commit changes to local clone
+    :param message:
+    :param git_group:
+    :param git_repository:
+    :param basedir:
+    :return:
+    """
 
     # Change into git repository
-    os.chdir(basedir+git_repository)
+    os.chdir(basedir+'/'+git_repository)
 
     # Commit changes
     os.system('git commit -a -m %s' % message)
@@ -137,6 +165,7 @@ def commit(message, git_group='', git_repository='', basedir='.'):
 
 if __name__ == '__main__':
 
+    # Default configuration
     configuration = {
         'launcher': {
             'git_group': 'launcher_config',
@@ -155,7 +184,7 @@ if __name__ == '__main__':
     parser.add_argument('configuration')
     parser.add_argument('-b', '--basedir', help='Base directory to clone configurations to', default=os.path.expanduser('~')+'/app_config')
 
-    # TODO add option to overwrite configuration dictionary
+    parser.add_argument('-c', '--config', nargs='?', help='Configuration')
 
     subparsers = parser.add_subparsers(title='command',
                                        description='valid commands',
@@ -168,11 +197,17 @@ if __name__ == '__main__':
     parser_push = subparsers.add_parser('push', help='push configuration from central server')
 
     parser_commit = subparsers.add_parser('commit', help='commit configuration changes to local repository')
-    parser_commit.add_argument('-m', '--message', help='commit message')
+    parser_commit.add_argument('-m', '--message', required=True, help='commit message')
 
     arguments = parser.parse_args()
 
     print(arguments.basedir)
+    os.makedirs(arguments.basedir, exist_ok=True)
+
+    if arguments.config:
+        import json
+        with open(arguments.config) as data_file:
+            configuration = json.load(data_file)
 
     if arguments.configuration not in configuration:
         print('Unsupported configuration')
@@ -181,7 +216,7 @@ if __name__ == '__main__':
 
     if arguments.command:
         if arguments.command == 'pull':
-            pull(basedir=arguments.basedir, **configuration[arguments.configuration])
+            pull(basedir=arguments.basedir, clean=arguments.clean, **configuration[arguments.configuration])
         elif arguments.command == 'push':
             push(basedir=arguments.basedir, **configuration[arguments.configuration])
         elif arguments.command == 'commit':

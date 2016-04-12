@@ -1,4 +1,4 @@
-import gitlab
+from . import gitlab
 import os
 
 
@@ -96,6 +96,8 @@ def pull(git_group='', git_repository='', basedir='.', clean=False):
         # Add upstream repository
         os.system('git remote add upstream %s' % (forked_project['ssh_url_to_repo']))
 
+    print('Configuration is now available at: '+basedir+'/'+git_repository)
+    
 
 def push(git_group='', git_repository='', basedir='.'):
     """
@@ -163,7 +165,7 @@ def commit(message, git_group='', git_repository='', basedir='.'):
     os.system('git commit -a -m %s' % message)
 
 
-if __name__ == '__main__':
+def main():
 
     # Default configuration
     configuration = {
@@ -225,3 +227,5 @@ if __name__ == '__main__':
         parser.print_help()
         exit(-1)
 
+if __name__ == '__main__':
+    main()

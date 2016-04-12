@@ -97,14 +97,16 @@ def pull(git_group='', git_repository='', basedir='.', clean=False):
         os.system('git remote add upstream %s' % (forked_project['ssh_url_to_repo']))
 
     print('Configuration is now available at: '+basedir+'/'+git_repository)
-    
 
-def push(git_group='', git_repository='', basedir='.'):
+
+def push(git_group='', git_repository='', basedir='.', merge_request=None):
     """
     Push changes to fork and create merge request
     :param git_group:
     :param git_repository:
     :param basedir:
+    :param title:
+    :param description:
     :return:
     """
 
@@ -138,14 +140,18 @@ def push(git_group='', git_repository='', basedir='.'):
     print('Push changes to central server')
     os.system('git push origin master')
 
-    # Create pull request
-    print('Create merge request')
-    merge_request = gitlab.create_merge_request(git_repository_id, forked_project['id'])
+    if merge_request:
+        title = merge_request
+        description = 'The configuration was changed by %s' % git_username
 
-    if 'message' in merge_request:
-        # Merge request already exists
-        for m in merge_request['message']:
-            print(m)
+        # Create pull request
+        print('Create merge request')
+        merge_request = gitlab.create_merge_request(git_repository_id, forked_project['id'], title=title, description=description)
+
+        if 'message' in merge_request:
+            # Merge request already exists
+            for m in merge_request['message']:
+                print(m)
 
 
 def commit(message, git_group='', git_repository='', basedir='.'):
@@ -197,6 +203,7 @@ def main():
     parser_pull.add_argument('-c', '--clean', action='store_true', help='Create clean fork and clone')
 
     parser_push = subparsers.add_parser('push', help='push configuration from central server')
+    parser_push.add_argument('-m', '--message', required=True, help='Merge request title')
 
     parser_commit = subparsers.add_parser('commit', help='commit configuration changes to local repository')
     parser_commit.add_argument('-m', '--message', required=True, help='commit message')
@@ -220,7 +227,7 @@ def main():
         if arguments.command == 'pull':
             pull(basedir=arguments.basedir, clean=arguments.clean, **configuration[arguments.configuration])
         elif arguments.command == 'push':
-            push(basedir=arguments.basedir, **configuration[arguments.configuration])
+            push(basedir=arguments.basedir, **configuration[arguments.configuration], merge_request=arguments.message)
         elif arguments.command == 'commit':
             commit(arguments.message, basedir=arguments.basedir, **configuration[arguments.configuration])
     else:

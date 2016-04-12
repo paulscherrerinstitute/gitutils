@@ -7,9 +7,26 @@ import logging
 
 # Gitlab API Documenation: http://doc.gitlab.com/ce/api/
 
+private_token = None
+# Download Gitlab private token for authentication if not already done so
+if not os.path.isfile(os.path.expanduser('~')+'/.gitlab_token'):
+    import getpass
+
+    print('To download your Gitlab private token please authenticate')
+    print('Username: '+getpass.getuser())
+
+    data = {"login": getpass.getuser(), 'password': getpass.getpass()}
+    r = requests.post('https://git.psi.ch/api/v3/session', data=data)
+    response = json.loads(r.content.decode("utf-8"))
+    private_token = response['private_token']
+    with open(os.path.expanduser('~')+'/.gitlab_token', 'w') as tfile:
+        tfile.write(response['private_token'])
+    os.chmod(os.path.expanduser('~')+'/.gitlab_token', 0o600)
+
 # Somehow get private token for gitlab
-with open(os.path.expanduser('~')+'/.gitlab_token', 'r') as tfile:
-    private_token=tfile.read().replace('\n', '')
+if not private_token:
+    with open(os.path.expanduser('~')+'/.gitlab_token', 'r') as tfile:
+       private_token = tfile.read().replace('\n', '')
 
 if 'GITLAB_PRIVATE_TOKEN' in os.environ:
     private_token = os.environ['GITLAB_PRIVATE_TOKEN']
@@ -102,6 +119,7 @@ def get_group_projects(group_id):
 
     return projects
 
+
 def fork_project(project_id):
     # POST /projects/fork/:id
     # Create group/namespace
@@ -111,10 +129,54 @@ def fork_project(project_id):
     if print_response:
         pprint.pprint(response)
 
-    # Check return value whether fork already exists ???
+    return response
 
-    # logging.info('%s - %d' % (response['name'], response['id']))
-    # return {'name': response['name'], 'id': response['id']}
+
+def create_merge_request(project_id, project_id_fork, title='Test Merge Request', description='Some wonderful text'):
+    # POST /projects/:id/merge_requests
+    headers = {'PRIVATE-TOKEN': private_token}
+    data = {'target_project_id': project_id, 'source_branch': 'master', 'target_branch': 'master', 'title': title, 'description':description}
+    r = requests.post('https://git.psi.ch/api/v3/projects/%d/merge_requests' % project_id_fork, headers=headers, data=data)
+    response = json.loads(r.content.decode("utf-8"))
+    if print_response:
+        pprint.pprint(response)
+
+    return response
+
+
+def get_owned_projects():
+    # GET /projects/owned
+    headers = {'PRIVATE-TOKEN': private_token}
+    # data = {"search": group_name}
+    data = {}
+    r = requests.get('https://git.psi.ch/api/v3/projects/owned', headers=headers, data=data)
+    response = json.loads(r.content.decode("utf-8"))
+    if print_response:
+        pprint.pprint(response)
+
+    return response
+
+
+def delete_project(project_id):
+    # DELETE /projects/:id
+    headers = {'PRIVATE-TOKEN': private_token}
+    r = requests.delete('https://git.psi.ch/api/v3/projects/%d' % project_id, headers=headers)
+    response = json.loads(r.content.decode("utf-8"))
+    if print_response:
+        pprint.pprint(response)
+
+    return
+
+
+def get_username():
+    headers = {'PRIVATE-TOKEN': private_token}
+    r = requests.get('https://git.psi.ch/api/v3/user', headers=headers)
+    response = json.loads(r.content.decode("utf-8"))
+    if print_response:
+        pprint.pprint(response)
+
+    return response['username']
+
 
 def update_project_visibility(project_id, visibility=10):
     headers = {'PRIVATE-TOKEN': private_token}

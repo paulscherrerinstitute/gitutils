@@ -2,11 +2,11 @@ from . import gitlab
 import os
 
 
-def pull(git_group='', git_repository='', basedir='.', clean=False):
+def pull(git_group_id='', git_repository='', basedir='.', clean=False):
     """
     Pull application configuration from central configuration management server
     :param clean: Clean pull - i.e. delete fork and local clone
-    :param git_group:
+    :param git_group_id:
     :param git_repository:
     :param basedir:
     """
@@ -19,7 +19,8 @@ def pull(git_group='', git_repository='', basedir='.', clean=False):
         option_delete_fork = True
 
     # Get id for git repository
-    group_id = gitlab.get_group_id(git_group)
+    # group_id = gitlab.get_group_id(git_group)
+    group_id = git_group_id
     projects = gitlab.get_group_projects(group_id)
 
     for project in projects:
@@ -99,10 +100,10 @@ def pull(git_group='', git_repository='', basedir='.', clean=False):
     print('Configuration is now available at: '+basedir+'/'+git_repository)
 
 
-def push(git_group='', git_repository='', basedir='.', merge_request=None):
+def push(git_group_id='', git_repository='', basedir='.', merge_request=None):
     """
     Push changes to fork and create merge request
-    :param git_group:
+    :param git_group_id:
     :param git_repository:
     :param basedir:
     :param title:
@@ -113,7 +114,8 @@ def push(git_group='', git_repository='', basedir='.', merge_request=None):
     git_username = gitlab.get_username()
 
     # Get id for master git repository
-    group_id = gitlab.get_group_id(git_group)
+    # group_id = gitlab.get_group_id(git_group)
+    group_id = git_group_id
     projects = gitlab.get_group_projects(group_id)
 
     for project in projects:
@@ -176,11 +178,13 @@ def main():
     # Default configuration
     configuration = {
         'launcher': {
-            'git_group': 'launcher_config',
+            # 'git_group': 'launcher_config',
+            'git_group_id': 107,
             'git_repository': 'sf_machine_launcher'
         },
         'archiver': {
-            'git_group': 'archiver_config',
+            # 'git_group': 'archiver_config',
+            'git_group_id': 302,
             'git_repository': 'sf_archapp'
         }
 

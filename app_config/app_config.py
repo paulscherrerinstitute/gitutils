@@ -176,6 +176,8 @@ def commit(message, git_group='', git_repository='', basedir='.'):
 def main():
 
     # Default configuration
+    # The group id can be found out by executing following command:
+    # curl -v -X GET -H "PRIVATE-TOKEN: aaaaaaaaaaaa" https://git.psi.ch/api/v3/groups?search=sf_config
     configuration = {
         'launcher': {
             # 'git_group': 'launcher_config',
@@ -186,6 +188,11 @@ def main():
             # 'git_group': 'archiver_config',
             'git_group_id': 302,
             'git_repository': 'sf_archapp'
+        }
+        'databuffer': {
+            # 'git_group': 'sf_config',
+            'git_group_id': 321,
+            'git_repository': 'sf_daq_config'
         }
 
     }

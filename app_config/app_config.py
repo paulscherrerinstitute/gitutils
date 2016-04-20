@@ -26,6 +26,7 @@ def pull(git_group_id='', git_repository='', basedir='.', clean=False):
     for project in projects:
         if project['name'] == git_repository:
             git_repository_id = project['id']
+            git_repository_upstream = project['ssh_url_to_repo']
             break
 
     # Check if there is already a fork
@@ -85,6 +86,7 @@ def pull(git_group_id='', git_repository='', basedir='.', clean=False):
         # Make sure that clone is up to date ...
         os.system('git pull upstream master')
 
+
     else:
         print('Clone fork')
 
@@ -95,7 +97,7 @@ def pull(git_group_id='', git_repository='', basedir='.', clean=False):
         os.chdir(git_repository)
 
         # Add upstream repository
-        os.system('git remote add upstream %s' % (forked_project['ssh_url_to_repo']))
+        os.system('git remote add upstream %s' % (git_repository_upstream))
 
     print('Configuration is now available at: '+basedir+'/'+git_repository)
 

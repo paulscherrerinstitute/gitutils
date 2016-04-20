@@ -26,7 +26,7 @@ def pull(git_group_id='', git_repository='', basedir='.', clean=False):
     for project in projects:
         if project['name'] == git_repository:
             git_repository_id = project['id']
-            git_repository_upstream = project['ssh_url_to_repo']
+            git_repository_upstream = project['url']
             break
 
     # Check if there is already a fork

@@ -188,7 +188,7 @@ def main():
             # 'git_group': 'archiver_config',
             'git_group_id': 302,
             'git_repository': 'sf_archapp'
-        }
+        },
         'databuffer': {
             # 'git_group': 'sf_config',
             'git_group_id': 321,

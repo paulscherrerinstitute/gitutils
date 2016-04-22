@@ -186,6 +186,51 @@ def main():
             'git_group_id': 107,
             'git_repository': 'sf_machine_launcher'
         },
+        'launcher_controls': {
+            # 'git_group': 'launcher_config',
+            'git_group_id': 107,
+            'git_repository': 'sf_controls_launcher'
+        },
+        'launcher_magnets': {
+            # 'git_group': 'launcher_config',
+            'git_group_id': 107,
+            'git_repository': 'sf_magnets_launcher'
+        },
+        'launcher_insertiondevices': {
+            # 'git_group': 'launcher_config',
+            'git_group_id': 107,
+            'git_repository': 'sf_insertiondevices_launcher'
+        },
+        'launcher_photonics': {
+            # 'git_group': 'launcher_config',
+            'git_group_id': 107,
+            'git_repository': 'sf_photonics_launcher'
+        },
+        'launcher_timingsynchronization': {
+            # 'git_group': 'launcher_config',
+            'git_group_id': 107,
+            'git_repository': 'sf_timingsynchronization_launcher'
+        },
+        'launcher_laser': {
+            # 'git_group': 'launcher_config',
+            'git_group_id': 107,
+            'git_repository': 'sf_laser_launcher'
+        },
+        'launcher_vacuum': {
+            # 'git_group': 'launcher_config',
+            'git_group_id': 107,
+            'git_repository': 'sf_vacuum_launcher'
+        },
+        'launcher_diagnostics': {
+            # 'git_group': 'launcher_config',
+            'git_group_id': 107,
+            'git_repository': 'sf_diagnostics_launcher'
+        },
+        'launcher_rf': {
+            # 'git_group': 'launcher_config',
+            'git_group_id': 107,
+            'git_repository': 'sf_rf_launcher'
+        },
         'archiver': {
             # 'git_group': 'archiver_config',
             'git_group_id': 302,
@@ -195,6 +240,11 @@ def main():
             # 'git_group': 'sf_config',
             'git_group_id': 321,
             'git_repository': 'sf_daq_config'
+        },
+        'alarmhandler': {
+            # 'git_group': 'alarmhandler_config',
+            'git_group_id': 323,
+            'git_repository': 'sf_alh_config'
         }
 
     }

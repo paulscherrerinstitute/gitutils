@@ -283,6 +283,7 @@ def main():
 
     if arguments.configuration not in configuration:
         print('Unsupported configuration')
+        print('Supported configurations are: {}'.format(list(configuration.keys())))
         parser.print_help()
         exit(-1)
 

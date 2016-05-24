@@ -236,10 +236,10 @@ def main():
             'git_group_id': 302,
             'git_repository': 'sf_archapp'
         },
-        'sf_daq_config': {
+        'sf_daq_sources': {
             # 'git_group': 'sf_config',
             'git_group_id': 321,
-            'git_repository': 'sf_daq_config'
+            'git_repository': 'sf_daq_sources'
         },
         'sf_daq_data_policy': {
             # 'git_group': 'sf_config',

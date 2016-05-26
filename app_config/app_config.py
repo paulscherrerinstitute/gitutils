@@ -231,10 +231,10 @@ def main():
             'git_group_id': 107,
             'git_repository': 'sf_rf_launcher'
         },
-        'launcher_virtual_accelerator': {
+        'launcher_bd': {
             # 'git_group': 'launcher_config',
             'git_group_id': 107,
-            'git_repository': 'sf_virtual_accelerator'
+            'git_repository': 'sf_beamdynamics_launcher'
         },
         'archiver': {
             # 'git_group': 'archiver_config',

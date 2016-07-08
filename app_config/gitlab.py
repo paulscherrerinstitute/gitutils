@@ -42,6 +42,7 @@ def get_groups():
     r = requests.get('https://git.psi.ch/api/v3/groups', headers=headers, data=data)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
+        print('Status Code: %d' % r.status_code)
         pprint.pprint(response)
 
     groups = dict()
@@ -58,6 +59,7 @@ def get_projects():
     r = requests.get('https://git.psi.ch/api/v3/projects', headers=headers)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
+        print('Status Code: %d' % r.status_code)
         pprint.pprint(response)
 
     projects = []
@@ -75,6 +77,7 @@ def create_group(group_name):
     r = requests.post('https://git.psi.ch/api/v3/groups', headers=headers, data=data)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
+        print('Status Code: %d' % r.status_code)
         pprint.pprint(response)
 
     logging.info('%s - %d' % (response['name'], response['id']))
@@ -88,6 +91,7 @@ def create_repository(repository_name, namespace_id):
     r = requests.post('https://git.psi.ch/api/v3/projects', headers=headers, data=data)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
+        print('Status Code: %d' % r.status_code)
         pprint.pprint(response)
 
     logging.info('%s [%s] - %s' % (response['name'], response['path_with_namespace'], response['ssh_url_to_repo']))
@@ -100,6 +104,7 @@ def get_group_id(group_name):
     r = requests.get('https://git.psi.ch/api/v3/groups', headers=headers, data=data)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
+        print('Status Code: %d' % r.status_code)
         pprint.pprint(response)
 
     return response[0]['id']
@@ -110,6 +115,7 @@ def get_group_projects(group_id):
     r = requests.get('https://git.psi.ch/api/v3/groups/%d' % group_id, headers=headers)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
+        print('Status Code: %d' % r.status_code)
         pprint.pprint(response)
 
     projects = []
@@ -127,6 +133,7 @@ def fork_project(project_id):
     r = requests.post('https://git.psi.ch/api/v3/projects/fork/%d' % project_id, headers=headers)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
+        print('Status Code: %d' % r.status_code)
         pprint.pprint(response)
 
     return response
@@ -139,6 +146,7 @@ def create_merge_request(project_id, project_id_fork, title='Test Merge Request'
     r = requests.post('https://git.psi.ch/api/v3/projects/%d/merge_requests' % project_id_fork, headers=headers, data=data)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
+        print('Status Code: %d' % r.status_code)
         pprint.pprint(response)
 
     return response
@@ -152,6 +160,7 @@ def get_owned_projects():
     r = requests.get('https://git.psi.ch/api/v3/projects/owned', headers=headers, data=data)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
+        print('Status Code: %d' % r.status_code)
         pprint.pprint(response)
 
     return response
@@ -163,6 +172,7 @@ def delete_project(project_id):
     r = requests.delete('https://git.psi.ch/api/v3/projects/%d' % project_id, headers=headers)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
+        print('Status Code: %d' % r.status_code)
         pprint.pprint(response)
 
     return
@@ -173,6 +183,7 @@ def get_username():
     r = requests.get('https://git.psi.ch/api/v3/user', headers=headers)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
+        print('Status Code: %d' % r.status_code)
         pprint.pprint(response)
 
     return response['username']
@@ -184,6 +195,7 @@ def update_project_visibility(project_id, visibility=10):
     r = requests.put('https://git.psi.ch/api/v3/projects/%d' % project_id, headers=headers, data=data)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
+        print('Status Code: %d' % r.status_code)
         pprint.pprint(response)
 
     return response

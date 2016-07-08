@@ -1,5 +1,6 @@
 from . import gitlab
 import os
+import time
 
 
 def pull(git_group_id='', git_repository='', basedir='.', clean=False):
@@ -62,9 +63,7 @@ def pull(git_group_id='', git_repository='', basedir='.', clean=False):
         # Fork project
         print('Fork project')
         forked_project = gitlab.fork_project(git_repository_id)
-
-        import time
-        time.sleep(1)
+        time.sleep(1)  # Needed because of problems with the git server
 
     # Change to base directory
     os.chdir(basedir)

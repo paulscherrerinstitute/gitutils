@@ -26,7 +26,7 @@ if not os.path.isfile(os.path.expanduser('~')+'/.gitlab_token'):
 # Somehow get private token for gitlab
 if not private_token:
     with open(os.path.expanduser('~')+'/.gitlab_token', 'r') as tfile:
-       private_token = tfile.read().replace('\n', '')
+        private_token = tfile.read().replace('\n', '')
 
 if 'GITLAB_PRIVATE_TOKEN' in os.environ:
     private_token = os.environ['GITLAB_PRIVATE_TOKEN']
@@ -38,7 +38,7 @@ print_response = False
 def get_groups():
     # Get groups
     headers = {'PRIVATE-TOKEN': private_token}
-    data = {"per_page":100}
+    data = {"per_page": 100}
     r = requests.get('https://git.psi.ch/api/v3/groups', headers=headers, data=data)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
@@ -142,7 +142,7 @@ def fork_project(project_id):
 def create_merge_request(project_id, project_id_fork, title='Test Merge Request', description='Some wonderful text'):
     # POST /projects/:id/merge_requests
     headers = {'PRIVATE-TOKEN': private_token}
-    data = {'target_project_id': project_id, 'source_branch': 'master', 'target_branch': 'master', 'title': title, 'description':description}
+    data = {'target_project_id': project_id, 'source_branch': 'master', 'target_branch': 'master', 'title': title, 'description': description}
     r = requests.post('https://git.psi.ch/api/v3/projects/%d/merge_requests' % project_id_fork, headers=headers, data=data)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:

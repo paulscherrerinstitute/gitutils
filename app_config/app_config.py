@@ -24,11 +24,17 @@ def pull(git_group_id='', git_repository='', basedir='.', clean=False):
     group_id = git_group_id
     projects = gitlab.get_group_projects(group_id)
 
+    git_repository_upstream = None
+    git_repository_id = None
+
     for project in projects:
         if project['name'] == git_repository:
             git_repository_id = project['id']
             git_repository_upstream = project['url']
             break
+
+    if git_repository_upstream is None or git_repository_id is None:
+        raise Exception("Unable to find project %s - Aborting...\n" % project['name'])
 
     # Check if there is already a fork
     forked_project = None
@@ -51,6 +57,9 @@ def pull(git_group_id='', git_repository='', basedir='.', clean=False):
                 print("Delete fork")
                 # gitlab.print_response = True
                 gitlab.delete_project(project['id'])
+                # TODO Need to be removed once Git server is fixed
+                print("Waiting for fork being deleted ...")
+                time.sleep(2) # Needed because of problems with the git server
                 forked_project = None
 
             break
@@ -63,7 +72,9 @@ def pull(git_group_id='', git_repository='', basedir='.', clean=False):
         # Fork project
         print('Fork project')
         forked_project = gitlab.fork_project(git_repository_id)
-        time.sleep(1)  # Needed because of problems with the git server
+        print("Waiting for fork being created ...")
+        # TODO Need to be removed once Git server is fixed
+        time.sleep(2)  # Needed because of problems with the git server
 
     # Change to base directory
     os.chdir(basedir)
@@ -85,7 +96,6 @@ def pull(git_group_id='', git_repository='', basedir='.', clean=False):
         # Make sure that clone is up to date ...
         os.system('git pull upstream master')
 
-
     else:
         print('Clone fork')
 
@@ -96,7 +106,7 @@ def pull(git_group_id='', git_repository='', basedir='.', clean=False):
         os.chdir(git_repository)
 
         # Add upstream repository
-        os.system('git remote add upstream %s' % (git_repository_upstream))
+        os.system('git remote add upstream %s' % git_repository_upstream)
 
     print('Configuration is now available at: '+basedir+'/'+git_repository)
 
@@ -118,6 +128,8 @@ def push(git_group_id='', git_repository='', basedir='.', merge_request=None):
     # group_id = gitlab.get_group_id(git_group)
     group_id = git_group_id
     projects = gitlab.get_group_projects(group_id)
+    forked_project = None
+    git_repository_id = None
 
     for project in projects:
         if project['name'] == git_repository:
@@ -148,6 +160,9 @@ def push(git_group_id='', git_repository='', basedir='.', merge_request=None):
         description = 'The configuration was changed by %s' % git_username
 
         # Create pull request
+        if forked_project in None:
+            raise Exception('Cannot create merge request as there is no forked')
+
         print('Create merge request')
         merge_request = gitlab.create_merge_request(git_repository_id, forked_project['id'], title=title, description=description)
 
@@ -297,12 +312,15 @@ def main():
         exit(-1)
 
     if arguments.command:
-        if arguments.command == 'pull':
-            pull(basedir=arguments.basedir, clean=arguments.clean, **configuration[arguments.configuration])
-        elif arguments.command == 'push':
-            push(basedir=arguments.basedir, **configuration[arguments.configuration], merge_request=arguments.message)
-        elif arguments.command == 'commit':
-            commit(arguments.message, basedir=arguments.basedir, **configuration[arguments.configuration])
+        try:
+            if arguments.command == 'pull':
+                pull(basedir=arguments.basedir, clean=arguments.clean, **configuration[arguments.configuration])
+            elif arguments.command == 'push':
+                push(basedir=arguments.basedir, **configuration[arguments.configuration], merge_request=arguments.message)
+            elif arguments.command == 'commit':
+                commit(arguments.message, basedir=arguments.basedir, **configuration[arguments.configuration])
+        except Exception as e:
+            print(str(e))
     else:
         parser.print_help()
         exit(-1)

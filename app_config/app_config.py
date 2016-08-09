@@ -156,11 +156,12 @@ def push(git_group_id='', git_repository='', basedir='.', merge_request=None):
     os.system('git push origin master')
 
     if merge_request:
+
         title = merge_request
         description = 'The configuration was changed by %s' % git_username
 
         # Create pull request
-        if forked_project in None:
+        if forked_project is None:
             raise Exception('Cannot create merge request as there is no forked')
 
         print('Create merge request')

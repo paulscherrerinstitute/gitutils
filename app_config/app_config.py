@@ -276,6 +276,10 @@ def main():
 
     import argparse
 
+    # TODO Add a --list option. This is currently not possible because the way the arguments are done right now
+    # (configuration is a required option and the parsing would fail before coming to the --list option)
+    # The usage should be like this: app_config <subparser> configuration 
+
     parser = argparse.ArgumentParser(description='Application configuration management utility')
     parser.add_argument('configuration')
     parser.add_argument('-b', '--basedir', help='Base directory to clone configurations to', default=os.path.expanduser('~')+'/app_config')

@@ -278,13 +278,14 @@ def main():
 
     # TODO Add a --list option. This is currently not possible because the way the arguments are done right now
     # (configuration is a required option and the parsing would fail before coming to the --list option)
-    # The usage should be like this: app_config <subparser> configuration 
+    # The usage should be like this: app_config <subparser> configuration
 
     parser = argparse.ArgumentParser(description='Application configuration management utility')
-    parser.add_argument('configuration')
+    parser.add_argument('configuration', nargs='?', default=None)
     parser.add_argument('-b', '--basedir', help='Base directory to clone configurations to', default=os.path.expanduser('~')+'/app_config')
 
     parser.add_argument('-c', '--config', nargs='?', help='Configuration')
+    parser.add_argument('-l', '--list', help='List available configurations to be used', action="store_true")
 
     subparsers = parser.add_subparsers(title='command',
                                        description='valid commands',
@@ -302,6 +303,14 @@ def main():
 
     arguments = parser.parse_args()
 
+    if arguments.list:
+        print('Supported configurations are:\n%s' % '\n'.join(list(configuration.keys())))
+        exit(0)
+
+    if not arguments.configuration:
+        parser.print_help()
+        exit(-1)
+
     print(arguments.basedir)
     os.makedirs(arguments.basedir, exist_ok=True)
 
@@ -311,7 +320,7 @@ def main():
             configuration = json.load(data_file)
 
     if arguments.configuration not in configuration:
-        print('Unsupported configuration - supported configurations are: {}\n'.format(list(configuration.keys())))
+        print('Unsupported configuration - supported configurations are:\n%s' % '\n'.join(list(configuration.keys())))
         parser.print_help()
         exit(-1)
 

@@ -7,7 +7,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'Readme.md')).read()
 
 setup(name='app_config',
-      version='1.0.14',
+      version='1.1.0',
       description="Configuration management tools to support configuration change workflows",
       long_description=README,
       author='Paul Scherrer Institute (PSI)',

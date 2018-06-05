@@ -10,18 +10,23 @@ import logging
 private_token = None
 # Download Gitlab private token for authentication if not already done so
 if not os.path.isfile(os.path.expanduser('~')+'/.gitlab_token'):
-    import getpass
 
-    print('To download your Gitlab private token please authenticate')
-    print('Username: '+getpass.getuser())
+    print("\nYou are missing the gitlab access token - due to changes in the gitlab API this cannot be done automatically for you any more\n\nPlease follow the procedure described as resolution of: https://jira.psi.ch/browse/CTRLIT-6320 before you continue ...\n")
+    exit(-1)
 
-    data = {"login": getpass.getuser(), 'password': getpass.getpass()}
-    r = requests.post('https://git.psi.ch/api/v3/session', data=data)
-    response = json.loads(r.content.decode("utf-8"))
-    private_token = response['private_token']
-    with open(os.path.expanduser('~')+'/.gitlab_token', 'w') as tfile:
-        tfile.write(response['private_token'])
-    os.chmod(os.path.expanduser('~')+'/.gitlab_token', 0o600)
+    # import getpass
+    #
+    # print('To download your Gitlab private token please authenticate')
+    # print('Username: '+getpass.getuser())
+    #
+    # data = {"login": getpass.getuser(), 'password': getpass.getpass()}
+    # r = requests.post('https://git.psi.ch/api/v4/profile/account', data=data)
+    # response = json.loads(r.content.decode("utf-8"))
+    # print(response)
+    # private_token = response['private_token']
+    # with open(os.path.expanduser('~')+'/.gitlab_token', 'w') as tfile:
+    #     tfile.write(response['private_token'])
+    # os.chmod(os.path.expanduser('~')+'/.gitlab_token', 0o600)
 
 # Somehow get private token for gitlab
 if not private_token:

@@ -270,6 +270,11 @@ def main():
             # 'git_group': 'alarmhandler_config',
             'git_group_id': 323,
             'git_repository': 'sf_alh_config'
+        },
+        'hipa_archiver': {
+            # 'git_group': 'archiver_config',
+            'git_group_id': 302,
+            'git_repository': 'hipa_archiver'
         }
 
     }

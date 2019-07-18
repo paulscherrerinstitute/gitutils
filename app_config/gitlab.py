@@ -44,7 +44,7 @@ def get_groups():
     # Get groups
     headers = {'PRIVATE-TOKEN': private_token}
     data = {"per_page": 100}
-    r = requests.get('https://git.psi.ch/api/v3/groups', headers=headers, data=data)
+    r = requests.get('https://git.psi.ch/api/v4/groups', headers=headers, data=data)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
         print('Status Code: %d' % r.status_code)
@@ -61,7 +61,7 @@ def get_groups():
 def get_projects():
     # Get projects / repositories
     headers = {'PRIVATE-TOKEN': private_token}
-    r = requests.get('https://git.psi.ch/api/v3/projects', headers=headers)
+    r = requests.get('https://git.psi.ch/api/v4/projects', headers=headers)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
         print('Status Code: %d' % r.status_code)
@@ -79,7 +79,7 @@ def create_group(group_name):
     # Create group/namespace
     headers = {'PRIVATE-TOKEN': private_token}
     data = {"name": group_name, "path":  group_name}
-    r = requests.post('https://git.psi.ch/api/v3/groups', headers=headers, data=data)
+    r = requests.post('https://git.psi.ch/api/v4/groups', headers=headers, data=data)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
         print('Status Code: %d' % r.status_code)
@@ -93,7 +93,7 @@ def create_repository(repository_name, namespace_id):
     # Create repository/project
     headers = {'PRIVATE-TOKEN': private_token}
     data = {"name": repository_name, "namespace_id":  namespace_id}
-    r = requests.post('https://git.psi.ch/api/v3/projects', headers=headers, data=data)
+    r = requests.post('https://git.psi.ch/api/v4/projects', headers=headers, data=data)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
         print('Status Code: %d' % r.status_code)
@@ -106,7 +106,7 @@ def create_repository(repository_name, namespace_id):
 def get_group_id(group_name):
     headers = {'PRIVATE-TOKEN': private_token}
     data = {"search": group_name}
-    r = requests.get('https://git.psi.ch/api/v3/groups', headers=headers, data=data)
+    r = requests.get('https://git.psi.ch/api/v4/groups', headers=headers, data=data)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
         print('Status Code: %d' % r.status_code)
@@ -117,7 +117,7 @@ def get_group_id(group_name):
 
 def get_group_projects(group_id):
     headers = {'PRIVATE-TOKEN': private_token}
-    r = requests.get('https://git.psi.ch/api/v3/groups/%d' % group_id, headers=headers)
+    r = requests.get('https://git.psi.ch/api/v4/groups/%d' % group_id, headers=headers)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
         print('Status Code: %d' % r.status_code)
@@ -135,7 +135,7 @@ def fork_project(project_id):
     # POST /projects/fork/:id
     # Create group/namespace
     headers = {'PRIVATE-TOKEN': private_token}
-    r = requests.post('https://git.psi.ch/api/v3/projects/fork/%d' % project_id, headers=headers)
+    r = requests.post('https://git.psi.ch/api/v4/projects/%d/fork' % project_id, headers=headers)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
         print('Status Code: %d' % r.status_code)
@@ -148,7 +148,7 @@ def create_merge_request(project_id, project_id_fork, title='Test Merge Request'
     # POST /projects/:id/merge_requests
     headers = {'PRIVATE-TOKEN': private_token}
     data = {'target_project_id': project_id, 'source_branch': 'master', 'target_branch': 'master', 'title': title, 'description': description}
-    r = requests.post('https://git.psi.ch/api/v3/projects/%d/merge_requests' % project_id_fork, headers=headers, data=data)
+    r = requests.post('https://git.psi.ch/api/v4/projects/%d/merge_requests' % project_id_fork, headers=headers, data=data)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
         print('Status Code: %d' % r.status_code)
@@ -162,7 +162,7 @@ def get_owned_projects():
     headers = {'PRIVATE-TOKEN': private_token}
     # data = {"search": group_name}
     data = {}
-    r = requests.get('https://git.psi.ch/api/v3/projects/owned', headers=headers, data=data)
+    r = requests.get('https://git.psi.ch/api/v4/projects?owned=true', headers=headers, data=data)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
         print('Status Code: %d' % r.status_code)
@@ -174,7 +174,7 @@ def get_owned_projects():
 def delete_project(project_id):
     # DELETE /projects/:id
     headers = {'PRIVATE-TOKEN': private_token}
-    r = requests.delete('https://git.psi.ch/api/v3/projects/%d' % project_id, headers=headers)
+    r = requests.delete('https://git.psi.ch/api/v4/projects/%d' % project_id, headers=headers)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
         print('Status Code: %d' % r.status_code)
@@ -185,7 +185,7 @@ def delete_project(project_id):
 
 def get_username():
     headers = {'PRIVATE-TOKEN': private_token}
-    r = requests.get('https://git.psi.ch/api/v3/user', headers=headers)
+    r = requests.get('https://git.psi.ch/api/v4/user', headers=headers)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
         print('Status Code: %d' % r.status_code)
@@ -197,7 +197,7 @@ def get_username():
 def update_project_visibility(project_id, visibility=10):
     headers = {'PRIVATE-TOKEN': private_token}
     data = {"visibility_level": visibility}
-    r = requests.put('https://git.psi.ch/api/v3/projects/%d' % project_id, headers=headers, data=data)
+    r = requests.put('https://git.psi.ch/api/v4/projects/%d' % project_id, headers=headers, data=data)
     response = json.loads(r.content.decode("utf-8"))
     if print_response:
         print('Status Code: %d' % r.status_code)

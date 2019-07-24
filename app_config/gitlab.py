@@ -39,55 +39,59 @@ if 'GITLAB_PRIVATE_TOKEN' in os.environ:
 
 print_response = False
 
+###############
+### UPDATED ###
+###############
+def oauth_authentication():
+    return requests.post("https://git.psi.ch/oauth/token?grant_type=password&username="+login+"&password="+password).json()
 
+###############
+### UPDATED ###
+###############
 def get_groups():
-    # Get groups
-    headers = {'PRIVATE-TOKEN': private_token}
-    data = {"per_page": 100}
-    r = requests.get('https://git.psi.ch/api/v4/groups', headers=headers, data=data)
-    response = json.loads(r.content.decode("utf-8"))
-    if print_response:
-        print('Status Code: %d' % r.status_code)
-        pprint.pprint(response)
+    groups = gl.groups.list()
+    groups_dict = dict()
+    for group in groups:
+        logging.info('%s - %d' % (group.attributes['name'], group.attributes['id']))
+        groups_dict[group.attributes['name']] = ({'name': group.attributes['name'], 'id': group.attributes['id']})
+    return groups_dict
 
-    groups = dict()
-    for group in response:
-        logging.info('%s - %d' % (group['name'], group['id']))
-        groups[group['name']] = ({'name': group['name'], 'id': group['id']})
-
-    return groups
-
-
+###############
+### UPDATED ###
+###############
 def get_projects():
-    # Get projects / repositories
-    headers = {'PRIVATE-TOKEN': private_token}
-    r = requests.get('https://git.psi.ch/api/v4/projects', headers=headers)
-    response = json.loads(r.content.decode("utf-8"))
-    if print_response:
-        print('Status Code: %d' % r.status_code)
-        pprint.pprint(response)
-
+    projects_list = gl.projects.list()
     projects = []
-    for project in response:
-        logging.info('%s [%s] - %s' % (project['name'], project['path_with_namespace'], project['ssh_url_to_repo']))
-        projects.append({'name': project['name'], 'path': project['path_with_namespace'], 'url': project['ssh_url_to_repo']})
-
+    for project in projects_list:
+        logging.info('%s [%s] - %s' % (project.attributes['name'], project.attributes['path_with_namespace'], project.attributes['ssh_url_to_repo']))
+        projects.append({'name': project.attributes['name'], 'path': project.attributes['path_with_namespace'], 'url': project.attributes['ssh_url_to_repo']})
     return projects
 
-
-def create_group(group_name):
-    # Create group/namespace
-    headers = {'PRIVATE-TOKEN': private_token}
-    data = {"name": group_name, "path":  group_name}
-    r = requests.post('https://git.psi.ch/api/v4/groups', headers=headers, data=data)
-    response = json.loads(r.content.decode("utf-8"))
-    if print_response:
-        print('Status Code: %d' % r.status_code)
-        pprint.pprint(response)
-
-    logging.info('%s - %d' % (response['name'], response['id']))
-    return {'name': response['name'], 'id': response['id']}
-
+###############
+### UPDATED ###
+###############
+def create_group(group_name, description):
+    try:
+        # creates the group and saves it
+        newGroup = gl.groups.create({'name': group_name, 'path': group_name})
+        newGroup.description = description
+        newGroup.save()
+        return 0
+    except:
+        print("Problem while creating group.")
+        return -1
+    
+###############
+### UPDATED ###
+###############
+def delete_group(group_name):
+    try:
+        group = gl.groups.get(group_name)
+        group.delete()
+        return 0
+    except:
+        print("Group to be deleted not found.")
+        return -1
 
 def create_repository(repository_name, namespace_id):
     # Create repository/project
@@ -102,108 +106,116 @@ def create_repository(repository_name, namespace_id):
     logging.info('%s [%s] - %s' % (response['name'], response['path_with_namespace'], response['ssh_url_to_repo']))
     return {'name': response['name'], 'path': response['path_with_namespace'], 'url': response['ssh_url_to_repo']}
 
-
+###############
+### UPDATED ###
+###############
 def get_group_id(group_name):
-    headers = {'PRIVATE-TOKEN': private_token}
-    data = {"search": group_name}
-    r = requests.get('https://git.psi.ch/api/v4/groups', headers=headers, data=data)
-    response = json.loads(r.content.decode("utf-8"))
-    if print_response:
-        print('Status Code: %d' % r.status_code)
-        pprint.pprint(response)
+    group_id = -1
+    try:
+        group_id = gl.groups.get(group_name).attributes['id']
+    except:
+        print('Group name provided not found.')
+    logging.info('Group name: %s (id %s)' % (group_name, group_id))
+    return group_id
 
-    return response[0]['id']
-
-
+###############
+### UPDATED ###
+###############
 def get_group_projects(group_id):
-    headers = {'PRIVATE-TOKEN': private_token}
-    r = requests.get('https://git.psi.ch/api/v4/groups/%d' % group_id, headers=headers)
-    response = json.loads(r.content.decode("utf-8"))
-    if print_response:
-        print('Status Code: %d' % r.status_code)
-        pprint.pprint(response)
+    # Retrieve the group
+    try:
+        group = gl.groups.get(group_id)
+    except:
+        print("Group id not found.")
+        return -1
 
+    # Retrieve the group's projects
+    group_projects = group.projects.list()
+    # Retrieve the info from each project
     projects = []
-    for project in response['projects']:
-        logging.info('%s %s [%s] - %s' % (project['name'], project['id'], project['path_with_namespace'], project['ssh_url_to_repo']))
-        projects.append({'name': project['name'], 'id': project['id'], 'path': project['path_with_namespace'], 'url': project['ssh_url_to_repo']})
-
+    for project in group_projects:
+        logging.info('%s %s [%s] - %s' % (project.attributes['name'], project.attributes['id'], project.attributes['path_with_namespace'], project.attributes['ssh_url_to_repo']))
+        projects.append({'name': project.attributes['name'], 'id': project.attributes['id'], 'path': project.attributes['path_with_namespace'], 'url': project.attributes['ssh_url_to_repo']})
     return projects
 
-
+###############
+### UPDATED ###
+###############
 def fork_project(project_id):
-    # POST /projects/fork/:id
-    # Create group/namespace
-    headers = {'PRIVATE-TOKEN': private_token}
-    r = requests.post('https://git.psi.ch/api/v4/projects/%d/fork' % project_id, headers=headers)
-    response = json.loads(r.content.decode("utf-8"))
-    if print_response:
-        print('Status Code: %d' % r.status_code)
-        pprint.pprint(response)
+    try:
+        project = gl.projects.get(project_id)
+        fork = project.forks.create({})
+        return 0
+    except:
+        print("Problem forking project id: %s" % project_id)
+        return -1
 
-    return response
+###############
+### UPDATED ###
+###############
+def create_merge_request(project_id, target_branch, source_branch, title, description, labels):
+    try:
+        project = gl.projects.get(project_id)
+        mr = project.mergerequests.create({'source_branch': source_branch,
+                                        'target_branch': target_branch,
+                                        'title': title})
+        mr.description = description
+        mr.labels = labels
+        mr.save()
+        return 0
+    except:
+        print("Problem creating merge request.")
+        return -1
 
-
-def create_merge_request(project_id, project_id_fork, title='Test Merge Request', description='Some wonderful text'):
-    # POST /projects/:id/merge_requests
-    headers = {'PRIVATE-TOKEN': private_token}
-    data = {'target_project_id': project_id, 'source_branch': 'master', 'target_branch': 'master', 'title': title, 'description': description}
-    r = requests.post('https://git.psi.ch/api/v4/projects/%d/merge_requests' % project_id_fork, headers=headers, data=data)
-    response = json.loads(r.content.decode("utf-8"))
-    if print_response:
-        print('Status Code: %d' % r.status_code)
-        pprint.pprint(response)
-
-    return response
-
-
+###############
+### UPDATED ###
+###############
 def get_owned_projects():
-    # GET /projects/owned
-    headers = {'PRIVATE-TOKEN': private_token}
-    # data = {"search": group_name}
-    data = {}
-    r = requests.get('https://git.psi.ch/api/v4/projects?owned=true', headers=headers, data=data)
-    response = json.loads(r.content.decode("utf-8"))
-    if print_response:
-        print('Status Code: %d' % r.status_code)
-        pprint.pprint(response)
+    try:
+        own_projects = gl.projects.list(owned=True)
+    except:
+        print("Problem accessing own projects.")
+        return -1
+    projects = []
+    for project in own_projects:
+        logging.info('%s [%s] - %s' % (project.attributes['name'], project.attributes['path_with_namespace'], project.attributes['ssh_url_to_repo']))
+        projects.append({'name': project.attributes['name'], 'path': project.attributes['path_with_namespace'], 'url': project.attributes['ssh_url_to_repo']})
+    return projects
 
-    return response
-
-
+###############
+### UPDATED ###
+###############
 def delete_project(project_id):
-    # DELETE /projects/:id
-    headers = {'PRIVATE-TOKEN': private_token}
-    r = requests.delete('https://git.psi.ch/api/v4/projects/%d' % project_id, headers=headers)
-    response = json.loads(r.content.decode("utf-8"))
-    if print_response:
-        print('Status Code: %d' % r.status_code)
-        pprint.pprint(response)
+    try:
+        gl.projects.delete(project_id)
+        return 0
+    except:
+        print("Problem deleting project id: %s." % project_id))
+        return -1
 
-    return
-
-
+###############
+### UPDATED ###
+###############
 def get_username():
-    headers = {'PRIVATE-TOKEN': private_token}
-    r = requests.get('https://git.psi.ch/api/v4/user', headers=headers)
-    response = json.loads(r.content.decode("utf-8"))
-    if print_response:
-        print('Status Code: %d' % r.status_code)
-        pprint.pprint(response)
+    try:
+        username = gl.user.attributes['username']
+        return username
+    except:
+        print("Problem getting username.")
+        return -1
 
-    return response['username']
-
-
-def update_project_visibility(project_id, visibility=10):
-    headers = {'PRIVATE-TOKEN': private_token}
-    data = {"visibility_level": visibility}
-    r = requests.put('https://git.psi.ch/api/v4/projects/%d' % project_id, headers=headers, data=data)
-    response = json.loads(r.content.decode("utf-8"))
-    if print_response:
-        print('Status Code: %d' % r.status_code)
-        pprint.pprint(response)
-
-    return response
+####################################
+### NOT SURE IF THIS MAKES SENSE ###
+####################################
+def update_project_visibility(project_id, visibility):
+    try:
+        project = gl.projects.get(project_id)
+    except:
+        print('Problem changing visibility of project id %s. Maybe access must be granted explicitly to each user.' % project_id )
+        return -1
+    project.attributes['visibility'] = visibility
+    project.save()
+    return 0
 
 
 def update_visibility_all_projects(visibility=10, excludes=[]):

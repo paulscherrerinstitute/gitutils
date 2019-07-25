@@ -9,6 +9,7 @@ import gitlab
 import app_config.const
 
 # Gitlab API Documenation: http://doc.gitlab.com/ce/api/
+# Python-Gitlab Documetation: https://python-gitlab.readthedocs.io/en/stable/index.html
 
 private_token = None
 

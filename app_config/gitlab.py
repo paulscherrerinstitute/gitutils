@@ -2,53 +2,45 @@ import requests
 import json
 import pprint
 import os
+import sys
+import errno
 import logging
-
+import gitlab
+import app_config.const
 
 # Gitlab API Documenation: http://doc.gitlab.com/ce/api/
 
 private_token = None
-# Download Gitlab private token for authentication if not already done so
-if not os.path.isfile(os.path.expanduser('~')+'/.gitlab_token'):
 
-    print("\nYou are missing the gitlab access token - due to changes in the gitlab API this cannot be done automatically for you any more\n\nPlease follow the procedure described as resolution of: https://jira.psi.ch/browse/CTRLIT-6320 before you continue ...\n")
-    exit(-1)
+print('To access your Gitlab account, please authenticate: ')
+login = input("Username:")
+password = getpass.getpass(prompt='Password')
 
-    # import getpass
-    #
-    # print('To download your Gitlab private token please authenticate')
-    # print('Username: '+getpass.getuser())
-    #
-    # data = {"login": getpass.getuser(), 'password': getpass.getpass()}
-    # r = requests.post('https://git.psi.ch/api/v4/profile/account', data=data)
-    # response = json.loads(r.content.decode("utf-8"))
-    # print(response)
-    # private_token = response['private_token']
-    # with open(os.path.expanduser('~')+'/.gitlab_token', 'w') as tfile:
-    #     tfile.write(response['private_token'])
-    # os.chmod(os.path.expanduser('~')+'/.gitlab_token', 0o600)
+gl = gitlab.Gitlab(endpoint, oauth_token=access_token, api_version=4)
+gl.auth()
 
-# Somehow get private token for gitlab
-if not private_token:
-    with open(os.path.expanduser('~')+'/.gitlab_token', 'r') as tfile:
-        private_token = tfile.read().replace('\n', '')
-
-if 'GITLAB_PRIVATE_TOKEN' in os.environ:
-    private_token = os.environ['GITLAB_PRIVATE_TOKEN']
-
-
-print_response = False
-
-###############
-### UPDATED ###
-###############
 def oauth_authentication():
-    return requests.post("https://git.psi.ch/oauth/token?grant_type=password&username="+login+"&password="+password).json()
+    """
+    Requests oauth authentication for the current user and login provided to be able to perform git operations. 
+    :return: Dictionary containing details of the authentication request (access_token, toke_type, refresh_token, scope and created_at)
+    :rtype: dict
+    """
+    return requests.post(oauth_rout+"?grant_type=password&username="+login+"&password="+password).json()
 
-###############
-### UPDATED ###
-###############
+try:
+    private_token = oauth_authentication()["access_token"]
+except Exception as ex:
+    template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+    message = template.format(type(ex).__name__, ex.args)
+    print(message)
+    sys.exit(errno.EACCES)
+
 def get_groups():
+    """
+    Retrieves all the groups of the current user.
+    :return: Dictionary containing details of the groups (name and id).
+    :rtype: dict
+    """
     groups = gl.groups.list()
     groups_dict = dict()
     for group in groups:
@@ -56,10 +48,12 @@ def get_groups():
         groups_dict[group.attributes['name']] = ({'name': group.attributes['name'], 'id': group.attributes['id']})
     return groups_dict
 
-###############
-### UPDATED ###
-###############
 def get_projects():
+    """
+    Retrieves all the projects of the current user.
+    :return: List containing all the details of the projects (name, path and url) in a dictionary-type format.
+    :rtype: list
+    """
     projects_list = gl.projects.list()
     projects = []
     for project in projects_list:
@@ -67,66 +61,100 @@ def get_projects():
         projects.append({'name': project.attributes['name'], 'path': project.attributes['path_with_namespace'], 'url': project.attributes['ssh_url_to_repo']})
     return projects
 
-###############
-### UPDATED ###
-###############
 def create_group(group_name, description):
+    """
+    Creates a group based on the name given as parameter and its description.
+    :param group_name: Name of the group that will be created.
+    :type group_name: str
+    :param description: Description of the group that will be created.
+    :type description: str
+    :return: Returns 0 if successful or -1 if a problem occured.
+    :rtype: int
+    """
     try:
-        # creates the group and saves it
         newGroup = gl.groups.create({'name': group_name, 'path': group_name})
         newGroup.description = description
         newGroup.save()
         return 0
-    except:
-        print("Problem while creating group.")
+    except Exception as ex:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(ex).__name__, ex.args)
+        print(message)
         return -1
-    
-###############
-### UPDATED ###
-###############
+
 def delete_group(group_name):
+    """
+    Deletes a group based on the name given as parameter.
+    :param group_name: Name of the group that will be deleted.
+    :type group_name: str
+    :return: Returns 0 if successful or -1 if a problem occured.
+    :rtype: int
+    """
     try:
         group = gl.groups.get(group_name)
         group.delete()
         return 0
-    except:
-        print("Group to be deleted not found.")
+    except Exception as ex:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(ex).__name__, ex.args)
+        print(message)
         return -1
 
-def create_repository(repository_name, namespace_id):
-    # Create repository/project
-    headers = {'PRIVATE-TOKEN': private_token}
-    data = {"name": repository_name, "namespace_id":  namespace_id}
-    r = requests.post('https://git.psi.ch/api/v4/projects', headers=headers, data=data)
-    response = json.loads(r.content.decode("utf-8"))
-    if print_response:
-        print('Status Code: %d' % r.status_code)
-        pprint.pprint(response)
 
-    logging.info('%s [%s] - %s' % (response['name'], response['path_with_namespace'], response['ssh_url_to_repo']))
-    return {'name': response['name'], 'path': response['path_with_namespace'], 'url': response['ssh_url_to_repo']}
+def create_repo(repo_name, namespace):
+    """
+    Creates a repository (project) with the name (given as parameter) under the specified namespace (also given as parameter).
+    :param repo_name: Name of the repository that will be created.
+    :type repo_name: str
+    :param namespace: Namespace which the new repository will belong.
+    :type namespace: str
+    :return: Dictionary containing the details of the newly created repository, including name, path and url.
+    :rtype: dict
+    """
+    try:
+        namespace_id = gl.groups.get(namespace).attributes['id']
+        project = gl.projects.create({'name': repo_name, 'namespace_id': namespace_id})
+        logging.info('%s [%s] - %s' % (project.attributes['name'], project.attributes['path_with_namespace'], project.attributes['ssh_url_to_repo']))
+        return {'name': project.attributes['name'], 'path': project.attributes['path_with_namespace'], 'url': project.attributes['ssh_url_to_repo']}
+    except Exception as ex:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(ex).__name__, ex.args)
+        print(message)
+        return -1
 
-###############
-### UPDATED ###
-###############
 def get_group_id(group_name):
+    """
+    Retrieves the group id based on the group name given as parameter.
+    :param group_name: Name of the group of interest.
+    :type group_name: str
+    :return: ID of the group given as parameter or -1 in case of a problem.
+    :rtype: int
+    """
     group_id = -1
     try:
         group_id = gl.groups.get(group_name).attributes['id']
-    except:
-        print('Group name provided not found.')
+    except Exception as ex:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(ex).__name__, ex.args)
+        print(message)
     logging.info('Group name: %s (id %s)' % (group_name, group_id))
     return group_id
 
-###############
-### UPDATED ###
-###############
 def get_group_projects(group_id):
+    """
+    Retrieves all the projects of a group, which is given as parameter.
+    :param group_id: ID of the group of interest.
+    :type group_id: int
+    :return: List of the projects (for the specified group id) containing name, id, path and url (in a dictionary-type).
+    :rtype: list
+    """
     # Retrieve the group
     try:
         group = gl.groups.get(group_id)
-    except:
-        print("Group id not found.")
+    except Exception as ex:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(ex).__name__, ex.args)
+        print(message)
         return -1
 
     # Retrieve the group's projects
@@ -138,22 +166,42 @@ def get_group_projects(group_id):
         projects.append({'name': project.attributes['name'], 'id': project.attributes['id'], 'path': project.attributes['path_with_namespace'], 'url': project.attributes['ssh_url_to_repo']})
     return projects
 
-###############
-### UPDATED ###
-###############
 def fork_project(project_id):
+    """
+    Creates a fork of the project given as parameter.
+    :param project_id: ID of the project that wants to be forked.
+    :type project_id: int
+    :return: Returns 0 if successful or -1 if a problem occured.
+    :rtype: int
+    """
     try:
         project = gl.projects.get(project_id)
         fork = project.forks.create({})
         return 0
-    except:
-        print("Problem forking project id: %s" % project_id)
+    except Exception as ex:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(ex).__name__, ex.args)
+        print(message)
         return -1
 
-###############
-### UPDATED ###
-###############
 def create_merge_request(project_id, target_branch, source_branch, title, description, labels):
+    """
+    Creates a merge request based on the parameters given. 
+    :param project_id: ID of the project for the merge request.
+    :type project_id: int
+    :param target_branch: Name of the target branch.
+    :type project_id: str
+    :param source_branch: Name of the source branch.
+    :type source_branch: str
+    :param title: Name of the merge request.
+    :type title: str
+    :param description: Description of the merge request.
+    :type description: str
+    :param labels: Possible labels for the merge request (this can be empty).
+    :type labels: str
+    :return: Returns 0 if successful or -1 if a problem occured.
+    :rtype: int
+    """
     try:
         project = gl.projects.get(project_id)
         mr = project.mergerequests.create({'source_branch': source_branch,
@@ -163,18 +211,24 @@ def create_merge_request(project_id, target_branch, source_branch, title, descri
         mr.labels = labels
         mr.save()
         return 0
-    except:
-        print("Problem creating merge request.")
+    except Exception as ex:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(ex).__name__, ex.args)
+        print(message)
         return -1
 
-###############
-### UPDATED ###
-###############
 def get_owned_projects():
+    """
+    Retrieves the projects owned by the current user.
+    :return: List of projects containing name, path and url (in a dictionary-type).
+    :rtype: list
+    """
     try:
         own_projects = gl.projects.list(owned=True)
-    except:
-        print("Problem accessing own projects.")
+    except Exception as ex:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(ex).__name__, ex.args)
+        print(message)
         return -1
     projects = []
     for project in own_projects:
@@ -182,36 +236,52 @@ def get_owned_projects():
         projects.append({'name': project.attributes['name'], 'path': project.attributes['path_with_namespace'], 'url': project.attributes['ssh_url_to_repo']})
     return projects
 
-###############
-### UPDATED ###
-###############
 def delete_project(project_id):
+    """
+    Deletes the project given as parameter
+    :return: Returns 0 if successful or -1 if a problem occured.
+    :rtype: int
+    """
     try:
         gl.projects.delete(project_id)
         return 0
-    except:
-        print("Problem deleting project id: %s." % project_id))
+    except Exception as ex:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(ex).__name__, ex.args)
+        print(message)
         return -1
 
-###############
-### UPDATED ###
-###############
 def get_username():
+    """
+    Gets the current username 
+    :return: Returns username if successful or "problem" if a problem occured.
+    :rtype: str
+    """
     try:
         username = gl.user.attributes['username']
         return username
-    except:
-        print("Problem getting username.")
-        return -1
+    except Exception as ex:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(ex).__name__, ex.args)
+        print(message)
+        return "problem"
 
-####################################
-### NOT SURE IF THIS MAKES SENSE ###
-####################################
 def update_project_visibility(project_id, visibility):
+    """
+    Update the visibility of the project passed via the excludes parameter
+    :param project_id: ID of the project that will have it's visibility updated
+    :type project_id: int
+    :param visibility: New visibility for the project
+    :type visibility: int
+    :return: Returns 0 if successful or -1 if a problem occured.
+    :rtype: int
+    """
     try:
         project = gl.projects.get(project_id)
-    except:
-        print('Problem changing visibility of project id %s. Maybe access must be granted explicitly to each user.' % project_id )
+    except Exception as ex:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(ex).__name__, ex.args)
+        print(message)
         return -1
     project.attributes['visibility'] = visibility
     project.save()
@@ -228,24 +298,23 @@ def update_visibility_all_projects(visibility=10, excludes=[]):
     result = get_groups()
 
     repository_count = 0
+    # for all groups
     for (key, group) in result.items():
-        # logging.info('Process group: %s' % group['name'])
         print('Process group: %s' % group['name'])
         # Exclude groups ...
         if group['name'] in excludes:
             continue
 
         group_id = group['id']
-        # group_id = get_group_id('launcher_config')
         projects = get_group_projects(group_id)
         for project in projects:
-            # logging.info('Update project: %s' % project['name'])
-            print('Update project: %s' % project['name'])
             result = update_project_visibility(project['id'], visibility=visibility)
-            # pprint.pprint(result)
-            repository_count += 1
-
-    # logging.info('Number of repositories changed: %d' % repository_count)
+            if result == 0:
+                print('Visibility of project %s updated.' % project['name'])
+                repository_count += 1
+            else:
+                print("Problem updating project the visibility of project %s." % project['name'])
+    logging.info('Number of repositories changed: %d' % repository_count)
     print('Number of repositories changed: %d' % repository_count)
 
 
@@ -254,12 +323,5 @@ if __name__ == '__main__':
 
     if not private_token:
         print('Before executing this script make sure that you have set GITLAB_PRIVATE_TOKEN')
-
-    # result = get_groups()
-    # result = get_projects()
-    # result = create_group('test')
-    # result = create_repository('test', 18)
-
-    # pprint.pprint(result)
 
     update_visibility_all_projects(excludes=['remote_data_transfers'])

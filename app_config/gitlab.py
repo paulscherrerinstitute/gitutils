@@ -6,18 +6,18 @@ import sys
 import errno
 import logging
 import gitlab
-import app_config.const
+import const
 
 # Gitlab API Documenation: http://doc.gitlab.com/ce/api/
 # Python-Gitlab Documetation: https://python-gitlab.readthedocs.io/en/stable/index.html
 
 private_token = None
 
-print('To access your Gitlab account, please authenticate: ')
-login = input("Username:")
-password = getpass.getpass(prompt='Password')
+print(const.AUTHENTICATE_REQUEST)
+login = input(const.LOGIN_REQUEST)
+password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
 
-gl = gitlab.Gitlab(endpoint, oauth_token=access_token, api_version=4)
+gl = gitlab.Gitlab(const.endpoint, oauth_token=access_token, api_version=4)
 gl.auth()
 
 def oauth_authentication():
@@ -26,12 +26,12 @@ def oauth_authentication():
     :return: Dictionary containing details of the authentication request (access_token, toke_type, refresh_token, scope and created_at)
     :rtype: dict
     """
-    return requests.post(oauth_rout+"?grant_type=password&username="+login+"&password="+password).json()
+    return requests.post(const.OATH_REQUEST+login+const.PASSWORD_URL+password).json()
 
 try:
     private_token = oauth_authentication()["access_token"]
 except Exception as ex:
-    template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+    template = const.EXCEPTION_TEMPLATE
     message = template.format(type(ex).__name__, ex.args)
     print(message)
     sys.exit(errno.EACCES)
@@ -78,7 +78,7 @@ def create_group(group_name, description):
         newGroup.save()
         return 0
     except Exception as ex:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
         return -1
@@ -96,7 +96,7 @@ def delete_group(group_name):
         group.delete()
         return 0
     except Exception as ex:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
         return -1
@@ -118,7 +118,7 @@ def create_repo(repo_name, namespace):
         logging.info('%s [%s] - %s' % (project.attributes['name'], project.attributes['path_with_namespace'], project.attributes['ssh_url_to_repo']))
         return {'name': project.attributes['name'], 'path': project.attributes['path_with_namespace'], 'url': project.attributes['ssh_url_to_repo']}
     except Exception as ex:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
         return -1
@@ -135,7 +135,7 @@ def get_group_id(group_name):
     try:
         group_id = gl.groups.get(group_name).attributes['id']
     except Exception as ex:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
     logging.info('Group name: %s (id %s)' % (group_name, group_id))
@@ -153,7 +153,7 @@ def get_group_projects(group_id):
     try:
         group = gl.groups.get(group_id)
     except Exception as ex:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
         return -1
@@ -180,7 +180,7 @@ def fork_project(project_id):
         fork = project.forks.create({})
         return 0
     except Exception as ex:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
         return -1
@@ -213,7 +213,7 @@ def create_merge_request(project_id, target_branch, source_branch, title, descri
         mr.save()
         return 0
     except Exception as ex:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
         return -1
@@ -227,7 +227,7 @@ def get_owned_projects():
     try:
         own_projects = gl.projects.list(owned=True)
     except Exception as ex:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
         return -1
@@ -247,7 +247,7 @@ def delete_project(project_id):
         gl.projects.delete(project_id)
         return 0
     except Exception as ex:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
         return -1
@@ -262,10 +262,10 @@ def get_username():
         username = gl.user.attributes['username']
         return username
     except Exception as ex:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
-        return "problem"
+        return const.RETURN_PROBLEM
 
 def update_project_visibility(project_id, visibility):
     """
@@ -280,7 +280,7 @@ def update_project_visibility(project_id, visibility):
     try:
         project = gl.projects.get(project_id)
     except Exception as ex:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
         return -1
@@ -323,6 +323,6 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.WARNING)
 
     if not private_token:
-        print('Before executing this script make sure that you have set GITLAB_PRIVATE_TOKEN')
+        print(const.NO_GITLAB_TOKEN)
 
     update_visibility_all_projects(excludes=['remote_data_transfers'])

@@ -6,13 +6,20 @@ import time
 def pull(git_group_id='', git_repository='', basedir='.', clean=False):
     """
     Pull application configuration from central configuration management server
+    :param git_group_id: Id of the group to be pulled from.
+    :type git_group_id: int
+    :param git_repository: Name of the repository to be pulled.
+    :type git_repository: str
+    :param basedir: Base directory.
+    :type basedir: str
     :param clean: Clean pull - i.e. delete fork and local clone
-    :param git_group_id:
-    :param git_repository:
-    :param basedir:
+    :type clean: Boolean
     """
-
+    
+    
     git_username = gitlab.get_username()
+    if git_username != const.RETURN_PROBLEM:
+        print(const.PROBLEM_USERNAME)
 
     option_delete_fork = False
 
@@ -34,7 +41,7 @@ def pull(git_group_id='', git_repository='', basedir='.', clean=False):
             break
 
     if git_repository_upstream is None or git_repository_id is None:
-        raise Exception("Unable to find project %s - Aborting...\n" % project['name'])
+        raise Exception(const.GIT_UNABLE_TO_FIND_PROJECT_MSG % project['name'])
 
     # Check if there is already a fork
     forked_project = None
@@ -44,22 +51,19 @@ def pull(git_group_id='', git_repository='', basedir='.', clean=False):
             if 'forked_from_project' in project:
                 # check whether project is forked from the right project
                 if project['forked_from_project']['id'] == git_repository_id:
-                    print('A forked repository with the name {} already exists'.format(git_repository))
+                    print(const.FORKED_EXISTS.format(git_repository))
                     forked_project = project
             else:
                 # Either we delete or we have to fail
-                print('A repository with the name {} already exists but is not a fork'.format(git_repository))
+                print(const.REPO_EXISTS_NOT_FORK.format(git_repository))
                 if not option_delete_fork:
                     return
 
             if option_delete_fork:
                 # Delete fork
-                print("Delete fork")
+                print(const.GIT_DELETE_FORK_MSG)
                 # gitlab.print_response = True
-                gitlab.delete_project(project['id'])
-                # TODO Need to be removed once Git server is fixed
-                print("Waiting for fork being deleted ...")
-                time.sleep(2) # Needed because of problems with the git server
+                r = gitlab.delete_project(project['id'])
                 forked_project = None
 
             break
@@ -70,55 +74,62 @@ def pull(git_group_id='', git_repository='', basedir='.', clean=False):
         # If yes, delete ... or just clone and update ...
 
         # Fork project
-        print('Fork project')
+        print(const.FORK_PROJECT)
         forked_project = gitlab.fork_project(git_repository_id)
-        print("Waiting for fork being created ...")
-        # TODO Need to be removed once Git server is fixed
-        time.sleep(2)  # Needed because of problems with the git server
+
+        # REMOVED THIS -> CHECK IF IT'S OK 
+        # print(const.FORK_WAIT)
+        # # TODO Need to be removed once Git server is fixed
+        # time.sleep(2)  # Needed because of problems with the git server
 
     # Change to base directory
     os.chdir(basedir)
 
     # Clean cloned repository
     if os.path.isdir(git_repository) and clean:
-        print('Removing local clone')
+        print(const.REMOVE_LOCAL_CLONE)
         import shutil
         shutil.rmtree(basedir+'/'+git_repository)
 
     # Check if directory already exsits
     if os.path.isdir(git_repository):
-        print('Clone already exists')
+        print(const.CLONE_EXISTS)
         # We assume that this is already a clone of a fork
 
         # Change into git repository
         os.chdir(git_repository)
 
         # Make sure that clone is up to date ...
-        os.system('git pull upstream master')
+        os.system(const.GIT_PULL_CMD)
 
     else:
-        print('Clone fork')
+        print(const.CLONE_FORK)
 
         # Clone repository
-        os.system('git clone %s' % (forked_project['ssh_url_to_repo']))
+        os.system(const.GIT_CLONE_CMD % (forked_project['ssh_url_to_repo']))
 
         # Change into git repository
         os.chdir(git_repository)
 
         # Add upstream repository
-        os.system('git remote add upstream %s' % git_repository_upstream)
+        os.system(const.GIT_UPSTREAM_REPO_CMD % git_repository_upstream)
 
-    print('Configuration is now available at: '+basedir+'/'+git_repository)
+    print(const.GIT_PULL_CONFIG_AVAILABLE+basedir+'/'+git_repository)
 
 
 def push(git_group_id='', git_repository='', basedir='.', merge_request=None):
     """
     Push changes to fork and create merge request
-    :param git_group_id:
-    :param git_repository:
-    :param basedir:
-    :param title:
-    :param description:
+    :param git_group_id: Id of the group to be pulled from.
+    :type git_group_id: int
+    :param git_repository: Name of the repository to push.
+    :type git_repository: str
+    :param basedir: Base directory
+    :type basedir: str
+    :param title: Title of the push command.
+    :type title: str
+    :param description: Description of the push command.
+    :type description: str
     :return:
     """
 
@@ -145,26 +156,26 @@ def push(git_group_id='', git_repository='', basedir='.', merge_request=None):
                 if project['forked_from_project']['id'] == git_repository_id:
                     forked_project = project
                 else:
-                    print('There is no fork on the central server')
+                    print(const.NO_FORK_CENTAL)
                     return
 
     # We assume that we are in the directory with the forked repository
     os.chdir(basedir+'/'+git_repository)
 
     # Push changes to forked repository
-    print('Push changes to central server')
-    os.system('git push origin master')
+    print(const.GIT_PUSH_MSG)
+    os.system(const.GIT_PUSH_CMD)
 
     if merge_request:
 
         title = merge_request
-        description = 'The configuration was changed by %s' % git_username
+        description = const.GIT_MERGE_DESCRIPTION_MSG % git_username
 
         # Create pull request
         if forked_project is None:
-            raise Exception('Cannot create merge request as there is no forked')
+            raise Exception(const.GIT_MERGE_PROBLEM)
 
-        print('Create merge request')
+        print(const.GIT_CREATE_MERGE_MSG)
         merge_request = gitlab.create_merge_request(git_repository_id, forked_project['id'], title=title, description=description)
 
         if 'message' in merge_request:
@@ -173,13 +184,15 @@ def push(git_group_id='', git_repository='', basedir='.', merge_request=None):
                 print(m)
 
 
-def commit(message, git_group='', git_repository='', basedir='.'):
+def commit(message, git_repository='', basedir='.'):
     """
-    Commit changes to local clone
-    :param message:
-    :param git_group:
-    :param git_repository:
-    :param basedir:
+    Commit changes to local clone of repository.
+    :param message: Commit message.
+    :type message: str
+    :param git_repository: Repository name.
+    :type git_repository: str
+    :param basedir: Base directory for the commit.
+    :type basedir: str 
     :return:
     """
 
@@ -187,7 +200,7 @@ def commit(message, git_group='', git_repository='', basedir='.'):
     os.chdir(basedir+'/'+git_repository)
 
     # Commit changes
-    os.system('git commit -a -m %s' % message)
+    os.system(const.GIT_COMMIT_CMD % message)
 
 
 def main():
@@ -285,31 +298,31 @@ def main():
     # (configuration is a required option and the parsing would fail before coming to the --list option)
     # The usage should be like this: app_config <subparser> configuration
 
-    parser = argparse.ArgumentParser(description='Application configuration management utility')
+    parser = argparse.ArgumentParser(description=const.APP_CONFIG_TITLE)
     parser.add_argument('configuration', nargs='?', default=None)
-    parser.add_argument('-b', '--basedir', help='Base directory to clone configurations to', default=os.path.expanduser('~')+'/app_config')
+    parser.add_argument('-b', '--basedir', help=const.BASEDIR_HELP_MSG, default=os.path.expanduser('~')+'/app_config')
 
-    parser.add_argument('-c', '--config', nargs='?', help='Configuration')
-    parser.add_argument('-l', '--list', help='List available configurations to be used', action="store_true")
+    parser.add_argument('-c', '--config', nargs='?', help=const.CONFIG_HELP_MSG)
+    parser.add_argument('-l', '--list', help=const.CONFIG_LIST_HELP_MSG, action=const.STORE_TRUE)
 
     subparsers = parser.add_subparsers(title='command',
                                        description='valid commands',
                                        dest='command',
                                        help='commands')
 
-    parser_pull = subparsers.add_parser('pull', help='pull configuration from central server')
-    parser_pull.add_argument('-c', '--clean', action='store_true', help='Create clean fork and clone')
+    parser_pull = subparsers.add_parser('pull', help=const.PULL_HELP_MSG)
+    parser_pull.add_argument('-c', '--clean', action=const.STORE_TRUE, help=const.PULL_CLEAN_HELP_MSG)
 
-    parser_push = subparsers.add_parser('push', help='push configuration from central server')
-    parser_push.add_argument('-m', '--message', required=True, help='Merge request title')
+    parser_push = subparsers.add_parser('push', help=const.PUSH_HELP_MSG)
+    parser_push.add_argument('-m', '--message', required=True, help=const.PUSH_MERGE_REQUEST_TITLE)
 
-    parser_commit = subparsers.add_parser('commit', help='commit configuration changes to local repository')
-    parser_commit.add_argument('-m', '--message', required=True, help='commit message')
+    parser_commit = subparsers.add_parser('commit', help=const.COMMIT_HELP_MSG)
+    parser_commit.add_argument('-m', '--message', required=True, help=const.COMMIT_MESSAGE)
 
     arguments = parser.parse_args()
 
     if arguments.list:
-        print('Supported configurations are:\n%s' % '\n'.join(list(configuration.keys())))
+        print(const.GIT_SUPPORTED_CONFIG_MSG % '\n'.join(list(configuration.keys())))
         exit(0)
 
     if not arguments.configuration:
@@ -325,7 +338,7 @@ def main():
             configuration = json.load(data_file)
 
     if arguments.configuration not in configuration:
-        print('Unsupported configuration - supported configurations are:\n%s' % '\n'.join(list(configuration.keys())))
+        print(const.GIT_UNSUPPORTED_CONFIG_MSG % '\n'.join(list(configuration.keys())))
         parser.print_help()
         exit(-1)
 

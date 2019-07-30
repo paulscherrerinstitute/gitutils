@@ -20,10 +20,10 @@ VISIBILITY_PUBLIC = 20
 # ROUTES #
 ##########
 ENDPOINT = "https://git.psi.ch"
-ROOT_ROUTE = urljoin(endpoint, "/")
-SIGN_IN_ROUTE = urljoin(endpoint, "/users/sign_in")
-PAT_ROUTE = urljoin(endpoint, "/profile/personal_access_tokens")
-OAUTH_ROUTE = urljoin(endpoint, "/oauth/token")
+ROOT_ROUTE = urljoin(ENDPOINT, "/")
+SIGN_IN_ROUTE = urljoin(ENDPOINT, "/users/sign_in")
+PAT_ROUTE = urljoin(ENDPOINT, "/profile/personal_access_tokens")
+OAUTH_ROUTE = urljoin(ENDPOINT, "/oauth/token")
 OATH_REQUEST = urljoin(OAUTH_ROUTE, "?grant_type=password&username=")
 PASSWORD_URL = "&password="
 ############
@@ -75,3 +75,92 @@ GIT_UPSTREAM_REPO_CMD = "git remote add upstream %s"
 GIT_PUSH_CMD = "git push origin master"
 GIT_CLONE_CMD = "git clone %s"
 GIT_PULL_CMD = "git pull upstream master"
+##################
+# DEFAULT CONFIG #
+##################
+# Default configuration
+# The group id can be found out by executing following command:
+# curl -v -X GET -H "PRIVATE-TOKEN: aaaaaaaaaaaa" https://git.psi.ch/api/v3/groups?search=sf_config
+DEFAULT_CONFIG = {
+        'launcher': {
+            # 'git_group': 'launcher_config',
+            'git_group_id': 107,
+            'git_repository': 'sf_machine_launcher'
+        },
+        'launcher_controls': {
+            # 'git_group': 'launcher_config',
+            'git_group_id': 107,
+            'git_repository': 'sf_controls_launcher'
+        },
+        'launcher_magnets': {
+            # 'git_group': 'launcher_config',
+            'git_group_id': 107,
+            'git_repository': 'sf_magnets_launcher'
+        },
+        'launcher_insertiondevices': {
+            # 'git_group': 'launcher_config',
+            'git_group_id': 107,
+            'git_repository': 'sf_insertiondevices_launcher'
+        },
+        'launcher_photonics': {
+            # 'git_group': 'launcher_config',
+            'git_group_id': 107,
+            'git_repository': 'sf_photonics_launcher'
+        },
+        'launcher_timingsynchronization': {
+            # 'git_group': 'launcher_config',
+            'git_group_id': 107,
+            'git_repository': 'sf_timingsynchronization_launcher'
+        },
+        'launcher_laser': {
+            # 'git_group': 'launcher_config',
+            'git_group_id': 107,
+            'git_repository': 'sf_laser_launcher'
+        },
+        'launcher_vacuum': {
+            # 'git_group': 'launcher_config',
+            'git_group_id': 107,
+            'git_repository': 'sf_vacuum_launcher'
+        },
+        'launcher_diagnostics': {
+            # 'git_group': 'launcher_config',
+            'git_group_id': 107,
+            'git_repository': 'sf_diagnostics_launcher'
+        },
+        'launcher_rf': {
+            # 'git_group': 'launcher_config',
+            'git_group_id': 107,
+            'git_repository': 'sf_rf_launcher'
+        },
+        'launcher_bd': {
+            # 'git_group': 'launcher_config',
+            'git_group_id': 107,
+            'git_repository': 'sf_beamdynamics_launcher'
+        },
+        'archiver': {
+            # 'git_group': 'archiver_config',
+            'git_group_id': 302,
+            'git_repository': 'sf_archapp'
+        },
+        'sf_daq_sources': {
+            # 'git_group': 'sf_config',
+            'git_group_id': 321,
+            'git_repository': 'sf_daq_sources'
+        },
+        'sf_daq_data_policy': {
+            # 'git_group': 'sf_config',
+            'git_group_id': 321,
+            'git_repository': 'sf_daq_data_policy'
+        },
+        'alarmhandler': {
+            # 'git_group': 'alarmhandler_config',
+            'git_group_id': 323,
+            'git_repository': 'sf_alh_config'
+        },
+        'hipa_archiver': {
+            # 'git_group': 'archiver_config',
+            'git_group_id': 302,
+            'git_repository': 'hipa_archiver'
+        }
+
+    }

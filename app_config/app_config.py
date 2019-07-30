@@ -1,4 +1,5 @@
-from . import gitlab
+import gitlab_utils
+import const
 import os
 import time
 
@@ -204,103 +205,15 @@ def commit(message, git_repository='', basedir='.'):
 
 
 def main():
-
-    # Default configuration
-    # The group id can be found out by executing following command:
-    # curl -v -X GET -H "PRIVATE-TOKEN: aaaaaaaaaaaa" https://git.psi.ch/api/v3/groups?search=sf_config
-    configuration = {
-        'launcher': {
-            # 'git_group': 'launcher_config',
-            'git_group_id': 107,
-            'git_repository': 'sf_machine_launcher'
-        },
-        'launcher_controls': {
-            # 'git_group': 'launcher_config',
-            'git_group_id': 107,
-            'git_repository': 'sf_controls_launcher'
-        },
-        'launcher_magnets': {
-            # 'git_group': 'launcher_config',
-            'git_group_id': 107,
-            'git_repository': 'sf_magnets_launcher'
-        },
-        'launcher_insertiondevices': {
-            # 'git_group': 'launcher_config',
-            'git_group_id': 107,
-            'git_repository': 'sf_insertiondevices_launcher'
-        },
-        'launcher_photonics': {
-            # 'git_group': 'launcher_config',
-            'git_group_id': 107,
-            'git_repository': 'sf_photonics_launcher'
-        },
-        'launcher_timingsynchronization': {
-            # 'git_group': 'launcher_config',
-            'git_group_id': 107,
-            'git_repository': 'sf_timingsynchronization_launcher'
-        },
-        'launcher_laser': {
-            # 'git_group': 'launcher_config',
-            'git_group_id': 107,
-            'git_repository': 'sf_laser_launcher'
-        },
-        'launcher_vacuum': {
-            # 'git_group': 'launcher_config',
-            'git_group_id': 107,
-            'git_repository': 'sf_vacuum_launcher'
-        },
-        'launcher_diagnostics': {
-            # 'git_group': 'launcher_config',
-            'git_group_id': 107,
-            'git_repository': 'sf_diagnostics_launcher'
-        },
-        'launcher_rf': {
-            # 'git_group': 'launcher_config',
-            'git_group_id': 107,
-            'git_repository': 'sf_rf_launcher'
-        },
-        'launcher_bd': {
-            # 'git_group': 'launcher_config',
-            'git_group_id': 107,
-            'git_repository': 'sf_beamdynamics_launcher'
-        },
-        'archiver': {
-            # 'git_group': 'archiver_config',
-            'git_group_id': 302,
-            'git_repository': 'sf_archapp'
-        },
-        'sf_daq_sources': {
-            # 'git_group': 'sf_config',
-            'git_group_id': 321,
-            'git_repository': 'sf_daq_sources'
-        },
-        'sf_daq_data_policy': {
-            # 'git_group': 'sf_config',
-            'git_group_id': 321,
-            'git_repository': 'sf_daq_data_policy'
-        },
-        'alarmhandler': {
-            # 'git_group': 'alarmhandler_config',
-            'git_group_id': 323,
-            'git_repository': 'sf_alh_config'
-        },
-        'hipa_archiver': {
-            # 'git_group': 'archiver_config',
-            'git_group_id': 302,
-            'git_repository': 'hipa_archiver'
-        }
-
-    }
-
     import argparse
-
+    configuration = const.DEFAULT_CONFIG
     # TODO Add a --list option. This is currently not possible because the way the arguments are done right now
     # (configuration is a required option and the parsing would fail before coming to the --list option)
     # The usage should be like this: app_config <subparser> configuration
 
-    parser = argparse.ArgumentParser(description=const.APP_CONFIG_TITLE)
+    parser = argparse.ArgumentParser(description=const.APP_CONFIG_TITLE_DESCRIPTION)
     parser.add_argument('configuration', nargs='?', default=None)
-    parser.add_argument('-b', '--basedir', help=const.BASEDIR_HELP_MSG, default=os.path.expanduser('~')+'/app_config')
+    parser.add_argument('-b', '--basedir', help=const.BASEDIR_HELP_MSG, default='./')
 
     parser.add_argument('-c', '--config', nargs='?', help=const.CONFIG_HELP_MSG)
     parser.add_argument('-l', '--list', help=const.CONFIG_LIST_HELP_MSG, action=const.STORE_TRUE)

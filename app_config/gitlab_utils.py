@@ -7,18 +7,18 @@ import errno
 import logging
 import gitlab
 import const
+import getpass
 
 # Gitlab API Documenation: http://doc.gitlab.com/ce/api/
 # Python-Gitlab Documetation: https://python-gitlab.readthedocs.io/en/stable/index.html
 
-private_token = None
+access_token = None
 
 print(const.AUTHENTICATE_REQUEST)
 login = input(const.LOGIN_REQUEST)
 password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
 
-gl = gitlab.Gitlab(const.endpoint, oauth_token=access_token, api_version=4)
-gl.auth()
+
 
 def oauth_authentication():
     """
@@ -29,12 +29,15 @@ def oauth_authentication():
     return requests.post(const.OATH_REQUEST+login+const.PASSWORD_URL+password).json()
 
 try:
-    private_token = oauth_authentication()["access_token"]
+    access_token = oauth_authentication()["access_token"]
 except Exception as ex:
     template = const.EXCEPTION_TEMPLATE
     message = template.format(type(ex).__name__, ex.args)
     print(message)
     sys.exit(errno.EACCES)
+
+gl = gitlab.Gitlab(const.ENDPOINT, oauth_token=access_token, api_version=4)
+gl.auth()
 
 def get_groups():
     """
@@ -322,7 +325,7 @@ def update_visibility_all_projects(visibility=10, excludes=[]):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.WARNING)
 
-    if not private_token:
+    if not access_token:
         print(const.NO_GITLAB_TOKEN)
 
     update_visibility_all_projects(excludes=['remote_data_transfers'])

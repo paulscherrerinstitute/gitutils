@@ -3,8 +3,7 @@ import const
 import os
 import time
 
-
-def pull(git_group_id='', git_repository='', basedir='.', clean=False):
+def pull(git_group_id='', git_repository_id='', git_repository_upstream='', git_repository='', basedir='.', clean=False):
     """
     Pull application configuration from central configuration management server
     :param git_group_id: Id of the group to be pulled from.
@@ -16,10 +15,8 @@ def pull(git_group_id='', git_repository='', basedir='.', clean=False):
     :param clean: Clean pull - i.e. delete fork and local clone
     :type clean: Boolean
     """
-    
-    
-    git_username = gitlab.get_username()
-    if git_username != const.RETURN_PROBLEM:
+    git_username = gitlab_utils.get_username()
+    if git_username == const.RETURN_PROBLEM:
         print(const.PROBLEM_USERNAME)
 
     option_delete_fork = False
@@ -27,28 +24,14 @@ def pull(git_group_id='', git_repository='', basedir='.', clean=False):
     if clean:
         option_delete_fork = True
 
-    # Get id for git repository
-    # group_id = gitlab.get_group_id(git_group)
-    group_id = git_group_id
-    projects = gitlab.get_group_projects(group_id)
-
-    git_repository_upstream = None
-    git_repository_id = None
-
-    for project in projects:
-        if project['name'] == git_repository:
-            git_repository_id = project['id']
-            git_repository_upstream = project['url']
-            break
-
     if git_repository_upstream is None or git_repository_id is None:
         raise Exception(const.GIT_UNABLE_TO_FIND_PROJECT_MSG % project['name'])
 
     # Check if there is already a fork
     forked_project = None
-    projects = gitlab.get_owned_projects()
+    projects = gitlab_utils.get_owned_projects()
     for project in projects:
-        if project['namespace']['name'] == git_username and project['name'] == git_repository:
+        if project['username'] == git_username and project['name'] == git_repository:
             if 'forked_from_project' in project:
                 # check whether project is forked from the right project
                 if project['forked_from_project']['id'] == git_repository_id:
@@ -63,26 +46,22 @@ def pull(git_group_id='', git_repository='', basedir='.', clean=False):
             if option_delete_fork:
                 # Delete fork
                 print(const.GIT_DELETE_FORK_MSG)
-                # gitlab.print_response = True
-                r = gitlab.delete_project(project['id'])
+                # gitlab_utils.print_response = True
+                r = gitlab_utils.delete_project(project['id'])
                 forked_project = None
-
             break
 
     # If there is no fork on the server - fork the repository
     if not forked_project:
-        # Need to check whether fork already exists
-        # If yes, delete ... or just clone and update ...
-
         # Fork project
         print(const.FORK_PROJECT)
-        forked_project = gitlab.fork_project(git_repository_id)
-
-        # REMOVED THIS -> CHECK IF IT'S OK 
-        # print(const.FORK_WAIT)
-        # # TODO Need to be removed once Git server is fixed
-        # time.sleep(2)  # Needed because of problems with the git server
-
+        rs = gitlab_utils.fork_project(git_repository_id)
+        if rs == -1:
+            print(const.FORK_PROBLEM)
+            exit(-1)
+        else:
+            ssh_url_to_fork = rs
+    
     # Change to base directory
     os.chdir(basedir)
 
@@ -95,8 +74,6 @@ def pull(git_group_id='', git_repository='', basedir='.', clean=False):
     # Check if directory already exsits
     if os.path.isdir(git_repository):
         print(const.CLONE_EXISTS)
-        # We assume that this is already a clone of a fork
-
         # Change into git repository
         os.chdir(git_repository)
 
@@ -104,13 +81,20 @@ def pull(git_group_id='', git_repository='', basedir='.', clean=False):
         os.system(const.GIT_PULL_CMD)
 
     else:
+        # Needed because of problems with the git server
+        time.sleep(2)
         print(const.CLONE_FORK)
-
+        
         # Clone repository
-        os.system(const.GIT_CLONE_CMD % (forked_project['ssh_url_to_repo']))
-
+        os.system(const.GIT_CLONE_CMD % (ssh_url_to_fork))
         # Change into git repository
-        os.chdir(git_repository)
+        try:
+            os.chdir(git_repository)
+        except Exception as ex:
+            template = const.EXCEPTION_TEMPLATE
+            message = template.format(type(ex).__name__, ex.args)
+            print(message)
+            return -1
 
         # Add upstream repository
         os.system(const.GIT_UPSTREAM_REPO_CMD % git_repository_upstream)
@@ -134,12 +118,12 @@ def push(git_group_id='', git_repository='', basedir='.', merge_request=None):
     :return:
     """
 
-    git_username = gitlab.get_username()
+    git_username = gitlab_utils.get_username()
 
     # Get id for master git repository
-    # group_id = gitlab.get_group_id(git_group)
+    # group_id = gitlab_utils.get_group_id(git_group)
     group_id = git_group_id
-    projects = gitlab.get_group_projects(group_id)
+    projects = gitlab_utils.get_group_projects(group_id)
     forked_project = None
     git_repository_id = None
 
@@ -149,7 +133,7 @@ def push(git_group_id='', git_repository='', basedir='.', merge_request=None):
             break
 
     # Get id for forked repository
-    projects = gitlab.get_owned_projects()
+    projects = gitlab_utils.get_owned_projects()
     for project in projects:
         if project['namespace']['name'] == git_username and project['name'] == git_repository:
             if 'forked_from_project' in project:
@@ -177,7 +161,7 @@ def push(git_group_id='', git_repository='', basedir='.', merge_request=None):
             raise Exception(const.GIT_MERGE_PROBLEM)
 
         print(const.GIT_CREATE_MERGE_MSG)
-        merge_request = gitlab.create_merge_request(git_repository_id, forked_project['id'], title=title, description=description)
+        merge_request = gitlab_utils.create_merge_request(git_repository_id, forked_project['id'], title=title, description=description)
 
         if 'message' in merge_request:
             # Merge request already exists
@@ -185,7 +169,7 @@ def push(git_group_id='', git_repository='', basedir='.', merge_request=None):
                 print(m)
 
 
-def commit(message, git_repository='', basedir='.'):
+def commit(message, basedir='.', git_repository=''):
     """
     Commit changes to local clone of repository.
     :param message: Commit message.
@@ -196,27 +180,31 @@ def commit(message, git_repository='', basedir='.'):
     :type basedir: str 
     :return:
     """
-
     # Change into git repository
     os.chdir(basedir+'/'+git_repository)
-
+    # Add all changes to commit
+    os.system(const.GIT_ADD_ALL)
     # Commit changes
-    os.system(const.GIT_COMMIT_CMD % message)
+    dir_c = basedir+'/'+git_repository
+    os.system(const.GIT_COMMIT_CMD % (dir_c, message))
+    # Message
+    print(const.GIT_PULL_CONFIG_AVAILABLE+basedir+'/'+git_repository)
 
 
 def main():
     import argparse
-    configuration = const.DEFAULT_CONFIG
+
+    
     # TODO Add a --list option. This is currently not possible because the way the arguments are done right now
     # (configuration is a required option and the parsing would fail before coming to the --list option)
     # The usage should be like this: app_config <subparser> configuration
 
     parser = argparse.ArgumentParser(description=const.APP_CONFIG_TITLE_DESCRIPTION)
-    parser.add_argument('configuration', nargs='?', default=None)
+    # parser.add_argument('configuration', nargs='?', default=None)
     parser.add_argument('-b', '--basedir', help=const.BASEDIR_HELP_MSG, default='./')
 
     parser.add_argument('-c', '--config', nargs='?', help=const.CONFIG_HELP_MSG)
-    parser.add_argument('-l', '--list', help=const.CONFIG_LIST_HELP_MSG, action=const.STORE_TRUE)
+    # parser.add_argument('-l', '--list', help=const.CONFIG_LIST_HELP_MSG, action=const.STORE_TRUE)
 
     subparsers = parser.add_subparsers(title='command',
                                        description='valid commands',
@@ -234,35 +222,35 @@ def main():
 
     arguments = parser.parse_args()
 
-    if arguments.list:
-        print(const.GIT_SUPPORTED_CONFIG_MSG % '\n'.join(list(configuration.keys())))
-        exit(0)
-
-    if not arguments.configuration:
-        parser.print_help()
-        exit(-1)
-
-    print(arguments.basedir)
     os.makedirs(arguments.basedir, exist_ok=True)
 
+    repo_name, group_name = None, None
     if arguments.config:
-        import json
-        with open(arguments.config) as data_file:
-            configuration = json.load(data_file)
-
-    if arguments.configuration not in configuration:
-        print(const.GIT_UNSUPPORTED_CONFIG_MSG % '\n'.join(list(configuration.keys())))
+        repo_name, group_name, valid  = gitlab_utils.get_repo_group_names(arguments.config)
+        group_id = gitlab_utils.get_group_id(group_name)
+        if not valid or group_id == -1:
+            parser.print_help()
+            exit(-1)
+    else:
         parser.print_help()
         exit(-1)
 
-    if arguments.command:
+
+    if arguments.command and repo_name != None and group_name != None:
         try:
             if arguments.command == 'pull':
-                pull(basedir=arguments.basedir, clean=arguments.clean, **configuration[arguments.configuration])
+                pull(git_group_id = group_id, 
+                     git_repository_id = gitlab_utils.get_project_id(group_name, repo_name), 
+                     git_repository_upstream = gitlab_utils.get_project_url(group_id, repo_name), 
+                     git_repository=repo_name,
+                     basedir=arguments.basedir, 
+                     clean=arguments.clean)
             elif arguments.command == 'push':
                 push(basedir=arguments.basedir, **configuration[arguments.configuration], merge_request=arguments.message)
             elif arguments.command == 'commit':
-                commit(arguments.message, basedir=arguments.basedir, **configuration[arguments.configuration])
+                commit(message = arguments.message, 
+                       basedir=arguments.basedir, 
+                       git_repository=repo_name,)
         except Exception as e:
             print(str(e))
     else:

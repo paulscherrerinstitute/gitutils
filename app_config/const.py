@@ -39,7 +39,9 @@ PROBLEM_USERNAME = "Problem getting the correct username. Please try again."
 FORKED_EXISTS = "A forked repository with the name {} already exists"
 REPO_EXISTS_NOT_FORK = "A repository with the name {} already exists but is not a fork"
 FORK_PROJECT = "Fork project..."
+PROJECT_ID_NOT_FOUND = "Project id not found, please check the configuration details."
 FORK_WAIT = "Waiting for fork being created ..."
+FORK_PROBLEM = "Problem while forking..."
 NO_FORK_CENTAL = "There is no fork on the central server"
 REMOVE_LOCAL_CLONE = "Removing local clone"
 CLONE_EXISTS = "Clone already exists"
@@ -70,11 +72,12 @@ STORE_TRUE = "store_true"
 ############
 # COMMANDS #
 ############
-GIT_COMMIT_CMD = "git commit -a -m %s"
+GIT_COMMIT_CMD = "git -C %s commit -m \"%s\""
 GIT_UPSTREAM_REPO_CMD = "git remote add upstream %s"
 GIT_PUSH_CMD = "git push origin master"
 GIT_CLONE_CMD = "git clone %s"
-GIT_PULL_CMD = "git pull upstream master"
+GIT_ADD_ALL = "git add ."
+GIT_PULL_CMD = "git pull"
 ##################
 # DEFAULT CONFIG #
 ##################
@@ -161,6 +164,10 @@ DEFAULT_CONFIG = {
             # 'git_group': 'archiver_config',
             'git_group_id': 302,
             'git_repository': 'hipa_archiver'
+        },
+        'app_config':{
+            'git_group_id': 84,
+            'git_repository': 'app_config'
         }
 
     }

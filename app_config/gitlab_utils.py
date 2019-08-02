@@ -19,7 +19,6 @@ login = input(const.LOGIN_REQUEST)
 password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
 
 
-
 def oauth_authentication():
     """
     Requests oauth authentication for the current user and login provided to be able to perform git operations. 
@@ -85,6 +84,57 @@ def create_group(group_name, description):
         message = template.format(type(ex).__name__, ex.args)
         print(message)
         return -1
+
+def get_project_web_url(project_name):
+    projects_list = gl.projects.list(search=project_name)
+    for project in projects_list:
+        if project_name == project.attributes['name']:
+            return project.attributes['web_url']
+
+def get_project_group(project_name):
+    projects_list = gl.projects.list(search=project_name)
+    for project in projects_list:
+        if project_name == project.attributes['name']:
+            return project.attributes['path_with_namespace'].split('/')[0]
+
+def get_project_url(group_id, project_name):
+    projects_list = gl.projects.list(search=project_name)
+    for project in projects_list:
+        if project.attributes['name'] == project_name:
+            return project.attributes['http_url_to_repo']
+
+def get_project_id(group_name, project_name):
+    projects_list = gl.projects.list(search=project_name)
+    for project in projects_list:
+        if project.attributes['name'] == project_name and group_name in project.attributes['path_with_namespace']:
+            return project.attributes['id']
+    print(const.PROJECT_ID_NOT_FOUND)
+    exit(-1)
+
+def get_repo_group_names(config):
+    repo_name = None
+    group_name = None
+    valid = False
+    # config format: "const.ENDPOINT/group_name/project_name"
+    if const.ENDPOINT in config:
+        web_url = config
+        web_url_split = web_url.split('/')
+        if len(web_url_split) == 5:
+            repo_name = web_url_split[-1]
+            group_name = web_url_split[-2]
+            valid = True
+    elif '/' in config: # config format: "group_name/project_name"
+        path_with_namespace = config.split('/')
+        if len(path_with_namespace) == 2:
+            group_name = path_with_namespace[0]
+            repo_name = path_with_namespace[1]
+            valid = True
+    else: # config format: "project_name"
+        repo_name = config
+        group_name = get_project_group(repo_name)
+        valid = True
+    return repo_name, group_name, valid
+    
 
 def delete_group(group_name):
     """
@@ -181,7 +231,7 @@ def fork_project(project_id):
     try:
         project = gl.projects.get(project_id)
         fork = project.forks.create({})
-        return 0
+        return fork.attributes['http_url_to_repo']
     except Exception as ex:
         template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
@@ -237,7 +287,10 @@ def get_owned_projects():
     projects = []
     for project in own_projects:
         logging.info('%s [%s] - %s' % (project.attributes['name'], project.attributes['path_with_namespace'], project.attributes['ssh_url_to_repo']))
-        projects.append({'name': project.attributes['name'], 'path': project.attributes['path_with_namespace'], 'url': project.attributes['ssh_url_to_repo']})
+        projects.append({'name': project.attributes['name'], 'path': project.attributes['path_with_namespace'], 'url': project.attributes['ssh_url_to_repo'], 'username': project.attributes['namespace']['name']})
+        # if it's a fork add the source project
+        if 'forked_from_project' in project.attributes:
+            projects[-1]['forked_from_project'] = project.attributes['forked_from_project']
     return projects
 
 def delete_project(project_id):

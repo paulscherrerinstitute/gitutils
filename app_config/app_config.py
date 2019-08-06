@@ -3,7 +3,8 @@ import const
 import os
 import time
 
-def pull(git_group_id='', git_repository_id='', git_repository_upstream='', git_repository='', basedir='.', clean=False):
+def pull(git_group_id='', git_repository_id='', git_repository_upstream='', 
+                                    git_repository='', basedir='.', clean=False):
     """
     Pull application configuration from central configuration management server
     :param git_group_id: Id of the group to be pulled from.
@@ -111,7 +112,8 @@ def pull(git_group_id='', git_repository_id='', git_repository_upstream='', git_
     print(const.GIT_PULL_CONFIG_AVAILABLE+basedir+'/'+git_repository)
 
 
-def push(git_group_id='', git_repository='', basedir='.', merge_request=None):
+def push(basedir='', git_group_name='', git_repository='',  git_repository_id = '', 
+                                    git_repository_upstream = '', merge_request=None):
     """
     Push changes to fork and create merge request
     :param git_group_id: Id of the group to be pulled from.
@@ -126,28 +128,22 @@ def push(git_group_id='', git_repository='', basedir='.', merge_request=None):
     :type description: str
     :return:
     """
+    git_group_id = gitlab_utils.get_group_id(git_group_name)
 
     git_username = gitlab_utils.get_username()
+    if git_username == const.RETURN_PROBLEM:
+        print(const.PROBLEM_USERNAME)
 
-    # Get id for master git repository
-    # group_id = gitlab_utils.get_group_id(git_group)
-    group_id = git_group_id
-    projects = gitlab_utils.get_group_projects(group_id)
     forked_project = None
-    git_repository_id = None
-
-    for project in projects:
-        if project['name'] == git_repository:
-            git_repository_id = project['id']
-            break
 
     # Get id for forked repository
     projects = gitlab_utils.get_owned_projects()
     for project in projects:
-        if project['namespace']['name'] == git_username and project['name'] == git_repository:
+        if project['username'] == git_username and project['name'] == git_repository:
             if 'forked_from_project' in project:
                 # check whether project is forked from the right project
                 if project['forked_from_project']['id'] == git_repository_id:
+                    print(const.FORKED_EXISTS.format(git_repository))
                     forked_project = project
                 else:
                     print(const.NO_FORK_CENTAL)
@@ -155,12 +151,11 @@ def push(git_group_id='', git_repository='', basedir='.', merge_request=None):
 
     # We assume that we are in the directory with the forked repository
     os.chdir(basedir+'/'+git_repository)
-
+    
     # Push changes to forked repository
-    print(const.GIT_PUSH_MSG)
-    os.system(const.GIT_PUSH_CMD)
-
     if merge_request:
+        print(const.GIT_PUSH_MSG_CENTRAL_SERVER)
+        os.system(const.GIT_PUSH_CMD)
 
         title = merge_request
         description = const.GIT_MERGE_DESCRIPTION_MSG % git_username
@@ -170,12 +165,25 @@ def push(git_group_id='', git_repository='', basedir='.', merge_request=None):
             raise Exception(const.GIT_MERGE_PROBLEM)
 
         print(const.GIT_CREATE_MERGE_MSG)
-        merge_request = gitlab_utils.create_merge_request(git_repository_id, forked_project['id'], title=title, description=description)
+        merge_request = gitlab_utils.create_merge_request(git_repository_id, 
+                                                          forked_project['id'], 
+                                                          title=title, 
+                                                          description=description)
 
         if 'message' in merge_request:
             # Merge request already exists
             for m in merge_request['message']:
                 print(m)
+    else:
+        print(const.GIT_PUSH_MSG_LOCAL_SERVER)
+        try:
+            os.system(const.GIT_PUSH_CMD)
+        except Exception as ex:
+            template = const.EXCEPTION_TEMPLATE
+            message = template.format(type(ex).__name__, ex.args)
+            print(message)
+            exit(-1)
+        
 
 
 def commit(message, basedir='.', git_repository=''):
@@ -204,8 +212,10 @@ def main():
     import argparse
 
     
-    # TODO Add a --list option. This is currently not possible because the way the arguments are done right now
-    # (configuration is a required option and the parsing would fail before coming to the --list option)
+    # TODO Add a --list option. This is currently not possible because the way the 
+    # arguments are done right now
+    # (configuration is a required option and the parsing would fail before coming 
+    # to the --list option)
     # The usage should be like this: app_config <subparser> configuration
 
     parser = argparse.ArgumentParser(description=const.APP_CONFIG_TITLE_DESCRIPTION)
@@ -213,7 +223,8 @@ def main():
     parser.add_argument('-b', '--basedir', help=const.BASEDIR_HELP_MSG, default='./')
 
     parser.add_argument('-c', '--config', nargs='?', help=const.CONFIG_HELP_MSG)
-    # parser.add_argument('-l', '--list', help=const.CONFIG_LIST_HELP_MSG, action=const.STORE_TRUE)
+    # parser.add_argument('-l', '--list', help=const.CONFIG_LIST_HELP_MSG,
+    #    action=const.STORE_TRUE)
 
     subparsers = parser.add_subparsers(title='command',
                                        description='valid commands',
@@ -221,13 +232,16 @@ def main():
                                        help='commands')
 
     parser_pull = subparsers.add_parser('pull', help=const.PULL_HELP_MSG)
-    parser_pull.add_argument('-c', '--clean', action=const.STORE_TRUE, help=const.PULL_CLEAN_HELP_MSG)
+    parser_pull.add_argument('-c', '--clean', action=const.STORE_TRUE, 
+                                                help=const.PULL_CLEAN_HELP_MSG)
 
     parser_push = subparsers.add_parser('push', help=const.PUSH_HELP_MSG)
-    parser_push.add_argument('-m', '--message', required=True, help=const.PUSH_MERGE_REQUEST_TITLE)
+    parser_push.add_argument('-m', '--message', required=False, 
+                                                help=const.PUSH_MERGE_REQUEST_TITLE)
 
     parser_commit = subparsers.add_parser('commit', help=const.COMMIT_HELP_MSG)
-    parser_commit.add_argument('-m', '--message', required=True, help=const.COMMIT_MESSAGE)
+    parser_commit.add_argument('-m', '--message', required=True, 
+                                                help=const.COMMIT_MESSAGE)
 
     arguments = parser.parse_args()
 
@@ -235,7 +249,8 @@ def main():
 
     repo_name, group_name = None, None
     if arguments.config:
-        repo_name, group_name, valid  = gitlab_utils.get_repo_group_names(arguments.config)
+        repo_name, group_name, valid  = gitlab_utils.get_repo_group_names(
+                                                                arguments.config)
         group_id = gitlab_utils.get_group_id(group_name)
         if not valid or group_id == -1:
             parser.print_help()
@@ -249,13 +264,22 @@ def main():
         try:
             if arguments.command == 'pull':
                 pull(git_group_id = group_id, 
-                     git_repository_id = gitlab_utils.get_project_id(group_name, repo_name), 
-                     git_repository_upstream = gitlab_utils.get_project_url(group_id, repo_name), 
+                     git_repository_id = gitlab_utils.get_project_id(group_name, 
+                                                                    repo_name), 
+                     git_repository_upstream = gitlab_utils.get_project_url(group_id, 
+                                                                    repo_name), 
                      git_repository=repo_name,
                      basedir=arguments.basedir, 
                      clean=arguments.clean)
             elif arguments.command == 'push':
-                push(basedir=arguments.basedir, **configuration[arguments.configuration], merge_request=arguments.message)
+                push(basedir=arguments.basedir,
+                    git_group_name = group_name,
+                    git_repository=repo_name,  
+                    git_repository_id = gitlab_utils.get_project_id(group_name, 
+                                                                    repo_name), 
+                    git_repository_upstream = gitlab_utils.get_project_url(group_id, 
+                                                                    repo_name), 
+                    merge_request=arguments.message)
             elif arguments.command == 'commit':
                 commit(message = arguments.message, 
                        basedir=arguments.basedir, 

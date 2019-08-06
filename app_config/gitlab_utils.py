@@ -18,6 +18,8 @@ print(const.AUTHENTICATE_REQUEST)
 login = input(const.LOGIN_REQUEST)
 password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
 
+def get_username():
+    return login
 
 def oauth_authentication():
     """
@@ -189,43 +191,48 @@ def get_group_id(group_name):
     if group_name == login:
         group_id = 0
     else:
-    try:
-        group_id = gl.groups.get(group_name).attributes['id']
-    except Exception as ex:
-        template = const.EXCEPTION_TEMPLATE
-        message = template.format(type(ex).__name__, ex.args)
-        print(message)
-    logging.info('Group name: %s (id %s)' % (group_name, group_id))
-        # check if group not found
-        if group_id == -1 and group_name == login:
-            # it could be a personal group -> group name == username
-            group_id = 0
+        try:
+            group_id = gl.groups.get(group_name).attributes['id']
+        except Exception as ex:
+            template = const.EXCEPTION_TEMPLATE
+            message = template.format(type(ex).__name__, ex.args)
+            print(message)
+        logging.info('Group name: %s (id %s)' % (group_name, group_id))
     return group_id
 
-def get_group_projects(group_id):
+def get_group_projects(group_name):
     """
     Retrieves all the projects of a group, which is given as parameter.
-    :param group_id: ID of the group of interest.
-    :type group_id: int
+    :param group_name: Name of the group of interest.
+    :type group_id: str
     :return: List of the projects (for the specified group id) containing name, id, path and url (in a dictionary-type).
     :rtype: list
     """
-    # Retrieve the group
-    try:
-        group = gl.groups.get(group_id)
-    except Exception as ex:
-        template = const.EXCEPTION_TEMPLATE
-        message = template.format(type(ex).__name__, ex.args)
-        print(message)
-        return -1
-
-    # Retrieve the group's projects
-    group_projects = group.projects.list()
+    if group_name == login:
+        group_id = 0
+        group_projects = gl.projects.list(owned=True)
+    else:
+        # Retrieve the group's projects
+        try:
+            group = gl.groups.get(group_id, lazy = True)
+            group_projects = group.projects.list()
+        except Exception as ex:
+            template = const.EXCEPTION_TEMPLATE
+            message = template.format(type(ex).__name__, ex.args)
+            print(message)
+            exit(-1)
+    
     # Retrieve the info from each project
     projects = []
     for project in group_projects:
-        logging.info('%s %s [%s] - %s' % (project.attributes['name'], project.attributes['id'], project.attributes['path_with_namespace'], project.attributes['ssh_url_to_repo']))
-        projects.append({'name': project.attributes['name'], 'id': project.attributes['id'], 'path': project.attributes['path_with_namespace'], 'url': project.attributes['ssh_url_to_repo']})
+        logging.info('%s %s [%s] - %s' % (project.attributes['name'], 
+                                            project.attributes['id'], 
+                                            project.attributes['path_with_namespace'], 
+                                            project.attributes['http_url_to_repo']))
+        projects.append({'name': project.attributes['name'], 
+                        'id': project.attributes['id'], 
+                        'path': project.attributes['path_with_namespace'], 
+                        'url': project.attributes['http_url_to_repo']})
     return projects
 
 def fork_project(project_id):
@@ -291,7 +298,8 @@ def get_owned_projects():
         template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
-        return -1
+        exit(-1)
+    
     projects = []
     for project in own_projects:
         logging.info('%s [%s] - %s' % (project.attributes['name'], project.attributes['path_with_namespace'], project.attributes['ssh_url_to_repo']))

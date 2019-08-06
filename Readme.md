@@ -51,6 +51,8 @@ source /opt/gfa/python
 
 After building, the package should be uploaded to anaconda.org via the command displayed at the end of the build process.
 
+Keep in mind: changing names of repositories might cause inconsistencies. Preferably, do not change names of repositories/forks.
+
 # Installation
 The package has to be installed as root on gfalcd.psi.ch .
 

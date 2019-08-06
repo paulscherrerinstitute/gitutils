@@ -51,16 +51,25 @@ def pull(git_group_id='', git_repository_id='', git_repository_upstream='', git_
                 forked_project = None
             break
 
+
     # If there is no fork on the server - fork the repository
     if not forked_project:
-        # Fork project
-        print(const.FORK_PROJECT)
-        rs = gitlab_utils.fork_project(git_repository_id)
-        if rs == -1:
-            print(const.FORK_PROBLEM)
-            exit(-1)
+        # checks if it is a personal project
+        if git_group_id == 0:
+            projects = gitlab_utils.get_owned_projects()
+            for i in projects:
+                if i['name'] == git_repository:
+                    http_url_to_repo = git_repository_upstream
         else:
-            ssh_url_to_fork = rs
+            # Fork project
+            print(const.FORK_PROJECT)
+            rs = gitlab_utils.fork_project(git_repository_id)
+            if rs == -1:
+                print(const.FORK_PROBLEM)
+                exit(-1)
+            else:
+                http_url_to_repo = rs
+
     
     # Change to base directory
     os.chdir(basedir)
@@ -86,7 +95,7 @@ def pull(git_group_id='', git_repository_id='', git_repository_upstream='', git_
         print(const.CLONE_FORK)
         
         # Clone repository
-        os.system(const.GIT_CLONE_CMD % (ssh_url_to_fork))
+        os.system(const.GIT_CLONE_CMD % (http_url_to_repo))
         # Change into git repository
         try:
             os.chdir(git_repository)

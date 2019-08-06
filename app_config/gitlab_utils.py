@@ -185,6 +185,10 @@ def get_group_id(group_name):
     :rtype: int
     """
     group_id = -1
+    # it could be a personal group -> group name == username
+    if group_name == login:
+        group_id = 0
+    else:
     try:
         group_id = gl.groups.get(group_name).attributes['id']
     except Exception as ex:
@@ -192,6 +196,10 @@ def get_group_id(group_name):
         message = template.format(type(ex).__name__, ex.args)
         print(message)
     logging.info('Group name: %s (id %s)' % (group_name, group_id))
+        # check if group not found
+        if group_id == -1 and group_name == login:
+            # it could be a personal group -> group name == username
+            group_id = 0
     return group_id
 
 def get_group_projects(group_id):

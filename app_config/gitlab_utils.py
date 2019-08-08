@@ -17,7 +17,6 @@ access_token = None
 print(const.AUTHENTICATE_REQUEST)
 login = input(const.LOGIN_REQUEST)
 password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
-
 def get_username():
     return login
 
@@ -178,6 +177,31 @@ def create_repo(repo_name, namespace):
         print(message)
         return -1
 
+
+def get_forked_project(git_repository, git_repository_id, 
+                                                        option_delete_fork):
+    forked_project = None
+    projects = get_owned_projects()
+    for project in projects:
+        if project['username'] == login and project['name'] == git_repository:
+            if 'forked_from_project' in project:
+                # check whether project is forked from the right project
+                if project['forked_from_project']['name'] == git_repository:
+                    print(const.FORKED_EXISTS.format(git_repository))
+                    forked_project = project
+            else:
+                # Either we delete or we have to fail
+                print(const.FORKED_EXISTS.format(git_repository))
+                if not option_delete_fork:
+                    return forked_project
+            if option_delete_fork:
+                # Delete fork
+                print(const.GIT_DELETE_FORK_MSG)
+                delete_project(project['id'])
+                forked_project = None
+            break
+    return forked_project
+
 def get_group_id(group_name):
     """
     Retrieves the group id based on the group name given as parameter.
@@ -253,7 +277,10 @@ def fork_project(project_id):
         print(message)
         return -1
 
-def create_merge_request(project_id, target_branch, source_branch, title, description, labels):
+def create_merge_request(source_project_id, source_branch,
+                        target_project_id, target_branch,
+                        title, description, labels, clean_branch):
+
     """
     Creates a merge request based on the parameters given. 
     :param project_id: ID of the project for the merge request.
@@ -272,19 +299,22 @@ def create_merge_request(project_id, target_branch, source_branch, title, descri
     :rtype: int
     """
     try:
-        project = gl.projects.get(project_id)
-        mr = project.mergerequests.create({'source_branch': source_branch,
-                                        'target_branch': target_branch,
-                                        'title': title})
-        mr.description = description
-        mr.labels = labels
-        mr.save()
-        return 0
+        project = gl.projects.get(source_project_id)
     except Exception as ex:
         template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
-        return -1
+        exit(-1)
+    mr = project.mergerequests.create({'source_branch': source_branch,
+                                        'target_branch': target_branch,
+                                        'title': title,
+                                        'target_project_id': target_project_id,
+                                        'remove_source_branch': clean_branch})
+    mr.description = description
+    mr.labels = labels
+    mr.save()
+    return mr
+
 
 def get_owned_projects():
     """

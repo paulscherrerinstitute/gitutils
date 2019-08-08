@@ -8,7 +8,6 @@ import logging
 import gitlab
 import const
 import getpass
-import time
 
 # Gitlab API Documenation: http://doc.gitlab.com/ce/api/
 # Python-Gitlab Documetation: https://python-gitlab.readthedocs.io/en/stable/index.html
@@ -16,10 +15,9 @@ import time
 access_token = None
 
 print(const.AUTHENTICATE_REQUEST)
-# login = input(const.LOGIN_REQUEST)
-# password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
-login = "hax_l"
-password = "PHDleo2019!"
+login = input(const.LOGIN_REQUEST)
+password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
+
 def get_username():
     return login
 
@@ -37,7 +35,7 @@ except Exception as ex:
     template = const.EXCEPTION_TEMPLATE
     message = template.format(type(ex).__name__, ex.args)
     print(message)
-    exit(-1)
+    sys.exit(errno.EACCES)
 
 gl = gitlab.Gitlab(const.ENDPOINT, oauth_token=access_token, api_version=4)
 gl.auth()
@@ -94,54 +92,26 @@ def get_project_web_url(project_name):
     for project in projects_list:
         if project_name == project.attributes['name']:
             return project.attributes['web_url']
-    raise Exception(const.PROJECT_NAME_NOT_FOUND)
 
 def get_project_group(project_name):
     projects_list = gl.projects.list(search=project_name)
     for project in projects_list:
         if project_name == project.attributes['name']:
             return project.attributes['path_with_namespace'].split('/')[0]
-    raise Exception(const.PROJECT_NAME_NOT_FOUND)
-
-def get_forked_project(git_repository, git_repository_id, 
-                                                        option_delete_fork):
-    forked_project = None
-    projects = get_owned_projects()
-    for project in projects:
-        if project['username'] == login and project['name'] == git_repository:
-            if 'forked_from_project' in project:
-                # check whether project is forked from the right project
-                if project['forked_from_project']['name'] == git_repository:
-                    print(const.FORKED_EXISTS.format(git_repository))
-                    forked_project = project
-            else:
-                # Either we delete or we have to fail
-                print(const.FORKED_EXISTS.format(git_repository))
-                if not option_delete_fork:
-                    return forked_project
-            if option_delete_fork:
-                # Delete fork
-                print(const.GIT_DELETE_FORK_MSG)
-                delete_project(project['id'])
-                forked_project = None
-            break
-    return forked_project
-        
-
 
 def get_project_url(group_id, project_name):
     projects_list = gl.projects.list(search=project_name)
     for project in projects_list:
         if project.attributes['name'] == project_name:
             return project.attributes['http_url_to_repo']
-    raise Exception(const.PROJECT_URL_NOT_FOUND)
 
 def get_project_id(group_name, project_name):
     projects_list = gl.projects.list(search=project_name)
     for project in projects_list:
         if project.attributes['name'] == project_name and group_name in project.attributes['path_with_namespace']:
             return project.attributes['id']
-    raise Exception(const.PROJECT_ID_NOT_FOUND)
+    print(const.PROJECT_ID_NOT_FOUND)
+    exit(-1)
 
 def get_repo_group_names(config):
     repo_name = None
@@ -276,18 +246,14 @@ def fork_project(project_id):
     try:
         project = gl.projects.get(project_id)
         fork = project.forks.create({})
-        time.sleep(2)
         return fork.attributes['http_url_to_repo']
     except Exception as ex:
         template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
-        print(const.FORK_PROBLEM)
-        exit(-1)
+        return -1
 
-def create_merge_request(source_project_id, source_branch,
-                        target_project_id, target_branch,
-                        title, description, labels, clean_branch):
+def create_merge_request(project_id, target_branch, source_branch, title, description, labels):
     """
     Creates a merge request based on the parameters given. 
     :param project_id: ID of the project for the merge request.
@@ -306,22 +272,19 @@ def create_merge_request(source_project_id, source_branch,
     :rtype: int
     """
     try:
-        project = gl.projects.get(source_project_id)
+        project = gl.projects.get(project_id)
+        mr = project.mergerequests.create({'source_branch': source_branch,
+                                        'target_branch': target_branch,
+                                        'title': title})
+        mr.description = description
+        mr.labels = labels
+        mr.save()
+        return 0
     except Exception as ex:
         template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
         return -1
-
-    mr = project.mergerequests.create({'source_branch': source_branch,
-                                        'target_branch': target_branch,
-                                        'title': title,
-                                        'target_project_id': target_project_id,
-                                        'remove_source_branch': clean_branch})
-    mr.description = description
-    mr.labels = labels
-    mr.save()
-    return mr
 
 def get_owned_projects():
     """
@@ -349,14 +312,17 @@ def get_owned_projects():
 def delete_project(project_id):
     """
     Deletes the project given as parameter
-    :return: 
+    :return: Returns 0 if successful or -1 if a problem occured.
+    :rtype: int
     """
     try:
         gl.projects.delete(project_id)
+        return 0
     except Exception as ex:
         template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
+        return -1
 
 def get_username():
     """
@@ -366,15 +332,12 @@ def get_username():
     """
     try:
         username = gl.user.attributes['username']
+        return username
     except Exception as ex:
         template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
-
-    if login == username:
-        return username
-    else:
-        return -1
+        return const.RETURN_PROBLEM
 
 def update_project_visibility(project_id, visibility):
     """

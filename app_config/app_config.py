@@ -2,7 +2,6 @@ import gitlab_utils
 import const
 import os
 import time
-import subprocess
 
 def pull(git_group_id='', git_repository_id='', git_repository_upstream='', 
                                     git_repository='', basedir='.', clean=False):
@@ -18,26 +17,61 @@ def pull(git_group_id='', git_repository_id='', git_repository_upstream='',
     :type clean: Boolean
     """
     git_username = gitlab_utils.get_username()
-    if git_username == -1:
+    if git_username == const.RETURN_PROBLEM:
         print(const.PROBLEM_USERNAME)
-        exit(-1)
+
+    option_delete_fork = False
+
+    if clean:
+        option_delete_fork = True
 
     if git_repository_upstream is None or git_repository_id is None:
         raise Exception(const.GIT_UNABLE_TO_FIND_PROJECT_MSG % project['name'])
 
     # Check if there is already a fork
-    forked_project = gitlab_utils.get_forked_project(git_repository, 
-                                                     git_repository_id,
-                                                     clean)
+    forked_project = None
+    projects = gitlab_utils.get_owned_projects()
+    for project in projects:
+        if project['username'] == git_username and project['name'] == git_repository:
+            if 'forked_from_project' in project:
+                # check whether project is forked from the right project
+                if project['forked_from_project']['id'] == git_repository_id:
+                    print(const.FORKED_EXISTS.format(git_repository))
+                    forked_project = project
+            else:
+                # Either we delete or we have to fail
+                print(const.REPO_EXISTS_NOT_FORK.format(git_repository))
+                if not option_delete_fork:
+                    return
+
+            if option_delete_fork:
+                # Delete fork
+                print(const.GIT_DELETE_FORK_MSG)
+                # gitlab_utils.print_response = True
+                r = gitlab_utils.delete_project(project['id'])
+                forked_project = None
+            break
 
 
     # If there is no fork on the server - fork the repository
-    if not forked_project and git_group_id == 0:
-        print(const.PERSONAL_FORK)
-        http_url_to_repo = git_repository_upstream
-    elif not forked_project and git_group_id != 0:    
-        print(const.FORK_PROJECT)
-        http_url_to_repo = gitlab_utils.fork_project(git_repository_id)
+    if not forked_project:
+        # checks if it is a personal project
+        if git_group_id == 0:
+            projects = gitlab_utils.get_owned_projects()
+            for i in projects:
+                if i['name'] == git_repository:
+                    http_url_to_repo = git_repository_upstream
+        else:
+            # Fork project
+            print(const.FORK_PROJECT)
+            rs = gitlab_utils.fork_project(git_repository_id)
+            if rs == -1:
+                print(const.FORK_PROBLEM)
+                exit(-1)
+            else:
+                http_url_to_repo = rs
+
+    
     # Change to base directory
     os.chdir(basedir)
 
@@ -79,84 +113,77 @@ def pull(git_group_id='', git_repository_id='', git_repository_upstream='',
 
 
 def push(basedir='', git_group_name='', git_repository='',  git_repository_id = '', 
-                                    git_repository_upstream = ''):
+                                    git_repository_upstream = '', merge_request=None):
     """
-    Push changes to fork
-    :param git_group_name: Name of the group push.
-    :type git_group_name: str
-    :param git_repository_id: Id of the group to push.
-    :type git_repository_id: Int
+    Push changes to fork and create merge request
+    :param git_group_id: Id of the group to be pulled from.
+    :type git_group_id: int
     :param git_repository: Name of the repository to push.
     :type git_repository: str
     :param basedir: Base directory
     :type basedir: str
-    
+    :param title: Title of the push command.
+    :type title: str
+    :param description: Description of the push command.
+    :type description: str
     :return:
     """
+    git_group_id = gitlab_utils.get_group_id(git_group_name)
 
     git_username = gitlab_utils.get_username()
-    if git_username == -1:
+    if git_username == const.RETURN_PROBLEM:
         print(const.PROBLEM_USERNAME)
-        exit(-1)
+
+    forked_project = None
+
+    # Get id for forked repository
+    projects = gitlab_utils.get_owned_projects()
+    for project in projects:
+        if project['username'] == git_username and project['name'] == git_repository:
+            if 'forked_from_project' in project:
+                # check whether project is forked from the right project
+                if project['forked_from_project']['id'] == git_repository_id:
+                    print(const.FORKED_EXISTS.format(git_repository))
+                    forked_project = project
+                else:
+                    print(const.NO_FORK_CENTAL)
+                    return
 
     # We assume that we are in the directory with the forked repository
     os.chdir(basedir+'/'+git_repository)
-    # Push changes to forked repository
-    print(const.GIT_PUSH_MSG_CENTRAL_SERVER)
-    try:
-        os.system(const.GIT_PUSH_CMD)
-    except Exception as ex:
-        template = const.EXCEPTION_TEMPLATE
-        message = template.format(type(ex).__name__, ex.args)
-        print(message)
-        exit(-1)
-    print(const.GIT_PUSHED % git_repository_upstream)
-
-def merge_request(basedir='.', 
-                    git_repository='',
-                    git_repository_id='',
-                    clean=None,
-                    description='',
-                    title='',
-                    labels='',
-                    target_branch='master'):
-    """
-    TO BE DONE
-    """
-
-    git_username = gitlab_utils.get_username()
-    if git_username == -1:
-        print(const.PROBLEM_USERNAME)
-        exit(-1)
-
-    # Check if there is already a fork
-    forked_project = gitlab_utils.get_forked_project(git_repository, 
-                                                     git_repository_id,
-                                                     clean)
     
-    if forked_project is None:
-            raise Exception(const.GIT_MERGE_PROBLEM)
-    else:
-        print(const.GIT_CREATE_MERGE_MSG)
-        title = title
+    # Push changes to forked repository
+    if merge_request:
+        print(const.GIT_PUSH_MSG_CENTRAL_SERVER)
+        os.system(const.GIT_PUSH_CMD)
+
+        title = merge_request
         description = const.GIT_MERGE_DESCRIPTION_MSG % git_username
-        description += ". "+description
-        # Gets the source branch (assuming the current branch is the one to be merged)
-        os.chdir(basedir+'/'+git_repository)
-        source_branch = subprocess.check_output(
-                        const.GIT_GET_CURRENT_BRANCH, shell=True).decode("utf-8").rstrip() 
-        # Gets the target branch (assuming the master as target branch)
-        if not target_branch:
-            target_branch = 'master'
+
+        # Create pull request
+        if forked_project is None:
+            raise Exception(const.GIT_MERGE_PROBLEM)
+
+        print(const.GIT_CREATE_MERGE_MSG)
         merge_request = gitlab_utils.create_merge_request(git_repository_id, 
-                                    source_branch,
-                                    forked_project['forked_from_project']['id'], 
-                                    target_branch, title, description, 
-                                    labels, clean)
+                                                          forked_project['id'], 
+                                                          title=title, 
+                                                          description=description)
+
         if 'message' in merge_request:
             # Merge request already exists
-            for msg in merge_request['message']:
-                print(msg)
+            for m in merge_request['message']:
+                print(m)
+    else:
+        print(const.GIT_PUSH_MSG_LOCAL_SERVER)
+        try:
+            os.system(const.GIT_PUSH_CMD)
+        except Exception as ex:
+            template = const.EXCEPTION_TEMPLATE
+            message = template.format(type(ex).__name__, ex.args)
+            print(message)
+            exit(-1)
+        
 
 
 def commit(message, basedir='.', git_repository=''):
@@ -170,11 +197,6 @@ def commit(message, basedir='.', git_repository=''):
     :type basedir: str 
     :return:
     """
-    # Checks the username+login validation
-    git_username = gitlab_utils.get_username()
-    if git_username == -1:
-        print(const.PROBLEM_USERNAME)
-        exit(-1)
     # Change into git repository
     os.chdir(basedir+'/'+git_repository)
     # Add all changes to commit
@@ -201,8 +223,8 @@ def main():
     parser.add_argument('-b', '--basedir', help=const.BASEDIR_HELP_MSG, default='./')
 
     parser.add_argument('-c', '--config', nargs='?', help=const.CONFIG_HELP_MSG)
-    parser.add_argument('-l', '--list', help=const.CONFIG_LIST_HELP_MSG,
-       action=const.STORE_TRUE)
+    # parser.add_argument('-l', '--list', help=const.CONFIG_LIST_HELP_MSG,
+    #    action=const.STORE_TRUE)
 
     subparsers = parser.add_subparsers(title='command',
                                        description='valid commands',
@@ -214,19 +236,12 @@ def main():
                                                 help=const.PULL_CLEAN_HELP_MSG)
 
     parser_push = subparsers.add_parser('push', help=const.PUSH_HELP_MSG)
+    parser_push.add_argument('-m', '--message', required=False, 
+                                                help=const.PUSH_MERGE_REQUEST_TITLE)
 
     parser_commit = subparsers.add_parser('commit', help=const.COMMIT_HELP_MSG)
     parser_commit.add_argument('-m', '--message', required=True, 
                                                 help=const.COMMIT_MESSAGE)
-
-    parser_mr = subparsers.add_parser('merge_request', help=const.MERGE_HELP_MSG)
-    parser_mr.add_argument('-t', '--title', required=True, 
-                                                help=const.MERGE_MESSAGE_TITLE)
-    parser_mr.add_argument('-d', '--description', help=const.MERGE_MESSAGE_DESCRIPTION)
-    parser_mr.add_argument('-l', '--labels', help=const.MERGE_MESSAGE_LABELS)
-    parser_mr.add_argument('-b', '--target_branch', help=const.MERGE_MESSAGE_TB)
-    parser_mr.add_argument('-c', '--clean', action=const.STORE_TRUE, 
-                                                help=const.PULL_CLEAN_HELP_MSG)
 
     arguments = parser.parse_args()
 
@@ -243,7 +258,7 @@ def main():
     else:
         parser.print_help()
         exit(-1)
-    
+
 
     if arguments.command and repo_name != None and group_name != None:
         try:
@@ -263,21 +278,12 @@ def main():
                     git_repository_id = gitlab_utils.get_project_id(group_name, 
                                                                     repo_name), 
                     git_repository_upstream = gitlab_utils.get_project_url(group_id, 
-                                                                    repo_name))
+                                                                    repo_name), 
+                    merge_request=arguments.message)
             elif arguments.command == 'commit':
                 commit(message = arguments.message, 
                        basedir=arguments.basedir, 
-                       git_repository=repo_name)
-            elif arguments.command == 'merge_request':
-                merge_request(basedir=arguments.basedir,
-                    git_repository = repo_name,
-                    git_repository_id = gitlab_utils.get_project_id(group_name, 
-                                                                    repo_name), 
-                    clean=arguments.clean,
-                    description=arguments.description,
-                    title = arguments.title,
-                    labels = arguments.labels,
-                    target_branch= arguments.target_branch)
+                       git_repository=repo_name,)
         except Exception as e:
             print(str(e))
     else:

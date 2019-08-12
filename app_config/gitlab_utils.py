@@ -18,6 +18,8 @@ access_token = None
 print(const.AUTHENTICATE_REQUEST)
 login = input(const.LOGIN_REQUEST)
 password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
+
+
 def get_username():
     return login
 
@@ -101,8 +103,7 @@ def get_project_group(project_name):
             return project.attributes['path_with_namespace'].split('/')[0]
     raise Exception(const.PROJECT_NAME_NOT_FOUND)
 
-def get_forked_project(git_repository, git_repository_id, 
-                                                        option_delete_fork):
+def get_forked_project(git_repository, git_repository_id):
     forked_project = None
     projects = get_owned_projects()
     for project in projects:
@@ -112,20 +113,18 @@ def get_forked_project(git_repository, git_repository_id,
                 if project['forked_from_project']['name'] == git_repository:
                     print(const.FORKED_EXISTS.format(git_repository))
                     forked_project = project
-            else:
-                # Either we delete or we have to fail
-                print(const.FORKED_EXISTS.format(git_repository))
-                if not option_delete_fork:
-                    return forked_project
-            if option_delete_fork:
-                # Delete fork
-                print(const.GIT_DELETE_FORK_MSG)
-                delete_project(project['id'])
-                forked_project = None
-            break
     return forked_project
         
-
+def get_branch(project_id):
+    # Get a project by ID
+    project = gl.projects.get(project_id)
+    # Verifies if there is a master branch to merge into
+    branch = project.branches.get('master')
+    if branch.attributes['name']:
+        return 'master'
+    else:
+        raise Exception(const.GIT_UNABLE_TO_FIND_MASTER_BRANCH % project['name'])
+    
 
 def get_project_url(group_id, project_name):
     projects_list = gl.projects.list(search=project_name)
@@ -206,31 +205,6 @@ def create_repo(repo_name, namespace):
         print(message)
         return -1
 
-
-def get_forked_project(git_repository, git_repository_id, 
-                                                        option_delete_fork):
-    forked_project = None
-    projects = get_owned_projects()
-    for project in projects:
-        if project['username'] == login and project['name'] == git_repository:
-            if 'forked_from_project' in project:
-                # check whether project is forked from the right project
-                if project['forked_from_project']['name'] == git_repository:
-                    print(const.FORKED_EXISTS.format(git_repository))
-                    forked_project = project
-            else:
-                # Either we delete or we have to fail
-                print(const.FORKED_EXISTS.format(git_repository))
-                if not option_delete_fork:
-                    return forked_project
-            if option_delete_fork:
-                # Delete fork
-                print(const.GIT_DELETE_FORK_MSG)
-                delete_project(project['id'])
-                forked_project = None
-            break
-    return forked_project
-
 def get_group_id(group_name):
     """
     Retrieves the group id based on the group name given as parameter.
@@ -293,24 +267,20 @@ def fork_project(project_id):
     Creates a fork of the project given as parameter.
     :param project_id: ID of the project that wants to be forked.
     :type project_id: int
-    :return: Returns 0 if successful or -1 if a problem occured.
-    :rtype: int
     """
+    project = gl.projects.get(project_id, lazy = True)
     try:
-        project = gl.projects.get(project_id)
         fork = project.forks.create({})
-        time.sleep(2)
-        return fork.attributes['http_url_to_repo']
     except Exception as ex:
         template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
         print(const.FORK_PROBLEM)
         exit(-1)
-
+    return fork.attributes['http_url_to_repo']
 def create_merge_request(source_project_id, source_branch,
                         target_project_id, target_branch,
-                        title, description, labels, clean_branch):
+                        title, description):
     """
     Creates a merge request based on the parameters given. 
     :param project_id: ID of the project for the merge request.
@@ -323,37 +293,21 @@ def create_merge_request(source_project_id, source_branch,
     :type title: str
     :param description: Description of the merge request.
     :type description: str
-    :param labels: Possible labels for the merge request (this can be empty).
-    :type labels: str
     :return: Returns 0 if successful or -1 if a problem occured.
     :rtype: int
     """
+    project = gl.projects.get(source_project_id, lazy=True)
     try:
-        project = gl.projects.get(source_project_id)
+        mr = project.mergerequests.create({'source_branch': 'master',
+                                    'target_branch': 'master',
+                                    'title': title,
+                                    'description': description,
+                                    'target_project_id': target_project_id})
     except Exception as ex:
         template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
         exit(-1)
-    mr = project.mergerequests.create({'source_branch': source_branch,
-                                        'target_branch': target_branch,
-                                        'title': title,
-                                        'target_project_id': target_project_id,
-                                        'remove_source_branch': clean_branch})
-    mr.description = description
-    mr.labels = labels
-    mr.save()
-    return mr
-
-
-    mr = project.mergerequests.create({'source_branch': source_branch,
-                                        'target_branch': target_branch,
-                                        'title': title,
-                                        'target_project_id': target_project_id,
-                                        'remove_source_branch': clean_branch})
-    mr.description = description
-    mr.labels = labels
-    mr.save()
     return mr
 
 def get_owned_projects():
@@ -373,7 +327,7 @@ def get_owned_projects():
     projects = []
     for project in own_projects:
         logging.info('%s [%s] - %s' % (project.attributes['name'], project.attributes['path_with_namespace'], project.attributes['ssh_url_to_repo']))
-        projects.append({'name': project.attributes['name'], 'path': project.attributes['path_with_namespace'], 'url': project.attributes['ssh_url_to_repo'], 'username': project.attributes['namespace']['name']})
+        projects.append({'name': project.attributes['name'], 'path': project.attributes['path_with_namespace'], 'url': project.attributes['ssh_url_to_repo'], 'username': project.attributes['namespace']['name'], 'id': project.attributes['id']})
         # if it's a fork add the source project
         if 'forked_from_project' in project.attributes:
             projects[-1]['forked_from_project'] = project.attributes['forked_from_project']
@@ -390,6 +344,7 @@ def delete_project(project_id):
         template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
+        exit(-1)
 
 def get_username():
     """

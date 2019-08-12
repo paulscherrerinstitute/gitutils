@@ -4,7 +4,7 @@ import os
 import time
 import subprocess
 
-def pull(git_group_id='', git_repository_id='', git_repository_upstream='', 
+def pull(git_group_id='', git_repository_id=None, git_repository_upstream=None, 
                                     git_repository='', basedir='.', clean=False):
     """
     Pull application configuration from central configuration management server
@@ -21,23 +21,39 @@ def pull(git_group_id='', git_repository_id='', git_repository_upstream='',
     if git_username == -1:
         print(const.PROBLEM_USERNAME)
         exit(-1)
-
+        
     if git_repository_upstream is None or git_repository_id is None:
         raise Exception(const.GIT_UNABLE_TO_FIND_PROJECT_MSG % project['name'])
 
     # Check if there is already a fork
     forked_project = gitlab_utils.get_forked_project(git_repository, 
-                                                     git_repository_id,
-                                                     clean)
+                                                     git_repository_id)
 
 
-    # If there is no fork on the server - fork the repository
-    if not forked_project and git_group_id == 0:
-        print(const.PERSONAL_FORK)
-        http_url_to_repo = git_repository_upstream
-    elif not forked_project and git_group_id != 0:    
+    # not forked -> fork
+    if not forked_project:
         print(const.FORK_PROJECT)
         http_url_to_repo = gitlab_utils.fork_project(git_repository_id)
+    else:
+        # forked and clean
+        if clean:
+            # personal group -> delete + fork
+            if git_group_id == 0:
+                print(const.DELETE_PERSONAL_PROJECT)
+                source_project_id = forked_project['forked_from_project']['id']
+                gitlab_utils.delete_project(git_repository_id)
+                http_url_to_repo = gitlab_utils.fork_project(source_project_id)
+            else:# not personal group -> warning about not deletion and fork
+                print(const.NOT_ABLE_TO_DELETE_NON_PERSONAL_REPO.format(forked_project['name']))
+                # check if personal project already exists
+                own_projects = gitlab_utils.get_owned_projects()
+                for project in own_projects:
+                    if project['name'] == forked_project['name']:
+                        http_url_to_repo = git_repository_upstream
+        else: # forked and not clean
+            print(const.FORKED_PULL.format(git_repository))
+        
+
     # Change to base directory
     os.chdir(basedir)
 
@@ -115,48 +131,41 @@ def push(basedir='', git_group_name='', git_repository='',  git_repository_id = 
 def merge_request(basedir='.', 
                     git_repository='',
                     git_repository_id='',
-                    clean=None,
                     description='',
-                    title='',
-                    labels='',
-                    target_branch='master'):
+                    title=''):
     """
-    TO BE DONE
+    Creates a merge request to merge a forked repository.
     """
-
     git_username = gitlab_utils.get_username()
     if git_username == -1:
         print(const.PROBLEM_USERNAME)
         exit(-1)
-
     # Check if there is already a fork
     forked_project = gitlab_utils.get_forked_project(git_repository, 
-                                                     git_repository_id,
-                                                     clean)
+                                                     git_repository_id)
     
     if forked_project is None:
             raise Exception(const.GIT_MERGE_PROBLEM)
     else:
         print(const.GIT_CREATE_MERGE_MSG)
         title = title
-        description = const.GIT_MERGE_DESCRIPTION_MSG % git_username
-        description += ". "+description
+        final_description = const.GIT_MERGE_DESCRIPTION_MSG % git_username
+        final_description += ". User definition: "+description
         # Gets the source branch (assuming the current branch is the one to be merged)
         os.chdir(basedir+'/'+git_repository)
         source_branch = subprocess.check_output(
                         const.GIT_GET_CURRENT_BRANCH, shell=True).decode("utf-8").rstrip() 
         # Gets the target branch (assuming the master as target branch)
-        if not target_branch:
-            target_branch = 'master'
+        target_branch = gitlab_utils.get_branch(forked_project['forked_from_project']['id'])
+        
         merge_request = gitlab_utils.create_merge_request(git_repository_id, 
                                     source_branch,
                                     forked_project['forked_from_project']['id'], 
-                                    target_branch, title, description, 
-                                    labels, clean)
-        if 'message' in merge_request:
-            # Merge request already exists
-            for msg in merge_request['message']:
-                print(msg)
+                                    target_branch, title, final_description)
+        
+        if merge_request.attributes['id']:
+            print(const.GIT_MERGE_SUCCESS.format(merge_request.attributes['id'], 
+                                            merge_request.attributes['created_at']))
 
 
 def commit(message, basedir='.', git_repository=''):
@@ -223,10 +232,6 @@ def main():
     parser_mr.add_argument('-t', '--title', required=True, 
                                                 help=const.MERGE_MESSAGE_TITLE)
     parser_mr.add_argument('-d', '--description', help=const.MERGE_MESSAGE_DESCRIPTION)
-    parser_mr.add_argument('-l', '--labels', help=const.MERGE_MESSAGE_LABELS)
-    parser_mr.add_argument('-b', '--target_branch', help=const.MERGE_MESSAGE_TB)
-    parser_mr.add_argument('-c', '--clean', action=const.STORE_TRUE, 
-                                                help=const.PULL_CLEAN_HELP_MSG)
 
     arguments = parser.parse_args()
 
@@ -243,7 +248,7 @@ def main():
     else:
         parser.print_help()
         exit(-1)
-    
+
 
     if arguments.command and repo_name != None and group_name != None:
         try:
@@ -273,11 +278,8 @@ def main():
                     git_repository = repo_name,
                     git_repository_id = gitlab_utils.get_project_id(group_name, 
                                                                     repo_name), 
-                    clean=arguments.clean,
                     description=arguments.description,
-                    title = arguments.title,
-                    labels = arguments.labels,
-                    target_branch= arguments.target_branch)
+                    title = arguments.title)
         except Exception as e:
             print(str(e))
     else:

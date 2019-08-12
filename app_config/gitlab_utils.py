@@ -18,9 +18,15 @@ access_token = None
 print(const.AUTHENTICATE_REQUEST)
 login = input(const.LOGIN_REQUEST)
 password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
-
+gl = gitlab.Gitlab(const.ENDPOINT, oauth_token=access_token, api_version=4)
+gl.auth()
 
 def get_username():
+    """
+    Gets the username used for authentication.
+    :return: Username
+    :rtype: str
+    """
     return login
 
 def oauth_authentication():
@@ -37,10 +43,7 @@ except Exception as ex:
     template = const.EXCEPTION_TEMPLATE
     message = template.format(type(ex).__name__, ex.args)
     print(message)
-    exit(-1)
-
-gl = gitlab.Gitlab(const.ENDPOINT, oauth_token=access_token, api_version=4)
-gl.auth()
+    sys.exit(-1)
 
 def get_groups():
     """
@@ -78,18 +81,24 @@ def create_group(group_name, description):
     :return: Returns 0 if successful or -1 if a problem occured.
     :rtype: int
     """
+    exitCode = 0
     try:
-        newGroup = gl.groups.create({'name': group_name, 'path': group_name})
-        newGroup.description = description
-        newGroup.save()
-        return 0
+        newGroup = gl.groups.create({'name': group_name, 'path': group_name, 'description': description})
     except Exception as ex:
         template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
-        return -1
+        exitCode = -1
+    return exitCode
 
 def get_project_web_url(project_name):
+    """
+    Function to get the web_url attribute of a project based on its name.
+    :param project_name: Name of the project
+    :type project_name: str
+    :return: Returns the web url to the project.
+    :rtype: str
+    """
     projects_list = gl.projects.list(search=project_name)
     for project in projects_list:
         if project_name == project.attributes['name']:
@@ -97,6 +106,13 @@ def get_project_web_url(project_name):
     raise Exception(const.PROJECT_NAME_NOT_FOUND)
 
 def get_project_group(project_name):
+    """
+    Function to get the web_url attribute of a project based on its name.
+    :param project_name: Name of the project
+    :type project_name: str
+    :return: Returns the web url to the project.
+    :rtype: str
+    """
     projects_list = gl.projects.list(search=project_name)
     for project in projects_list:
         if project_name == project.attributes['name']:
@@ -104,6 +120,15 @@ def get_project_group(project_name):
     raise Exception(const.PROJECT_NAME_NOT_FOUND)
 
 def get_forked_project(git_repository, git_repository_id):
+    """
+    Function to get the forked project based on the git repository name and id.
+    :param git_repository: Name of the project
+    :type git_repository: str
+    :param git_repository_id: Id of the project
+    :type git_repository_id: int
+    :return: Returns the web url to the project.
+    :rtype: str
+    """
     forked_project = None
     projects = get_owned_projects()
     for project in projects:
@@ -116,6 +141,13 @@ def get_forked_project(git_repository, git_repository_id):
     return forked_project
         
 def get_branch(project_id):
+    """
+    Function to check if there is a 'master' branch on the project.
+    :param project_id: Id of the project
+    :type project_id: int
+    :return: Returns the name of the branch.
+    :rtype: str
+    """
     # Get a project by ID
     project = gl.projects.get(project_id)
     # Verifies if there is a master branch to merge into
@@ -127,6 +159,15 @@ def get_branch(project_id):
     
 
 def get_project_url(group_id, project_name):
+    """
+    Function to get the project http url attribute of a project based on its group id and name.
+    :param project_name: Name of the project
+    :type project_name: str
+    :param group_id: Id of the group
+    :type group_id: int
+    :return: Returns the http url to the project.
+    :rtype: str
+    """
     projects_list = gl.projects.list(search=project_name)
     for project in projects_list:
         if project.attributes['name'] == project_name:
@@ -134,6 +175,15 @@ def get_project_url(group_id, project_name):
     raise Exception(const.PROJECT_URL_NOT_FOUND)
 
 def get_project_id(group_name, project_name):
+    """
+    Function to get the id attribute of a project based on its group and project name.
+    :param group_name: Name of the group
+    :type group_name: str
+    :param project_name: Name of the project
+    :type project_name: str
+    :return: Returns the id of the project.
+    :rtype: str
+    """
     projects_list = gl.projects.list(search=project_name)
     for project in projects_list:
         if project.attributes['name'] == project_name and group_name in project.attributes['path_with_namespace']:
@@ -141,6 +191,13 @@ def get_project_id(group_name, project_name):
     raise Exception(const.PROJECT_ID_NOT_FOUND)
 
 def get_repo_group_names(config):
+    """
+    Gets the project name and group name based on the argument given on the cli.
+    :param config: String given as argument that can be of different formats: full path to the project, groupname/projectname or project name.
+    :type config: str
+    :return: Returns the project name, group name and a boolean indicating if the results are valid.
+    :rtype: tuple
+    """
     repo_name = None
     group_name = None
     valid = False
@@ -173,15 +230,16 @@ def delete_group(group_name):
     :return: Returns 0 if successful or -1 if a problem occured.
     :rtype: int
     """
+    group = gl.groups.get(group_name, lazy = True)
+    returnCode = 0
     try:
-        group = gl.groups.get(group_name)
         group.delete()
-        return 0
     except Exception as ex:
         template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
-        return -1
+        returnCode = -1
+    return returnCode
 
 
 def create_repo(repo_name, namespace):

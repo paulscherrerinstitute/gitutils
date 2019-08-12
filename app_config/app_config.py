@@ -1,5 +1,6 @@
 import gitlab_utils
 import const
+import sys
 import os
 import time
 import subprocess
@@ -19,8 +20,7 @@ def pull(git_group_id='', git_repository_id=None, git_repository_upstream=None,
     """
     git_username = gitlab_utils.get_username()
     if git_username == -1:
-        print(const.PROBLEM_USERNAME)
-        exit(-1)
+        raise Exception(const.PROBLEM_USERNAME)
         
     if git_repository_upstream is None or git_repository_id is None:
         raise Exception(const.GIT_UNABLE_TO_FIND_PROJECT_MSG % project['name'])
@@ -112,8 +112,7 @@ def push(basedir='', git_group_name='', git_repository='',  git_repository_id = 
 
     git_username = gitlab_utils.get_username()
     if git_username == -1:
-        print(const.PROBLEM_USERNAME)
-        exit(-1)
+        raise Exception(const.PROBLEM_USERNAME)
 
     # We assume that we are in the directory with the forked repository
     os.chdir(basedir+'/'+git_repository)
@@ -125,7 +124,8 @@ def push(basedir='', git_group_name='', git_repository='',  git_repository_id = 
         template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
-        exit(-1)
+        sys.exit(-1)
+    
     print(const.GIT_PUSHED % git_repository_upstream)
 
 def merge_request(basedir='.', 
@@ -135,11 +135,22 @@ def merge_request(basedir='.',
                     title=''):
     """
     Creates a merge request to merge a forked repository.
+    :param basedir: Base directory.
+    :type basedir: str
+    :param git_group_id: Id of the group to be pulled from.
+    :type git_group_id: int
+    :param git_repository: Name of the repository to be pulled.
+    :type git_repository: str
+    :param description: Description of the merge request.
+    :type description: str
+    :param title: Title of the merge request.
+    :type title: str
+    :return: 
     """
     git_username = gitlab_utils.get_username()
     if git_username == -1:
-        print(const.PROBLEM_USERNAME)
-        exit(-1)
+        raise Exception(const.PROBLEM_USERNAME)
+
     # Check if there is already a fork
     forked_project = gitlab_utils.get_forked_project(git_repository, 
                                                      git_repository_id)
@@ -182,8 +193,8 @@ def commit(message, basedir='.', git_repository=''):
     # Checks the username+login validation
     git_username = gitlab_utils.get_username()
     if git_username == -1:
-        print(const.PROBLEM_USERNAME)
-        exit(-1)
+        raise Exception(const.PROBLEM_USERNAME)
+
     # Change into git repository
     os.chdir(basedir+'/'+git_repository)
     # Add all changes to commit
@@ -244,10 +255,10 @@ def main():
         group_id = gitlab_utils.get_group_id(group_name)
         if not valid or group_id == -1:
             parser.print_help()
-            exit(-1)
+            sys.exit(-1)
     else:
         parser.print_help()
-        exit(-1)
+        sys.exit(-1)
 
 
     if arguments.command and repo_name != None and group_name != None:

@@ -13,20 +13,13 @@ import time
 # Gitlab API Documenation: http://doc.gitlab.com/ce/api/
 # Python-Gitlab Documetation: https://python-gitlab.readthedocs.io/en/stable/index.html
 
-access_token = None
-
-print(const.AUTHENTICATE_REQUEST)
-login = input(const.LOGIN_REQUEST)
-password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
-gl = gitlab.Gitlab(const.ENDPOINT, oauth_token=access_token, api_version=4)
-gl.auth()
-
 def get_username():
     """
     Gets the username used for authentication.
     :return: Username
     :rtype: str
     """
+    logging.info('Login: %s' % (login))
     return login
 
 def oauth_authentication():
@@ -37,6 +30,17 @@ def oauth_authentication():
     """
     return requests.post(const.OATH_REQUEST+login+const.PASSWORD_URL+password).json()
 
+
+access_token = None
+# Informs the user to input login+password
+print(const.AUTHENTICATE_REQUEST)
+login = input(const.LOGIN_REQUEST)
+password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
+# Creates the python-gitlab object indicatin the endpoing, oauth token and api version
+gl = gitlab.Gitlab(const.ENDPOINT, oauth_token=access_token, api_version=4)
+# performs an authentication using the private access token
+gl.auth()
+# Requests the access token for the user
 try:
     access_token = oauth_authentication()["access_token"]
 except Exception as ex:
@@ -44,6 +48,8 @@ except Exception as ex:
     message = template.format(type(ex).__name__, ex.args)
     print(message)
     sys.exit(-1)
+
+logging.info('Authentication for user %s at %s succesfully.' % (login, const.ENDPOINT))
 
 def get_groups():
     """
@@ -89,6 +95,7 @@ def create_group(group_name, description):
         message = template.format(type(ex).__name__, ex.args)
         print(message)
         exitCode = -1
+    logging.info('Newly created group: %s - %d' % (newGroup.attributes['name'], newGroup.attributes['id']))
     return exitCode
 
 def get_project_web_url(project_name):
@@ -102,6 +109,7 @@ def get_project_web_url(project_name):
     projects_list = gl.projects.list(search=project_name)
     for project in projects_list:
         if project_name == project.attributes['name']:
+            logging.info('Project web url: %s' % (project.attributes['web_url']))
             return project.attributes['web_url']
     raise Exception(const.PROJECT_NAME_NOT_FOUND)
 
@@ -116,7 +124,9 @@ def get_project_group(project_name):
     projects_list = gl.projects.list(search=project_name)
     for project in projects_list:
         if project_name == project.attributes['name']:
-            return project.attributes['path_with_namespace'].split('/')[0]
+            group = project.attributes['path_with_namespace'].split('/')[0]
+            logging.info('Project\'s %s group:'% (group))
+            return group
     raise Exception(const.PROJECT_NAME_NOT_FOUND)
 
 def get_forked_project(git_repository, git_repository_id):
@@ -137,6 +147,7 @@ def get_forked_project(git_repository, git_repository_id):
                 # check whether project is forked from the right project
                 if project['forked_from_project']['name'] == git_repository:
                     print(const.FORKED_EXISTS.format(git_repository))
+                    logging.info(const.FORKED_EXISTS.format(git_repository))
                     forked_project = project
     return forked_project
         
@@ -149,10 +160,11 @@ def get_branch(project_id):
     :rtype: str
     """
     # Get a project by ID
-    project = gl.projects.get(project_id)
+    project = gl.projects.get(project_id, lazy = True)
     # Verifies if there is a master branch to merge into
     branch = project.branches.get('master')
     if branch.attributes['name']:
+        logging.info('Master branch found within project id %s. '% (project_id))
         return 'master'
     else:
         raise Exception(const.GIT_UNABLE_TO_FIND_MASTER_BRANCH % project['name'])
@@ -171,6 +183,7 @@ def get_project_url(group_id, project_name):
     projects_list = gl.projects.list(search=project_name)
     for project in projects_list:
         if project.attributes['name'] == project_name:
+            logging.info('Project http url to repo: %s' % (project.attributes['http_url_to_repo']))
             return project.attributes['http_url_to_repo']
     raise Exception(const.PROJECT_URL_NOT_FOUND)
 
@@ -187,6 +200,7 @@ def get_project_id(group_name, project_name):
     projects_list = gl.projects.list(search=project_name)
     for project in projects_list:
         if project.attributes['name'] == project_name and group_name in project.attributes['path_with_namespace']:
+            logging.info('Found the project id ( %s - %s ) : %s' % (group_name, project_name, project.attributes['id']))
             return project.attributes['id']
     raise Exception(const.PROJECT_ID_NOT_FOUND)
 
@@ -239,6 +253,7 @@ def delete_group(group_name):
         message = template.format(type(ex).__name__, ex.args)
         print(message)
         returnCode = -1
+    logging.info('Deleted group: %s' % (group_name))
     return returnCode
 
 
@@ -252,16 +267,16 @@ def create_repo(repo_name, namespace):
     :return: Dictionary containing the details of the newly created repository, including name, path and url.
     :rtype: dict
     """
+    namespace_group = gl.groups.get(namespace, lazy = True)
     try:
-        namespace_id = gl.groups.get(namespace).attributes['id']
-        project = gl.projects.create({'name': repo_name, 'namespace_id': namespace_id})
-        logging.info('%s [%s] - %s' % (project.attributes['name'], project.attributes['path_with_namespace'], project.attributes['ssh_url_to_repo']))
-        return {'name': project.attributes['name'], 'path': project.attributes['path_with_namespace'], 'url': project.attributes['ssh_url_to_repo']}
+        project = gl.projects.create({'name': repo_name, 'namespace_id': namespace_group.attributes['id']})
     except Exception as ex:
         template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
         return -1
+    logging.info('%s [%s] - %s' % (project.attributes['name'], project.attributes['path_with_namespace'], project.attributes['ssh_url_to_repo']))
+    return {'name': project.attributes['name'], 'path': project.attributes['path_with_namespace'], 'url': project.attributes['ssh_url_to_repo']}
 
 def get_group_id(group_name):
     """
@@ -282,7 +297,7 @@ def get_group_id(group_name):
             template = const.EXCEPTION_TEMPLATE
             message = template.format(type(ex).__name__, ex.args)
             print(message)
-        logging.info('Group name: %s (id %s)' % (group_name, group_id))
+    logging.info('Group name: %s (id %s)' % (group_name, group_id))
     return group_id
 
 def get_group_projects(group_name):
@@ -335,7 +350,9 @@ def fork_project(project_id):
         print(message)
         print(const.FORK_PROBLEM)
         exit(-1)
+    logging.info('Forking project id %d' % (project_id))
     return fork.attributes['http_url_to_repo']
+
 def create_merge_request(source_project_id, source_branch,
                         target_project_id, target_branch,
                         title, description):
@@ -366,6 +383,7 @@ def create_merge_request(source_project_id, source_branch,
         message = template.format(type(ex).__name__, ex.args)
         print(message)
         exit(-1)
+    logging.info('Creating merge request %s (Description: %s). Source project id/branch: %s - %s. Targer project id/branch: %s - %s' % (title, description, source_project_id, 'master', target_project_id, 'master'))
     return mr
 
 def get_owned_projects():
@@ -403,6 +421,7 @@ def delete_project(project_id):
         message = template.format(type(ex).__name__, ex.args)
         print(message)
         exit(-1)
+    return 0
 
 def get_username():
     """
@@ -416,7 +435,7 @@ def get_username():
         template = const.EXCEPTION_TEMPLATE
         message = template.format(type(ex).__name__, ex.args)
         print(message)
-
+    logging.info('Retrieving username %s' % (username))
     if login == username:
         return username
     else:

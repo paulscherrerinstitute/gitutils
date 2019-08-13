@@ -41,8 +41,11 @@ def pull(git_group_id='', git_repository_id=None, git_repository_upstream=None,
             if git_group_id == 0:
                 print(const.DELETE_PERSONAL_PROJECT)
                 source_project_id = forked_project['forked_from_project']['id']
-                gitlab_utils.delete_project(git_repository_id)
-                http_url_to_repo = gitlab_utils.fork_project(source_project_id)
+                r = gitlab_utils.delete_project(git_repository_id)
+                if r == 0:
+                    http_url_to_repo = gitlab_utils.fork_project(source_project_id)
+                else:
+                    raise Exception(const.PROBLEM_DELETING_PROJECT)
             else:# not personal group -> warning about not deletion and fork
                 print(const.NOT_ABLE_TO_DELETE_NON_PERSONAL_REPO.format(forked_project['name']))
                 # check if personal project already exists

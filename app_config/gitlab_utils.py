@@ -12,6 +12,13 @@ import time
 
 # Gitlab API Documenation: http://doc.gitlab.com/ce/api/
 # Python-Gitlab Documetation: https://python-gitlab.readthedocs.io/en/stable/index.html
+access_token = None
+
+print(const.AUTHENTICATE_REQUEST)
+login = input(const.LOGIN_REQUEST)
+password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
+gl = gitlab.Gitlab(const.ENDPOINT, oauth_token=access_token, api_version=4)
+# gl.auth()
 
 def get_username():
     """
@@ -19,7 +26,6 @@ def get_username():
     :return: Username
     :rtype: str
     """
-    logging.info('Login: %s' % (login))
     return login
 
 def oauth_authentication():
@@ -30,17 +36,6 @@ def oauth_authentication():
     """
     return requests.post(const.OATH_REQUEST+login+const.PASSWORD_URL+password).json()
 
-
-access_token = None
-# Informs the user to input login+password
-print(const.AUTHENTICATE_REQUEST)
-login = input(const.LOGIN_REQUEST)
-password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
-# Creates the python-gitlab object indicatin the endpoing, oauth token and api version
-gl = gitlab.Gitlab(const.ENDPOINT, oauth_token=access_token, api_version=4)
-# performs an authentication using the private access token
-gl.auth()
-# Requests the access token for the user
 try:
     access_token = oauth_authentication()["access_token"]
 except Exception as ex:
@@ -48,8 +43,6 @@ except Exception as ex:
     message = template.format(type(ex).__name__, ex.args)
     print(message)
     sys.exit(-1)
-
-logging.info('Authentication for user %s at %s succesfully.' % (login, const.ENDPOINT))
 
 def get_groups():
     """
@@ -423,23 +416,23 @@ def delete_project(project_id):
         exit(-1)
     return 0
 
-def get_username():
-    """
-    Gets the current username 
-    :return: Returns username if successful or "problem" if a problem occured.
-    :rtype: str
-    """
-    try:
-        username = gl.user.attributes['username']
-    except Exception as ex:
-        template = const.EXCEPTION_TEMPLATE
-        message = template.format(type(ex).__name__, ex.args)
-        print(message)
-    logging.info('Retrieving username %s' % (username))
-    if login == username:
-        return username
-    else:
-        return -1
+# def get_username():
+#     """
+#     Gets the current username 
+#     :return: Returns username if successful or "problem" if a problem occured.
+#     :rtype: str
+#     """
+#     try:
+#         username = gl.user.attributes['username']
+#     except Exception as ex:
+#         template = const.EXCEPTION_TEMPLATE
+#         message = template.format(type(ex).__name__, ex.args)
+#         print(message)
+#     logging.info('Retrieving username %s' % (username))
+#     if login == username:
+#         return username
+#     else:
+#         return -1
 
 def update_project_visibility(project_id, visibility):
     """

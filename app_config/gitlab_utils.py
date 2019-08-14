@@ -114,21 +114,33 @@ def get_project_web_url(project_name):
             return project.attributes['web_url']
     raise Exception(const.PROJECT_NAME_NOT_FOUND)
 
-def get_project_group(project_name):
+def checkKey(dict, key): 
+    if key in dict: 
+        return True
+    else: 
+        return False
+
+def get_project_group(project_name, merge=False):
     """
     Function to get the web_url attribute of a project based on its name.
     :param project_name: Name of the project
     :type project_name: str
-    :return: Returns the web url to the project.
+    :return: Returns the name of the group.
     :rtype: str
     """
     count = 0
     projects_list = gl.projects.list(search=project_name)
     for project in projects_list:
         if project_name == project.attributes['name']:
-            groupFound = project.attributes['path_with_namespace'].split('/')[0]
-            count += 1
-            logging.info('Project\'s %s group:'% (group))
+            if merge:
+                if checkKey(project.attributes, 'forked_from_project'):
+                    groupFound = project.attributes['path_with_namespace'].split('/')[0]
+                    count += 1
+                    logging.info('Project\'s %s group:'% (groupFound))
+            elif not merge:
+                groupFound = project.attributes['path_with_namespace'].split('/')[0]
+                count += 1
+                logging.info('Project\'s %s group:'% (groupFound))
     if count == 1:
         return groupFound
     elif count >= 2: 
@@ -238,7 +250,7 @@ def get_repo_group_names(config):
             valid = True
     else: # config format: "project_name"
         repo_name = config
-        group_name = get_project_group(repo_name)
+        group_name = get_project_group(repo_name, False)
         # warning if multiple and ERROR out - > ambiguous
         valid = True
     return repo_name, group_name, valid

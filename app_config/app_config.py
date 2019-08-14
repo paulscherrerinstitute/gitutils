@@ -4,6 +4,48 @@ import sys
 import os
 import time
 import subprocess
+import logging
+
+
+def fork(git_repository_id=None, git_repository='', no_clone=False):
+    git_username = gitlab_utils.get_username()
+    if git_username == -1:
+        raise Exception(const.PROBLEM_USERNAME)
+        
+    if git_repository_id is None:
+        raise Exception(const.GIT_UNABLE_TO_FIND_PROJECT_MSG % project['name'])
+
+    print(const.FORK_PROJECT % git_repository)
+
+    # Forks and copy the direct http to the repo
+    new_project = gitlab_utils.fork_project(git_repository_id)
+    http_url_to_repo = new_project.attributes['http_url_to_repo']
+
+    if not no_clone:
+        print(const.CLONE_FORK)        
+        # Clone repository
+        time.sleep(2)
+        os.system(const.GIT_CLONE_CMD % (http_url_to_repo))
+        # Change into git repository
+        try:
+            os.chdir(git_repository)
+        except Exception as ex:
+            template = const.EXCEPTION_TEMPLATE
+            message = template.format(type(ex).__name__, ex.args)
+            print(message)
+            return -1
+
+        # Add upstream repository
+        os.system(const.GIT_UPSTREAM_REPO_CMD % git_repository_upstream)
+    else:
+        print(const.FORKED_BUT_NOT_CLONED)
+
+    logging.info('New project forked: [%s] (id: %s) - %s' % (new_project.attributes['path_with_namespace'], 
+                                    new_project.attributes['id'], 
+                                    new_project.attributes['http_url_to_repo']))
+    print('New project forked: [%s] (id: %s) - %s' % (new_project.attributes['path_with_namespace'], 
+                                    new_project.attributes['id'], 
+                                    new_project.attributes['http_url_to_repo']))
 
 def pull(git_group_id='', git_repository_id=None, git_repository_upstream=None, 
                                     git_repository='', basedir='.', clean=False):
@@ -212,49 +254,37 @@ def commit(message, basedir='.', git_repository=''):
 def main():
     import argparse
 
-    
-    # TODO Add a --list option. This is currently not possible because the way the 
-    # arguments are done right now
-    # (configuration is a required option and the parsing would fail before coming 
-    # to the --list option)
-    # The usage should be like this: app_config <subparser> configuration
-
     parser = argparse.ArgumentParser(description=const.APP_CONFIG_TITLE_DESCRIPTION)
-    # parser.add_argument('configuration', nargs='?', default=None)
-    parser.add_argument('-b', '--basedir', help=const.BASEDIR_HELP_MSG, default='./')
-
-    parser.add_argument('-c', '--config', nargs='?', help=const.CONFIG_HELP_MSG)
-    parser.add_argument('-l', '--list', help=const.CONFIG_LIST_HELP_MSG,
-       action=const.STORE_TRUE)
+    parser.add_argument('-e', '--endpoint', help=const.BASEDIR_HELP_MSG, default=const.ENDPOINT)
 
     subparsers = parser.add_subparsers(title='command',
                                        description='valid commands',
                                        dest='command',
                                        help='commands')
 
-    parser_pull = subparsers.add_parser('pull', help=const.PULL_HELP_MSG)
-    parser_pull.add_argument('-c', '--clean', action=const.STORE_TRUE, 
-                                                help=const.PULL_CLEAN_HELP_MSG)
-
-    parser_push = subparsers.add_parser('push', help=const.PUSH_HELP_MSG)
-
-    parser_commit = subparsers.add_parser('commit', help=const.COMMIT_HELP_MSG)
-    parser_commit.add_argument('-m', '--message', required=True, 
-                                                help=const.COMMIT_MESSAGE)
+    parser_fork = subparsers.add_parser('fork', help=const.FORK_HELP_MSG)
+    parser_fork.add_argument('-p', '--project', required=True, 
+                                                help=const.FORK_PROJECT_MESSAGE)
+    parser_fork.add_argument('-n', '--no_clone', action=const.STORE_TRUE, 
+                                                help=const.FORK_NOCLONE_HELP)
 
     parser_mr = subparsers.add_parser('merge_request', help=const.MERGE_HELP_MSG)
+    parser_mr.add_argument('-p', '--project', required=True, 
+                                                help=const.FORK_PROJECT_MESSAGE)
     parser_mr.add_argument('-t', '--title', required=True, 
                                                 help=const.MERGE_MESSAGE_TITLE)
     parser_mr.add_argument('-d', '--description', help=const.MERGE_MESSAGE_DESCRIPTION)
 
     arguments = parser.parse_args()
 
-    os.makedirs(arguments.basedir, exist_ok=True)
+
+    # Authenticate
+    gitlab_utils.authenticate(arguments.endpoint)
 
     repo_name, group_name = None, None
-    if arguments.config:
+    if arguments.project:
         repo_name, group_name, valid  = gitlab_utils.get_repo_group_names(
-                                                                arguments.config)
+                                                                arguments.project)
         group_id = gitlab_utils.get_group_id(group_name)
         if not valid or group_id == -1:
             parser.print_help()
@@ -262,31 +292,14 @@ def main():
     else:
         parser.print_help()
         sys.exit(-1)
-
-
+    
     if arguments.command and repo_name != None and group_name != None:
         try:
-            if arguments.command == 'pull':
-                pull(git_group_id = group_id, 
-                     git_repository_id = gitlab_utils.get_project_id(group_name, 
+            if arguments.command == 'fork':
+                fork(git_repository_id = gitlab_utils.get_project_id(group_name, 
                                                                     repo_name), 
-                     git_repository_upstream = gitlab_utils.get_project_url(group_id, 
-                                                                    repo_name), 
-                     git_repository=repo_name,
-                     basedir=arguments.basedir, 
-                     clean=arguments.clean)
-            elif arguments.command == 'push':
-                push(basedir=arguments.basedir,
-                    git_group_name = group_name,
-                    git_repository=repo_name,  
-                    git_repository_id = gitlab_utils.get_project_id(group_name, 
-                                                                    repo_name), 
-                    git_repository_upstream = gitlab_utils.get_project_url(group_id, 
-                                                                    repo_name))
-            elif arguments.command == 'commit':
-                commit(message = arguments.message, 
-                       basedir=arguments.basedir, 
-                       git_repository=repo_name)
+                     git_repository=repo_name, 
+                     no_clone=arguments.no_clone)
             elif arguments.command == 'merge_request':
                 merge_request(basedir=arguments.basedir,
                     git_repository = repo_name,

@@ -15,10 +15,18 @@ import time
 access_token = None
 
 print(const.AUTHENTICATE_REQUEST)
-login = input(const.LOGIN_REQUEST)
-password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
-gl = gitlab.Gitlab(const.ENDPOINT, oauth_token=access_token, api_version=4)
+# login = input(const.LOGIN_REQUEST)
+login = "hax_l"
+# password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
+password = "PHDleo2019!"
+gl = None
+# gl = gitlab.Gitlab(const.ENDPOINT, oauth_token=access_token, api_version=4)
 # gl.auth()
+
+def authenticate(endpoint):
+    global gl
+    gl = gitlab.Gitlab(const.ENDPOINT, oauth_token=access_token, api_version=4)
+    gl.auth()
 
 def get_username():
     """
@@ -114,13 +122,19 @@ def get_project_group(project_name):
     :return: Returns the web url to the project.
     :rtype: str
     """
+    count = 0
     projects_list = gl.projects.list(search=project_name)
     for project in projects_list:
         if project_name == project.attributes['name']:
-            group = project.attributes['path_with_namespace'].split('/')[0]
+            groupFound = project.attributes['path_with_namespace'].split('/')[0]
+            count += 1
             logging.info('Project\'s %s group:'% (group))
-            return group
-    raise Exception(const.PROJECT_NAME_NOT_FOUND)
+    if count == 1:
+        return groupFound
+    elif count >= 2: 
+        raise Exception(const.MULTIPLE_PROJECTS)
+    else:
+        raise Exception(const.PROJECT_NAME_NOT_FOUND)
 
 def get_forked_project(git_repository, git_repository_id):
     """
@@ -225,6 +239,7 @@ def get_repo_group_names(config):
     else: # config format: "project_name"
         repo_name = config
         group_name = get_project_group(repo_name)
+        # warning if multiple and ERROR out - > ambiguous
         valid = True
     return repo_name, group_name, valid
     
@@ -343,8 +358,8 @@ def fork_project(project_id):
         print(message)
         print(const.FORK_PROBLEM)
         exit(-1)
-    logging.info('Forking project id %d' % (project_id))
-    return fork.attributes['http_url_to_repo']
+    logging.info('Forked project id %d' % (project_id))
+    return fork
 
 def create_merge_request(source_project_id, source_branch,
                         target_project_id, target_branch,

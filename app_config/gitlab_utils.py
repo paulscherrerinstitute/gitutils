@@ -13,20 +13,44 @@ import time
 # Gitlab API Documenation: http://doc.gitlab.com/ce/api/
 # Python-Gitlab Documetation: https://python-gitlab.readthedocs.io/en/stable/index.html
 access_token = None
+login = None
+password = None
 
-print(const.AUTHENTICATE_REQUEST)
-# login = input(const.LOGIN_REQUEST)
-login = "hax_l"
-# password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
-password = "PHDleo2019!"
-gl = None
-# gl = gitlab.Gitlab(const.ENDPOINT, oauth_token=access_token, api_version=4)
-# gl.auth()
 
 def authenticate(endpoint):
     global gl
-    gl = gitlab.Gitlab(const.ENDPOINT, oauth_token=access_token, api_version=4)
-    gl.auth()
+    global login
+    global password
+    global access_token
+    private_token = None
+    # Try to take the access token from the .gitlab_token file
+    if os.path.isfile(os.path.expanduser('~')+'/.gitlab_token'):
+        with open(os.path.expanduser('~')+'/.gitlab_token', 'r') as tfile:
+            private_token = tfile.read().replace('\n', '')
+
+    # if not existant, authenticate with the user and saves it
+    if private_token == None:
+        print(const.AUTHENTICATE_REQUEST)
+        login = input(const.LOGIN_REQUEST)
+        password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
+        try:
+            access_token = oauth_authentication()["access_token"]
+        except Exception as ex:
+            template = const.EXCEPTION_TEMPLATE
+            message = template.format(type(ex).__name__, ex.args)
+            print(message)
+            sys.exit(-1)
+        # saves token into personal file
+        if access_token:
+            with open(os.path.expanduser('~')+'/.gitlab_token', 'w') as tfile:
+                tfile.write(access_token)
+            os.chmod(os.path.expanduser('~')+'/.gitlab_token', 0o600)
+        # python-gitlab object
+        gl = gitlab.Gitlab(const.ENDPOINT, oauth_token=access_token, api_version=4)
+        gl.auth()
+    else:
+        gl = gitlab.Gitlab(const.ENDPOINT, oauth_token=private_token, api_version=4)
+        gl.auth()
 
 def get_username():
     """
@@ -44,13 +68,7 @@ def oauth_authentication():
     """
     return requests.post(const.OATH_REQUEST+login+const.PASSWORD_URL+password).json()
 
-try:
-    access_token = oauth_authentication()["access_token"]
-except Exception as ex:
-    template = const.EXCEPTION_TEMPLATE
-    message = template.format(type(ex).__name__, ex.args)
-    print(message)
-    sys.exit(-1)
+
 
 def get_groups():
     """

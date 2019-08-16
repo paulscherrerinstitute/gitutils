@@ -20,7 +20,10 @@ import pwd
 access_token = None
 login = None
 password = None
+gl = None
 
+def get_gl():
+    return gl
 
 def authenticate(endpoint):
     global gl
@@ -36,7 +39,6 @@ def authenticate(endpoint):
             private_token = tfile.read().replace('\n', '')
 
     # if not existant, authenticate with the user and saves it
-
     if private_token is None:
         print(const.AUTHENTICATE_REQUEST)
         login = input(const.LOGIN_REQUEST)
@@ -180,7 +182,7 @@ def checkKey(dict, key):
 
 def get_project_group(project_name, merge=False):
     """
-    Function to get the web_url attribute of a project based on its name.
+    Function to get the group of a project based on its name.
     :param project_name: Name of the project
     :type project_name: str
     :return: Returns the name of the group.
@@ -224,7 +226,6 @@ def get_forked_project(git_repository, git_repository_id):
     forked_project = None
     projects = get_owned_projects()
     for project in projects:
-        print(project['username'],login, project['name'], git_repository)
         if project['username'] == login and project['name'] == git_repository:
             if 'forked_from_project' in project:
                 # check whether project is forked from the right project
@@ -440,7 +441,7 @@ def get_group_projects(group_name):
     else:
 
         # Retrieve the group's projects
-
+        group_id = get_group_id(group_name)
         try:
             group = gl.groups.get(group_id, lazy=True)
             group_projects = group.projects.list()
@@ -538,7 +539,7 @@ def get_owned_projects():
     Retrieves the projects owned by the current user.
     :return: List of projects containing name, path and url
     (in a dictionary-type).
-    :rtype: list
+    :rtype: dict
     """
 
     try:

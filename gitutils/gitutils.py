@@ -186,9 +186,7 @@ def main():
         (repo_name, group_name, project_id, valid) = \
             gitlab_utils.get_repo_group_names(arguments.project)
         group_id = gitlab_utils.get_group_id(group_name)
-        print(group_id)
         if not valid or group_id == -1:
-            print('demonho')
             parser.print_help()
             sys.exit(-1)
     elif arguments.command == 'merge':

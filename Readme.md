@@ -132,14 +132,12 @@ GITUTILS will assume the command is being executed on the git repository folder.
 
 Please note that the *-t* title directive is required.
 
-
-
 # Tests
 
 Unit tests are available on the folder `tests`. To run the unit tests, navigate into `tests` and use the command:
 
 ```bash
-$python -m unittest gitutils_test.py
+$python3 -m unittest gitutils/tests/gitutils_test.py
 ```
 
 # Contact

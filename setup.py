@@ -6,14 +6,11 @@ from setuptools import setup, find_packages
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'Readme.md')).read()
 
-setup(name='app_config',
-      version='1.3.2',
-      description="Configuration management tools to support configuration change workflows",
+setup(name='gitutils',
+      version='1.4',
+      description="GITUTILS is a tool to facilitate the server-side operations when developing software that uses git repositories.",
       long_description=README,
       author='Paul Scherrer Institute (PSI)',
-      url='https://git.psi.ch/git_tools/git_workflow_tools',
-      packages=['app_config'],
-      # package_dir={'app_config': 'src'},
-      # package_data={'pylauncher': ['resources/images/*.png', 'resources/qss/*.qss', 'resources/mapping/*.json']},
-      # platforms=["any"],
+      url='https://git.psi.ch/controls_highlevel_applications/app_config',
+      packages=['gitutils'],
       )

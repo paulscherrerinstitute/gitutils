@@ -1,12 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import unittest
 import sys
 import os
-
-sys.path.insert(0, '../')
-
-from gitutils import gitlab_utils, fork, merge, const
+from gitutils import gitlab_utils
+from gitutils import const
 
 
 class TestGitlabUtils(unittest.TestCase):
@@ -56,8 +54,7 @@ class TestGitlabUtils(unittest.TestCase):
         """
 
         web_url = gitlab_utils.get_project_web_url('app_config')
-        default = 'https://git.psi.ch/\
-                controls_highlevel_applications/app_config'
+        default = 'https://git.psi.ch/controls_highlevel_applications/app_config'
         self.assertEqual(web_url, default)
 
     def test_checkKey(self):
@@ -77,7 +74,7 @@ class TestGitlabUtils(unittest.TestCase):
         Test get_project_group
         """
 
-        group = gitlab_utils.get_project_group('app_config', False)
+        group = gitlab_utils.get_project_group('app_config', False, False)
         self.assertEqual(group, 'controls_highlevel_applications')
 
     def test_get_group_id(self):
@@ -95,8 +92,7 @@ class TestGitlabUtils(unittest.TestCase):
         """
 
         http_url_to_repo = gitlab_utils.get_project_url(84, 'app_config')
-        default = 'https://git.psi.ch/\
-                controls_highlevel_applications/app_config.git'
+        default = 'https://git.psi.ch/controls_highlevel_applications/app_config.git'
         self.assertEqual(http_url_to_repo, default)
 
     def test_get_project_id(self):
@@ -113,10 +109,9 @@ class TestGitlabUtils(unittest.TestCase):
         """
         Test get_repo_group_names with the full path
         """
-        config = 'https://git.psi.ch/\
-            controls_highlevel_applications/app_config'
+        config = 'https://git.psi.ch/controls_highlevel_applications/app_config'
         (repo_name, group_name, project_id, valid) = \
-            gitlab_utils.get_repo_group_names(config)
+            gitlab_utils.get_repo_group_names(config, False)
         self.assertEqual(repo_name, 'app_config')
         self.assertEqual(group_name, 'controls_highlevel_applications')
         self.assertEqual(project_id, 941)
@@ -127,7 +122,7 @@ class TestGitlabUtils(unittest.TestCase):
         """
         config = 'controls_highlevel_applications/app_config'
         (repo_name, group_name, project_id, valid) = \
-            gitlab_utils.get_repo_group_names(config)
+            gitlab_utils.get_repo_group_names(config, False)
         self.assertEqual(repo_name, 'app_config')
         self.assertEqual(group_name, 'controls_highlevel_applications')
         self.assertEqual(project_id, 941)
@@ -138,7 +133,7 @@ class TestGitlabUtils(unittest.TestCase):
         """
 
         (repo_name, group_name, project_id, valid) = \
-            gitlab_utils.get_repo_group_names('app_config')
+            gitlab_utils.get_repo_group_names('app_config', False)
         self.assertEqual(repo_name, 'app_config')
         self.assertEqual(group_name, 'controls_highlevel_applications')
         self.assertEqual(project_id, 941)
@@ -152,7 +147,7 @@ class TestGitlabUtils(unittest.TestCase):
             gitlab_utils.get_group_projects(group_name)
         if len(projects) >= 1:
             project_name = projects[0]['name']
-            group_name = gitlab_utils.get_project_group(project_name)
+            group_name = gitlab_utils.get_project_group(project_name, False, False)
             self.assertEqual(group_name,
                              'controls_highlevel_applications')
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import gitlab_utils
-import const
+from gitutils import gitlab_utils
+from gitutils import const
 import sys
 import os
 import time

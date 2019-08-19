@@ -1,5 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from gitutils import const
 import requests
 import json
 import pprint
@@ -8,7 +9,6 @@ import sys
 import errno
 import logging
 import gitlab
-import const
 import getpass
 import time
 import pwd

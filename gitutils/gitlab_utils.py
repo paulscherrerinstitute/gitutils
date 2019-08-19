@@ -180,7 +180,7 @@ def checkKey(dict, key):
         return False
 
 
-def get_project_group(project_name, merge=False):
+def get_project_group(project_name, clean, merge=False):
     """
     Function to get the group of a project based on its name.
     :param project_name: Name of the project
@@ -188,7 +188,6 @@ def get_project_group(project_name, merge=False):
     :return: Returns the name of the group.
     :rtype: str
     """
-
     count = 0
     projects_list = gl.projects.list(search=project_name)
     for project in projects_list:
@@ -201,9 +200,18 @@ def get_project_group(project_name, merge=False):
                     logging.info('Project\'s %s group:' % groupFound)
             elif not merge:
                 project_path = project.attributes['path_with_namespace']
-                groupFound = project_path.split('/')[0]
-                count += 1
-                logging.info('Project\'s %s group:' % groupFound)
+                # verify if it's a personal project
+                if project_path.split('/')[0] == get_username():
+                    # if it's personal, it should be cleaned
+                    if clean:
+                        delete_project(project.attributes['id'])
+                    else:
+                        raise Exception(const.GIT_FORK_PROBLEM_MULTIPLE)
+                else: # not a personal project
+                    groupFound = project_path.split('/')[0]
+                    count += 1
+                    logging.info('Project\'s %s group:' % groupFound)
+
     if count == 1:
         return groupFound
     elif count >= 2:
@@ -305,7 +313,7 @@ def get_project_id(group_name, project_name):
     raise Exception(const.PROJECT_ID_NOT_FOUND)
 
 
-def get_repo_group_names(config):
+def get_repo_group_names(config, clean=False):
     """
     Gets the project name and group name based on the argument given
     on the cli.
@@ -329,6 +337,7 @@ def get_repo_group_names(config):
             repo_name = web_url_split[-1]
             group_name = web_url_split[-2]
             valid = True
+            group_name = check_group_clean(group_name, repo_name, clean)
     elif '/' in config:
         # config format: "group_name/project_name"
         path_with_namespace = config.split('/')
@@ -336,17 +345,38 @@ def get_repo_group_names(config):
             group_name = path_with_namespace[0]
             repo_name = path_with_namespace[1]
             valid = True
+            group_name = check_group_clean(group_name, repo_name, clean)
     else:
         # config format: "project_name"
         repo_name = config
-        group_name = get_project_group(repo_name, False)
-
+        group_name = get_project_group(repo_name, clean, False)
         # warning if multiple and ERROR out - > ambiguous
         valid = True
-
     project_id = get_project_id(group_name, repo_name)
     return (repo_name, group_name, project_id, valid)
 
+
+def check_group_clean(group_name, repo_name, clean):
+    # If group name == username
+    if group_name == get_username():
+        raise RuntimeError(const.FORK_PROBLEM_PERSONAL)
+    else:
+        if clean:
+            # finds the personal project and deletes it
+            own_projects = get_owned_projects()
+            for own_proj in own_projects:
+                if own_proj['name'] == repo_name:
+                    forked_group = own_proj['forked_from_project']['path_with_namespace'].split('/')[0]
+                    print(const.DELETING_EXISTING_FORK)
+                    delete_project(own_proj['id'])
+                    return forked_group
+        else:
+            # verifies if there is a personal project existing
+            own_projects = get_owned_projects()
+            for own_proj in own_projects:
+                if own_proj['name'] == repo_name:
+                    raise RuntimeError(const.FORKED_EXISTS.format(repo_name))
+    return group_name
 
 def delete_group(group_name):
     """
@@ -412,15 +442,13 @@ def get_group_id(group_name):
     global login
     group_id = -1
     # it could be a personal group -> group name == username
-    if group_name == login:
-        group_id = 0
-    else:
-        try:
-            group_id = gl.groups.get(group_name).attributes['id']
-        except Exception as ex:
-            template = const.EXCEPTION_TEMPLATE
-            message = template.format(type(ex).__name__, ex.args)
-            print(message)
+    try:
+        group_id = gl.groups.get(group_name).attributes['id']
+    except Exception as ex:
+        template = const.EXCEPTION_TEMPLATE
+        message = template.format(type(ex).__name__, ex.args)
+        print(message)
+        exit(-1)
     logging.info('Group name: %s (id %s)' % (group_name, group_id))
     return group_id
 

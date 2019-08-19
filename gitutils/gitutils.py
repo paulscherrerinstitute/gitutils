@@ -6,6 +6,7 @@ import sys
 import os
 import time
 import subprocess
+import shutil
 import logging
 
 
@@ -37,14 +38,20 @@ def fork(git_repository_id=None, git_repository='', no_clone=False):
     http_url_to_repo = new_project.attributes['http_url_to_repo']
 
     if not no_clone:
+        # verify if there is an previously existing local folder
+        if os.path.exists('./'+git_repository):
+            ## Try to remove tree directory; if failed show an error using try...except on screen
+            print(const.DELETING_LOCAL_STORAGE)
+            try:
+                shutil.rmtree(git_repository)
+            except OSError as e:
+                print ("Error: %s - %s." % (e.filename, e.strerror))
 
         # Clone repository
-
         time.sleep(2)
         os.system(const.GIT_CLONE_CMD % http_url_to_repo)
 
         # Change into git repository
-
         try:
             os.chdir(git_repository)
         except Exception as ex:
@@ -53,8 +60,8 @@ def fork(git_repository_id=None, git_repository='', no_clone=False):
             print(message)
             return -1
 
-        # Add upstream repository
-
+        # Creates Add upstream repository
+        # Configure Git to sync your fork with the original repository
         os.system(const.GIT_UPSTREAM_REPO_CMD % http_url_to_repo)
 
     logging.info('New project forked: [%s] (id: %s) - %s' % (
@@ -155,6 +162,11 @@ def main():
                              '--no_clone',
                              action=const.STORE_TRUE,
                              help=const.FORK_NOCLONE_HELP)
+    parser_fork.add_argument('-c',
+                             '--clean',
+                             action=const.STORE_TRUE,
+                             help=const.FORK_NOCLONE_HELP)
+
 
     #############
     # MERGE CMD #
@@ -182,17 +194,23 @@ def main():
     # retrieve repository and group names
 
     (repo_name, group_name, project_id) = (None, None, None)
-    if arguments.project:
-        (repo_name, group_name, project_id, valid) = \
-            gitlab_utils.get_repo_group_names(arguments.project)
-        group_id = gitlab_utils.get_group_id(group_name)
-        if not valid or group_id == -1:
-            parser.print_help()
-            sys.exit(-1)
-    elif arguments.command == 'merge':
+    if arguments.command == 'merge':
         repo_name = os.path.basename(os.getcwd())
-        group_name = gitlab_utils.get_project_group(repo_name, True)
+        group_name = gitlab_utils.get_project_group(repo_name, True, False)
         project_id = gitlab_utils.get_project_id(group_name, repo_name)
+    elif arguments.project:
+        (repo_name, group_name, project_id, valid) = \
+            gitlab_utils.get_repo_group_names(arguments.project, arguments.clean)
+        # if project is personal, needs to be deleted
+        if group_name == gitlab_utils.get_username():
+            if arguments.clean:
+                gitlab_utils.delete_project(project_id)
+                (repo_name, group_name, project_id, valid) = \
+                    gitlab_utils.get_repo_group_names(arguments.project, False)
+            else:
+                print(const.FORK_PROBLEM_PERSONAL)
+                parser.print_help()
+                sys.exit(-1)
     else:
         parser.print_help()
         sys.exit(-1)

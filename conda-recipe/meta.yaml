@@ -1,6 +1,6 @@
 package:
     name: gitutils
-    version: 1.4
+    version: 1.4.0
 source:
     path: ..
 requirements:
@@ -9,11 +9,12 @@ requirements:
         - setuptools
     run:
         - python
+        - python-gitlab
 
 build:
   entry_points:
     - gitutils = gitutils.gitutils:main
 
 about:
-    home: https://git.psi.ch/controls_highlevel_applications/app_config
+    home: https://git.psi.ch/controls_highlevel_applications/ch.psi.gitutils
     summary: "GITUTILS is a tool to facilitate the server-side operations when developing software that uses git repositories."

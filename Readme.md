@@ -1,10 +1,10 @@
 # Overview
 GITUTILS is a tool to facilitate the server-side operations when developing software that uses git repositories. It allows users to create forks and merge requests directly from the command line interface in a straighforward.
 
-## GIT Credentials
+### GIT Credentials
 GITUTILS authenticates on the git server using the OAuth2 protocol. If the token is non existant or not valid, gitutils will request username and password and store the token in a file located on the user's home directory called `.gitlab_token`. The user will not need to supply username and password until the expiration time of the saved token.
 
-## Development
+### Development
 
 The package can be build via
 
@@ -21,11 +21,11 @@ source /opt/gfa/python
 
 After building, the package should be uploaded to anaconda.org via the command displayed at the end of the build process.
 
-### Built With
+#### Built With
 
 * [Python-Gitlab](https://python-gitlab.readthedocs.io/en/stable/index.html) - A library for command-line interaction with gitlab servers.
 
-# Installation
+## Installation
 The package has to be installed as root on gfalcd.psi.ch .
 
 ```
@@ -36,7 +36,7 @@ conda install -c paulscherrerinstitute gitutils
 As this will change the global Python distribution, make sure that only the gitutils package gets updated.
 
 
-# Usage
+## Usage
 
 ```
 usage: gitutils [-h] [-e ENDPOINT] {fork, merge} ...
@@ -63,38 +63,55 @@ command:
 
 If not specified otherwise the default endpoint is https://git.psi.ch.
 
+### Turn gitutils into a command
+
+To make gitutils available as a command, turn it into an executable and add it to your "~/.bash_profile", by executing the gitutils_install.sh script, as in:
+
+```bash
+./gitutils_install.sh
+```
+
+To do it mannually, do the following:
+
+```bash
+cp ./gitutils/gitutils.py ./gitutils/gitutils
+chmod +x ./gitutils/gitutils
+echo $"export PATH=\$PATH:$(pwd)/gitutils" >> ~/.bash_profile
+source ~/.bash_profile
+```
+
 # Examples
 
 Currently, there are two commands available: *fork* and *merge request*.
 
-## FORK
+### FORK
 
 To fork and clone into a repository, use the following command:
 ```bash
-$python gitutils.py fork -p <group_name>/<repository_name>
+gitutils fork -p <group_name>/<repository_name>
 ```
 
 To fork and **not** clone, add the directive `-n` at the end of the previous command, as in:
 ```bash
-$python gitutils.py fork -p <group_name>/<repository_name> -n
+gitutils fork -p <group_name>/<repository_name> -n
 ```
 
-## MERGE REQUEST
+### MERGE REQUEST
 
 To create a merge request for a repository, use the following command while on a git repository folder:
 ```bash
-$python gitutils.py merge -t <title> -d <description>
+gitutils merge -t <title> -d <description>
 ```
 
 GITUTILS will assume the command is being executed on the git repository folder. Alternatively, one can use the directive `-p` to indicate directly which project should be merged, as in:
 
 ```bash
-$python gitutils.py merge -p <group_name>/<repository_name> -t <title> -d <description>
+gitutils merge -p <group_name>/<repository_name> -t <title> -d <description>
 ```
 
 Please note that the title directive is required.
 
-# Tests
+## Tests
 
 Unit tests are available on the folder `tests`. To run the unit tests, navigate into `tests` and use the command:
 

@@ -1,29 +1,58 @@
 # Overview
 GITUTILS is a tool to facilitate the server-side operations when developing software that uses git repositories. It allows users to create forks and merge requests directly from the command line interface in a straighforward.
 
-### GIT Credentials
+## GIT Credentials
 GITUTILS authenticates on the git server using the OAuth2 protocol. If the token is non existant or not valid, gitutils will request username and password and store the token in a file located on the user's home directory called `.gitlab_token`. The user will not need to supply username and password until the expiration time of the saved token.
 
-### Development
+## Built With
 
-The package can be build via
+* [Python-Gitlab](https://python-gitlab.readthedocs.io/en/stable/index.html) - A library for command-line interaction with gitlab servers.
+
+# Development
+
+Checkout the project like so:
+```bash
+> cd ~ (for example)
+> git clone git@git.psi.ch:controls_highlevel_applications/gitutils.git
+# or
+> git clone https://git.psi.ch/controls_highlevel_applications/gitutils.git
+```
+
+## Tests
+
+(Preliminary) Unit tests are available on the folder `tests`. To run the unit tests, use the command:
 
 ```bash
-conda build conda-recipe
+$python3 -m unittest gitutils/tests/gitutils_test.py
 ```
-Remember to increase the package version before the build (inside `setup.py` and `conda-recipe/meta.yaml`)
 
-As the package is mainly used on Linux the package should be build on gfalcd.psi.ch. There, before building you have to source the right anaconda environment by executing the command
+## Building the conda package
+
+First, login into ```gfa-lc6-64```, source the right anaconda environment by executing the command:
 
 ```bash
 source /opt/gfa/python
 ```
 
-After building, the package should be uploaded to anaconda.org via the command displayed at the end of the build process.
+After that, clone into the repository or pull the latest changes (if you've already cloned it before). The package can be build via
 
-#### Built With
+```bash
+conda build conda-recipe
+```
 
-* [Python-Gitlab](https://python-gitlab.readthedocs.io/en/stable/index.html) - A library for command-line interaction with gitlab servers.
+Remember to increase the package version before the build (inside `setup.py` and `conda-recipe/meta.yaml`)
+
+After building, the package should be uploaded to anaconda.org via the command displayed at the end of the build process (similar to the shown below).
+
+```bash
+anaconda -t <PERSONAL_CONDA_TOKEN> upload /afs/psi.ch/user/<PATH_TO_USER>/conda-bld/linux-64/<PACKAGE_NAME>
+```
+
+If you need to build for different python versions, use the command (where X.X is the specific needed version of python):
+
+```bash
+conda build conda-recipe --python=X.X
+```
 
 ## Installation
 The package has to be installed as root on gfalcd.psi.ch .
@@ -36,7 +65,7 @@ conda install -c paulscherrerinstitute gitutils
 As this will change the global Python distribution, make sure that only the gitutils package gets updated.
 
 
-## Usage
+# Usage
 
 ```
 usage: gitutils.py [-h] [-e ENDPOINT] {fork,merge} ...
@@ -61,15 +90,15 @@ command:
 If not specified otherwise the default endpoint is https://git.psi.ch.
 
 
-# Examples
+## Examples
 
 Currently, there are two commands available: *fork* and *merge request*.
 
 
 
-## FORK
+### FORK
 
-### Gitutils Fork Walk through
+#### Gitutils Fork Walk through
 1. Define a project to fork and issue the command. Once a repository is forked, it also creates a local clone and an upstream link to the reference repository. Arguments:
   1. -p (*required*): Indicates the project to be forked. It can be of three different formats:
     1. "https://git.psi.ch/group_name/project_name" : The user provides the direct http to the git repository.
@@ -84,7 +113,7 @@ Currently, there are two commands available: *fork* and *merge request*.
 Remarks:
 When a successful fork happens, it already creates the upstream link. This is done automatically.
 
-### Fork usage
+#### Fork usage
 
 1. To fork and clone into a repository, use the following command:
   ```bash
@@ -101,9 +130,15 @@ When a successful fork happens, it already creates the upstream link. This is do
   gitutils fork -p <group_name>/<repository_name> -c
   ```
 
-## MERGE REQUEST
+4. To fork (using the full path) and not clone an existing repository:
+```bash
+  gitutils fork -p https://git.psi.ch/<group_name>/<repository_name> -n -c
+  ```
 
-### Gitutils Merge Walk through
+
+### MERGE REQUEST
+
+#### Gitutils Merge Walk through
 1. Once all the necessary changes/development have been commited and pushed to a forked repository.
 2. Navigate to the home folder of your forked repository (where the ```/.git``` folder is). Issue the command to merge. Arguments:
   1. -p : Indicates the project to be forked. It can be of four different formats:
@@ -115,27 +150,21 @@ When a successful fork happens, it already creates the upstream link. This is do
   3. -d : The description of the merge request that is going to be created.
 
 
-### Merge usage
-To create a merge request for a repository, use the following command while on a git repository folder:
-1. ```bash
-  gitutils merge -t <title> -d <description>
-  ```
+#### Merge usage
 
-GITUTILS will assume the command is being executed on the git repository folder. Alternatively, one can use the directive `-p` to indicate directly which project should be merged, as in:
+1. To create a merge request for a repository, use the following command while on a git repository folder: 
+    ```bash
+      gitutils merge -t <title> -d <description>
+   ```
 
-2. ```bash
-  gitutils merge -p <group_name>/<repository_name> -t <title> -d <description>
+  GITUTILS will assume the command is being executed on the git repository folder. Alternatively, one can use the directive `-p` to indicate directly which project should be merged, as in:
+
+2. To create a merge request for a repository by using the argument ```-p``` to indicate the project:
+    ```bash
+      gitutils merge -p <group_name>/<repository_name> -t <title> -d <description>
   ```
 
 Please note that the *-t* title directive is required.
-
-# Tests
-
-Unit tests are available on the folder `tests`. To run the unit tests, navigate into `tests` and use the command:
-
-```bash
-$python3 -m unittest gitutils/tests/gitutils_test.py
-```
 
 # Contact
 Questions or problems: Leonardo Hax Damiani - leonardo.hax@psi.ch

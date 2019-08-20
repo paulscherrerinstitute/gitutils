@@ -83,8 +83,7 @@ def oauth_authentication():
     (access_token, toke_type, refresh_token, scope and created_at)
     :rtype: dict
     """
-    global login
-    return requests.post(const.OATH_REQUEST + login +
+    return requests.post(const.OATH_REQUEST + get_username() +
                          const.PASSWORD_URL + password).json()
 
 
@@ -228,7 +227,6 @@ def get_forked_project(git_repository, git_repository_id):
     :return: Returns the web url to the project.
     :rtype: str
     """
-    global login
     forked_project = None
     projects = get_owned_projects()
     for project in projects:
@@ -435,7 +433,6 @@ def get_group_id(group_name):
     :return: ID of the group given as parameter or -1 in case of a problem.
     :rtype: int
     """
-    global login
     group_id = -1
     # it could be a personal group -> group name == username
     try:
@@ -458,8 +455,7 @@ def get_group_projects(group_name):
      id, path and url (in a dictionary-type).
     :rtype: list
     """
-    global login
-    if group_name == login:
+    if group_name == get_username():
         group_id = 0
         group_projects = gl.projects.list(owned=True)
     else:

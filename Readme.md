@@ -4,10 +4,6 @@ GITUTILS is a tool to facilitate the server-side operations when developing soft
 ## GIT Credentials
 GITUTILS authenticates on the git server using the OAuth2 protocol. If the token is non existant or not valid, gitutils will request username and password and store the token in a file located on the user's home directory called `.gitlab_token`. The user will not need to supply username and password until the expiration time of the saved token.
 
-## Built With
-
-* [Python-Gitlab](https://python-gitlab.readthedocs.io/en/stable/index.html) - A library for command-line interaction with gitlab servers.
-
 # Development
 
 Checkout the project:
@@ -95,12 +91,12 @@ Currently, there are two commands available: *fork* and *merge request*.
 
 #### Gitutils Fork Walk through
 1. Define a project to fork and issue the command. Once a repository is forked, it also creates a local clone and an upstream link to the reference repository. Arguments:
-  1.1 ___-p___ (___required___): Indicates the project to be forked. It can be of three different formats:
-    1.1.1 "https://git.psi.ch/group_name/project_name" : The user provides the direct http to the git repository.
-    1.1.2 "group_name/project_name" : The user provides a combination of group_name and project_name divided by "/".
-    1.1.3 "project_name" : The user provides the name of the project name. Gitutils will fetch the name of the group (keep in mind, that this may cause ambiguity problems).
-  1.2 ___-n___ : Indicates that the forked project *will not* be cloned after forking. A fork will be created on the server-side and no clone nor upstream will be generated on the local git server.
-  1.3 ___-c___ : Indicates to delete any existing fork project under your personal group. This might be necessary to fork and clone into a clean copy of the original repository. The desired forked project *must not* be a pre-existing forked project under your personal projects. 
+  * ___-p___ (___required___): Indicates the project to be forked. It can be of three different formats:
+       * "https://git.psi.ch/group_name/project_name" : The user provides the direct http to the git repository.
+       * "group_name/project_name" : The user provides a combination of group_name and project_name divided by "/".
+       * "project_name" : The user provides the name of the project name. Gitutils will fetch the name of the group (keep in mind, that this may cause ambiguity problems).
+  * ___-n___ : Indicates that the forked project *will not* be cloned after forking. A fork will be created on the server-side and no clone nor upstream will be generated on the local git server.
+  * ___-c___ : Indicates to delete any existing fork project under your personal group. This might be necessary to fork and clone into a clean copy of the original repository. The desired forked project *must not* be a pre-existing forked project under your personal projects. 
 2. Implement the changes/development necessary on the forked repository.
 3. Commit changes.
 4. Push changes to the forked repository.
@@ -111,22 +107,22 @@ Currently, there are two commands available: *fork* and *merge request*.
 
 1. To fork and clone into a repository, use the following command:
   ```bash
-  gitutils fork -p <group_name>/<repository_name>
+  > gitutils fork -p <group_name>/<repository_name>
   ```
 
-2. To fork and **not** clone, add the directive `-n` at the end of the previous command, as in:
+2. To fork and **not** clone, add the directive ___-n___ at the end of the previous command, as in:
   ```bash
-  gitutils fork -p <group_name>/<repository_name> -n
+  > gitutils fork -p <group_name>/<repository_name> -n
   ```
 
 3. To delete existing fork and create a clean fork of a repository, use the following command:
   ```bash
-  gitutils fork -p <group_name>/<repository_name> -c
+  > gitutils fork -p <group_name>/<repository_name> -c
   ```
 
 4. To fork (using the full path) and not clone an existing repository:
 ```bash
-  gitutils fork -p https://git.psi.ch/<group_name>/<repository_name> -n -c
+  > gitutils fork -p https://git.psi.ch/<group_name>/<repository_name> -n -c
   ```
 
 
@@ -135,13 +131,14 @@ Currently, there are two commands available: *fork* and *merge request*.
 #### Gitutils Merge Walk through
 1. Once all the necessary changes/development have been commited and pushed to a forked repository.
 2. Navigate to the home folder of your forked repository (where the ```/.git``` folder is). Issue the command to merge. Arguments:
-  1. ___-p___ : Indicates the project to be forked. It can be of four different formats:
-    1. "" : The user doesn't provide this argument, the project's group and name will be fetched from the ```/.git``` folder within the path where the gitutils is being called.
-    2. "https://git.psi.ch/group_name/project_name" : The user provides the direct http to the git repository.
-    3. "group_name/project_name" : The user provides a combination of group_name and project_name divided by "/".
-    4. "project_name" : The user provides the name of the project name. Gitutils will fetch the name of the group (keep in mind, that this may cause ambiguity problems).
-  2. ___-t___ (*required*): The title of the merge request that is going to be created.
-  3. ___-d___ : The description of the merge request that is going to be created.
+  * ___-t___ (___required___): The title of the merge request that is going to be created.
+  * ___-d___ : The description of the merge request that is going to be created.
+  * ___-p___ : Indicates the project to be forked. It can be of four different formats:
+       * "" : The user doesn't provide this argument, the project's group and name will be fetched from the ```/.git``` folder within the path where the gitutils is being called.
+       * "https://git.psi.ch/group_name/project_name" : The user provides the direct http to the git repository.
+       * "group_name/project_name" : The user provides a combination of group_name and project_name divided by "/".
+       * "project_name" : The user provides the name of the project name. Gitutils will fetch the name of the group (keep in mind, that this may cause ambiguity problems).
+  
 
 
 #### Merge usage
@@ -150,19 +147,22 @@ Please note that the ___-t___ title directive is required. GITUTILS will assume 
 
 1. To create a merge request for a repository, use the following command while on a git repository folder: 
 ```bash
-  gitutils merge -t <title> -d <description>
+  > gitutils merge -t <title> -d <description>
   ```
 
 2. To create a merge request for a repository by using the argument ```-p``` to indicate the project:
 ```bash
-  gitutils merge -p <group_name>/<repository_name> -t <title> -d <description>
+  > gitutils merge -p <group_name>/<repository_name> -t <title> -d <description>
   ```
 
 3. To create a merge request indicating the full-path to the repository and without giving a description:
 ```bash
-  gitutils merge -p https://git.psi.ch/<group_name>/<repository_name> -t <title>
+  > gitutils merge -p https://git.psi.ch/<group_name>/<repository_name> -t <title>
   ```
 
+# Built With
+
+* [Python-Gitlab](https://python-gitlab.readthedocs.io/en/stable/index.html) - A library for command-line interaction with gitlab servers.
 
 # Contact
 Questions or problems: Leonardo Hax Damiani - leonardo.hax@psi.ch

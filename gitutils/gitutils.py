@@ -192,11 +192,23 @@ def main():
     gitlab_utils.authenticate(arguments.endpoint)
 
     # retrieve repository and group names
-
     (repo_name, group_name, project_id) = (None, None, None)
     if arguments.command == 'merge':
-        repo_name = os.path.basename(os.getcwd())
-        group_name = gitlab_utils.get_project_group(repo_name, True, False)
+        if not arguments.project:
+            repo_name = os.path.basename(os.getcwd())
+        else:
+            if const.ENDPOINT in arguments.project:
+                web_url_split = arguments.project.split('/')
+                if len(web_url_split) == 5:
+                    repo_name = web_url_split[-1]
+            elif '/' in arguments.project:
+                # config format: "group_name/project_name"
+                path_with_namespace = arguments.project.split('/')
+                if len(path_with_namespace) == 2:
+                    repo_name = path_with_namespace[1]
+            else:
+                repo_name = arguments.project
+        group_name = gitlab_utils.get_project_group(repo_name, False, True)
         project_id = gitlab_utils.get_project_id(group_name, repo_name)
     elif arguments.project:
         (repo_name, group_name, project_id, valid) = \

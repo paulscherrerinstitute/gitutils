@@ -37,9 +37,8 @@ def authenticate(endpoint):
     if os.path.isfile(os.path.expanduser('~') + '/.gitlab_token'):
         with open(os.path.expanduser('~') + '/.gitlab_token', 'r') as tfile:
             private_token = tfile.read().replace('\n', '')
-
     # if not existant, authenticate with the user and saves it
-    if private_token is None:
+    if private_token is None or private_token == "":
         print(const.AUTHENTICATE_REQUEST)
         login = input(const.LOGIN_REQUEST)
         password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
@@ -75,7 +74,6 @@ def get_username():
     """
     global login
     return login
-
 
 def oauth_authentication():
     """
@@ -234,12 +232,10 @@ def get_forked_project(git_repository, git_repository_id):
     forked_project = None
     projects = get_owned_projects()
     for project in projects:
-        if project['username'] == login and project['name'] == git_repository:
+        if project['username'] == get_username() and project['name'] == git_repository:
             if 'forked_from_project' in project:
                 # check whether project is forked from the right project
                 if project['forked_from_project']['name'] == git_repository:
-                    print(const.FORKED_EXISTS.format(git_repository))
-                    logging.info(const.FORKED_EXISTS.format(git_repository))
                     forked_project = project
     return forked_project
 

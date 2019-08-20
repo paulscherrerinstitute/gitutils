@@ -39,12 +39,9 @@ As this will change the global Python distribution, make sure that only the gitu
 ## Usage
 
 ```
-usage: gitutils [-h] [-e ENDPOINT] {fork, merge} ...
+usage: gitutils.py [-h] [-e ENDPOINT] {fork,merge} ...
 
 GITUTILS utility
-
-positional arguments:
-  configuration (e.g. launcher, archiver)
 
 optional arguments:
   -h, --help            show this help message and exit

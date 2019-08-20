@@ -10,12 +10,9 @@ GITUTILS authenticates on the git server using the OAuth2 protocol. If the token
 
 # Development
 
-Checkout the project like so:
+Checkout the project:
 ```bash
-> cd ~ (for example)
 > git clone git@git.psi.ch:controls_highlevel_applications/gitutils.git
-# or
-> git clone https://git.psi.ch/controls_highlevel_applications/gitutils.git
 ```
 
 ## Tests
@@ -23,7 +20,7 @@ Checkout the project like so:
 (Preliminary) Unit tests are available on the folder `tests`. To run the unit tests, use the command:
 
 ```bash
-$python3 -m unittest gitutils/tests/gitutils_test.py
+> python -m unittest gitutils/tests/gitutils_test.py
 ```
 
 ## Building the conda package
@@ -31,13 +28,13 @@ $python3 -m unittest gitutils/tests/gitutils_test.py
 First, login into ```gfa-lc6-64```, source the right anaconda environment by executing the command:
 
 ```bash
-source /opt/gfa/python
+> source /opt/gfa/python
 ```
 
 After that, clone into the repository or pull the latest changes (if you've already cloned it before). The package can be build via
 
 ```bash
-conda build conda-recipe
+> conda build conda-recipe
 ```
 
 Remember to increase the package version before the build (inside `setup.py` and `conda-recipe/meta.yaml`)
@@ -45,21 +42,21 @@ Remember to increase the package version before the build (inside `setup.py` and
 After building, the package should be uploaded to anaconda.org via the command displayed at the end of the build process (similar to the shown below).
 
 ```bash
-anaconda -t <PERSONAL_CONDA_TOKEN> upload /afs/psi.ch/user/<PATH_TO_USER>/conda-bld/linux-64/<PACKAGE_NAME>
+> anaconda -t <PERSONAL_CONDA_TOKEN> upload /afs/psi.ch/user/<PATH_TO_USER>/conda-bld/linux-64/<PACKAGE_NAME>
 ```
 
 If you need to build for different python versions, use the command (where X.X is the specific needed version of python):
 
 ```bash
-conda build conda-recipe --python=X.X
+> conda build conda-recipe --python=X.X
 ```
 
 ## Installation
 The package has to be installed as root on gfalcd.psi.ch .
 
 ```
-source /opt/gfa/python
-conda install -c paulscherrerinstitute gitutils
+> source /opt/gfa/python
+> conda install -c paulscherrerinstitute gitutils
 ```
 
 As this will change the global Python distribution, make sure that only the gitutils package gets updated.
@@ -87,31 +84,28 @@ command:
                         original repository.
 ```
 
-If not specified otherwise the default endpoint is https://git.psi.ch.
+> If not specified otherwise the default endpoint is ```https://git.psi.ch```.
 
 
 ## Examples
 
 Currently, there are two commands available: *fork* and *merge request*.
 
-
-
 ### FORK
 
 #### Gitutils Fork Walk through
 1. Define a project to fork and issue the command. Once a repository is forked, it also creates a local clone and an upstream link to the reference repository. Arguments:
-  1. -p (*required*): Indicates the project to be forked. It can be of three different formats:
-    1. "https://git.psi.ch/group_name/project_name" : The user provides the direct http to the git repository.
-    2. "group_name/project_name" : The user provides a combination of group_name and project_name divided by "/".
-    3. "project_name" : The user provides the name of the project name. Gitutils will fetch the name of the group (keep in mind, that this may cause ambiguity problems).
-  1. -n : Indicates that the forked project *will not* be cloned after forking. A fork will be created on the server-side and no clone nor upstream will be generated on the local git server.
-  2. -c : Indicates to delete any existing fork project under your personal group. This might be necessary to fork and clone into a clean copy of the original repository. The desired forked project *must not* be a pre-existing forked project under your personal projects. 
-2. Implement the changes/development necessary.
+  1.1 ___-p___ (___required___): Indicates the project to be forked. It can be of three different formats:
+    1.1.1 "https://git.psi.ch/group_name/project_name" : The user provides the direct http to the git repository.
+    1.1.2 "group_name/project_name" : The user provides a combination of group_name and project_name divided by "/".
+    1.1.3 "project_name" : The user provides the name of the project name. Gitutils will fetch the name of the group (keep in mind, that this may cause ambiguity problems).
+  1.2 ___-n___ : Indicates that the forked project *will not* be cloned after forking. A fork will be created on the server-side and no clone nor upstream will be generated on the local git server.
+  1.3 ___-c___ : Indicates to delete any existing fork project under your personal group. This might be necessary to fork and clone into a clean copy of the original repository. The desired forked project *must not* be a pre-existing forked project under your personal projects. 
+2. Implement the changes/development necessary on the forked repository.
 3. Commit changes.
 4. Push changes to the forked repository.
 
-Remarks:
-When a successful fork happens, it already creates the upstream link. This is done automatically.
+> Remarks: When a successful fork happens, it already creates the upstream link. This is done automatically.
 
 #### Fork usage
 
@@ -141,30 +135,34 @@ When a successful fork happens, it already creates the upstream link. This is do
 #### Gitutils Merge Walk through
 1. Once all the necessary changes/development have been commited and pushed to a forked repository.
 2. Navigate to the home folder of your forked repository (where the ```/.git``` folder is). Issue the command to merge. Arguments:
-  1. -p : Indicates the project to be forked. It can be of four different formats:
+  1. ___-p___ : Indicates the project to be forked. It can be of four different formats:
     1. "" : The user doesn't provide this argument, the project's group and name will be fetched from the ```/.git``` folder within the path where the gitutils is being called.
     2. "https://git.psi.ch/group_name/project_name" : The user provides the direct http to the git repository.
     3. "group_name/project_name" : The user provides a combination of group_name and project_name divided by "/".
     4. "project_name" : The user provides the name of the project name. Gitutils will fetch the name of the group (keep in mind, that this may cause ambiguity problems).
-  2. -t (*required*): The title of the merge request that is going to be created.
-  3. -d : The description of the merge request that is going to be created.
+  2. ___-t___ (*required*): The title of the merge request that is going to be created.
+  3. ___-d___ : The description of the merge request that is going to be created.
 
 
 #### Merge usage
 
+Please note that the ___-t___ title directive is required. GITUTILS will assume the command is being executed on the git repository folder. Alternatively, one can use the directive `-p` to indicate directly which project should be merged.
+
 1. To create a merge request for a repository, use the following command while on a git repository folder: 
-    ```bash
-      gitutils merge -t <title> -d <description>
-   ```
-
-  GITUTILS will assume the command is being executed on the git repository folder. Alternatively, one can use the directive `-p` to indicate directly which project should be merged, as in:
-
-2. To create a merge request for a repository by using the argument ```-p``` to indicate the project:
-    ```bash
-      gitutils merge -p <group_name>/<repository_name> -t <title> -d <description>
+```bash
+  gitutils merge -t <title> -d <description>
   ```
 
-Please note that the *-t* title directive is required.
+2. To create a merge request for a repository by using the argument ```-p``` to indicate the project:
+```bash
+  gitutils merge -p <group_name>/<repository_name> -t <title> -d <description>
+  ```
+
+3. To create a merge request indicating the full-path to the repository and without giving a description:
+```bash
+  gitutils merge -p https://git.psi.ch/<group_name>/<repository_name> -t <title>
+  ```
+
 
 # Contact
 Questions or problems: Leonardo Hax Damiani - leonardo.hax@psi.ch

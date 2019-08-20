@@ -187,9 +187,13 @@ def main():
 
     arguments = parser.parse_args()
 
-    # Authenticate user
+    print(arguments.endpoint)
+    quit()
 
+    # Authenticate user
     gitlab_utils.authenticate(arguments.endpoint)
+
+
 
     # retrieve repository and group names
     (repo_name, group_name, project_id) = (None, None, None)

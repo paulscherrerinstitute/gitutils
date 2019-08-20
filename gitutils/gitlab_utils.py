@@ -21,11 +21,13 @@ access_token = None
 login = None
 password = None
 gl = None
+user_defined_endpoint = None
+
 
 def get_gl():
     return gl
 
-def authenticate(endpoint):
+def authenticate():
     global gl
     global login
     global password
@@ -33,7 +35,6 @@ def authenticate(endpoint):
     private_token = None
 
     # Try to take the access token from the .gitlab_token file
-
     if os.path.isfile(os.path.expanduser('~') + '/.gitlab_token'):
         with open(os.path.expanduser('~') + '/.gitlab_token', 'r') as tfile:
             private_token = tfile.read().replace('\n', '')
@@ -58,13 +59,22 @@ def authenticate(endpoint):
             os.chmod(os.path.expanduser('~') + '/.gitlab_token', 0o600)
 
         # python-gitlab object
-        gl = gitlab.Gitlab(const.ENDPOINT, oauth_token=access_token,
+        gl = gitlab.Gitlab(get_endpoint(), oauth_token=access_token,
                            api_version=4)
     else:
-        gl = gitlab.Gitlab(const.ENDPOINT, oauth_token=private_token,
+        gl = gitlab.Gitlab(get_endpoint(), oauth_token=private_token,
                            api_version=4)
         login = pwd.getpwuid(os.getuid())[0]
     gl.auth()
+
+
+def set_endpoint(endpoint):
+    global user_defined_endpoint
+    user_defined_endpoint = endpoint
+
+def get_endpoint():
+    global user_defined_endpoint
+    return user_defined_endpoint
 
 def get_username():
     """
@@ -324,7 +334,7 @@ def get_repo_group_names(config, clean=False):
     valid = False
 
     # config format: "const.ENDPOINT/group_name/project_name"
-    if const.ENDPOINT in config:
+    if get_endpoint() in config:
         web_url = config
         web_url_split = web_url.split('/')
         if len(web_url_split) == 5:

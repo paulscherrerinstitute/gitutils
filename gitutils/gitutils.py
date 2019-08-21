@@ -6,7 +6,6 @@ from gitutils import const
 import sys
 import os
 import time
-import subprocess
 import shutil
 import logging
 import argparse
@@ -21,25 +20,22 @@ def fork(git_repository_id=None, git_repository='', no_clone=False, clean=False)
     :type git_repository: str
     :param no_clone: Flag to clone or not the forked repository.
     :type no_clone: bool
+    :param clean: Flag to clean or not the previously existing repository.
+    :type clean: bool
     :return:
     """
+    # checks if fork is executed inside git repo
+    # gitlab_utils.is_git_repo()
+    # Message user about forking project
+    print(const.FORK_PROJECT % (git_repository, git_repository_id))
 
-    git_username = gitlab_utils.get_username()
-    if git_username == -1:
-        raise gitutils_exception.GitutilsError(const.PROBLEM_USERNAME)
+    # not cloning into the new repo
+    if no_clone:
+        # Forks the repo
+        new_project = gitlab_utils.fork_project(git_repository_id)
+        http_url_to_repo = new_project.attributes['http_url_to_repo']
+    else: #cloning into the new repo
 
-    if git_repository_id is None:
-        raise gitutils_exception.GitutilsError(const.GIT_UNABLE_TO_FIND_PROJECT_MSG
-                        % project['name'])
-
-    print(const.FORK_PROJECT % git_repository)
-
-    # Forks and copy the direct http to the repo
-
-    new_project = gitlab_utils.fork_project(git_repository_id)
-    http_url_to_repo = new_project.attributes['http_url_to_repo']
-
-    if not no_clone:
         # verify if there is an previously existing local folder
         if os.path.exists('./'+git_repository):
             if clean:
@@ -51,6 +47,12 @@ def fork(git_repository_id=None, git_repository='', no_clone=False, clean=False)
                     print ("Error: %s - %s." % (e.filename, e.strerror))
             else:
                 raise gitutils_exception.GitutilsError(const.FORK_PROBLEM_FOLDER)
+
+        # Forks the repo
+        new_project = gitlab_utils.fork_project(git_repository_id)
+        http_url_to_repo = new_project.attributes['http_url_to_repo']
+        http_url_to_original_repo = new_project.attributes['forked_from_project']['http_url_to_repo']
+
         # Clone repository
         time.sleep(2)
         os.system(const.GIT_CLONE_CMD % http_url_to_repo)
@@ -59,14 +61,11 @@ def fork(git_repository_id=None, git_repository='', no_clone=False, clean=False)
         try:
             os.chdir(git_repository)
         except Exception as ex:
-            template = const.EXCEPTION_TEMPLATE
-            message = template.format(type(ex).__name__, ex.args)
-            print(message)
-            return -1
+            raise gitutils_exception.GitutilsError( ex.args[1])
 
-        # Creates Add upstream repository
+        # Add upstream repository
         # Configure Git to sync your fork with the original repository
-        os.system(const.GIT_UPSTREAM_REPO_CMD % new_project.attributes['forked_from_project']['http_url_to_repo'])
+        os.system(const.GIT_UPSTREAM_REPO_CMD % http_url_to_original_repo)
 
     logging.info('New project forked: [%s] (id: %s) - %s' % (
                  new_project.attributes['path_with_namespace'],
@@ -93,6 +92,8 @@ def merge(git_repository='',
     :type description: str
     :param title: Title of the merge request.
     :type title: str
+    :param local_project: Indicates if the user has used the -p argument for indicating the project
+    :type local_project: bool
     :return:
     """
 
@@ -116,7 +117,8 @@ def merge(git_repository='',
         title = title
         final_description = const.GIT_MERGE_DESCRIPTION_MSG \
             % git_username
-        final_description += '. User definition: ' + description
+        if description is not None:
+            final_description += ' User description: ' + description
 
         # Merge will be from source and target masters branches
         source_branch = 'master'
@@ -181,13 +183,15 @@ def main():
     parser_mr = subparsers.add_parser('merge',
                                       help=const.MERGE_HELP_MSG,
                                       formatter_class=argparse.RawTextHelpFormatter)
-    parser_mr.add_argument('-p',
-                           '--project',
-                           help=const.MERGE_PROJECT_MESSAGE)
     parser_mr.add_argument('-t',
                            '--title',
                            required=True,
                            help=const.MERGE_MESSAGE_TITLE)
+
+    parser_mr.add_argument('-p',
+                           '--project',
+                           help=const.MERGE_PROJECT_MESSAGE)
+
     parser_mr.add_argument('-d',
                            '--description',
                            help=const.MERGE_MESSAGE_DESCRIPTION)

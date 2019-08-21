@@ -13,6 +13,8 @@ import gitlab
 import getpass
 import time
 import pwd
+import subprocess
+
 
 # Gitlab API Documenation: http://doc.gitlab.com/ce/api/
 # Python-Gitlab Documetation:
@@ -47,10 +49,7 @@ def authenticate():
         try:
             access_token = oauth_authentication()['access_token']
         except Exception as ex:
-            template = const.EXCEPTION_TEMPLATE
-            message = template.format(type(ex).__name__, ex.args)
-            print(message)
-            sys.exit(-1)
+            raise gitutils_exception.GitutilsError( ex.args[1])
 
         # saves token into personal file
         if access_token:
@@ -152,13 +151,11 @@ def create_group(group_name, description):
                                      'path': group_name,
                                      'description': description})
     except Exception as ex:
-        template = const.EXCEPTION_TEMPLATE
-        message = template.format(type(ex).__name__, ex.args)
-        print(message)
-        exitCode = -1
+        raise gitutils_exception.GitutilsError( ex.args[1])
+
     logging.info('Newly created group: %s - %d' % (
-                 newGroup.attributes['name'],
-                 newGroup.attributes['id']))
+                newGroup.attributes['name'],
+                newGroup.attributes['id']))
     return exitCode
 
 
@@ -382,6 +379,11 @@ def check_group_clean(group_name, repo_name, clean):
                     raise gitutils_exception.GitutilsError(const.FORKED_EXISTS.format(repo_name))
     return group_name
 
+def is_git_repo():
+    is_git_repo = subprocess.check_output(const.GIT_IS_REPO_PATH, shell=True).decode('UTF-8').split('\n')[0]
+    if 'true' in is_git_repo:
+        raise gitutils_exception.GitutilsError(const.FORK_PROBLEM_GIT_FOLDER)
+
 def delete_group(group_name):
     """
     Deletes a group based on the name given as parameter.
@@ -396,9 +398,7 @@ def delete_group(group_name):
     try:
         group.delete()
     except Exception as ex:
-        template = const.EXCEPTION_TEMPLATE
-        message = template.format(type(ex).__name__, ex.args)
-        print(message)
+        print(ex.args[1])
         returnCode = -1
     logging.info('Deleted group: %s' % group_name)
     return returnCode
@@ -423,10 +423,8 @@ def create_repo(repo_name, namespace):
                 'name': repo_name,
                 'namespace_id': namespace_group.attributes['id']})
     except Exception as ex:
-        template = const.EXCEPTION_TEMPLATE
-        message = template.format(type(ex).__name__, ex.args)
-        print(message)
-        return -1
+        raise gitutils_exception.GitutilsError( ex.args[1])
+
     logging.info('%s [%s] - %s' % (project.attributes['name'],
                  project.attributes['path_with_namespace'],
                  project.attributes['ssh_url_to_repo']))
@@ -448,10 +446,8 @@ def get_group_id(group_name):
     try:
         group_id = gl.groups.get(group_name).attributes['id']
     except Exception as ex:
-        template = const.EXCEPTION_TEMPLATE
-        message = template.format(type(ex).__name__, ex.args)
-        print(message)
-        exit(-1)
+        raise gitutils_exception.GitutilsError( ex.args[1])
+
     logging.info('Group name: %s (id %s)' % (group_name, group_id))
     return group_id
 
@@ -476,10 +472,7 @@ def get_group_projects(group_name):
             group = gl.groups.get(group_id, lazy=True)
             group_projects = group.projects.list()
         except Exception as ex:
-            template = const.EXCEPTION_TEMPLATE
-            message = template.format(type(ex).__name__, ex.args)
-            print(message)
-            exit(-1)
+            raise gitutils_exception.GitutilsError( ex.args[1])
 
     # Retrieve the info from each project
 
@@ -506,13 +499,12 @@ def fork_project(project_id):
     """
 
     project = gl.projects.get(project_id, lazy=True)
+
     try:
         fork = project.forks.create({})
     except Exception as ex:
-        template = const.EXCEPTION_TEMPLATE
-        message = template.format(type(ex).__name__, ex.args)
-        print(message)
-        exit(-1)
+        raise gitutils_exception.GitutilsError( ex.args[1])
+
     logging.info('Forked project id %d' % project_id)
     return fork
 
@@ -549,10 +541,8 @@ def create_merge_request(source_project_id,
             'target_project_id': target_project_id,
             })
     except Exception as ex:
-        template = const.EXCEPTION_TEMPLATE
-        message = template.format(type(ex).__name__, ex.args)
-        print(message)
-        exit(-1)
+        raise gitutils_exception.GitutilsError( ex.args[1])
+
     logging.info('Creating merge request %s (Description: %s). Source project \
                 id/branch: %s - %s. Targer project id/branch: %s - %s' % (
                 title,
@@ -575,10 +565,7 @@ def get_owned_projects():
     try:
         own_projects = gl.projects.list(owned=True)
     except Exception as ex:
-        template = const.EXCEPTION_TEMPLATE
-        message = template.format(type(ex).__name__, ex.args)
-        print(message)
-        exit(-1)
+        raise gitutils_exception.GitutilsError( ex.args[1])
 
     projects = []
     for project in own_projects:
@@ -610,10 +597,7 @@ def delete_project(project_id):
     try:
         gl.projects.delete(project_id)
     except Exception as ex:
-        template = const.EXCEPTION_TEMPLATE
-        message = template.format(type(ex).__name__, ex.args)
-        print(message)
-        exit(-1)
+        raise gitutils_exception.GitutilsError( ex.args[1])
     return 0
 
 
@@ -631,9 +615,7 @@ def update_project_visibility(project_id, visibility):
     try:
         project = gl.projects.get(project_id)
     except Exception as ex:
-        template = const.EXCEPTION_TEMPLATE
-        message = template.format(type(ex).__name__, ex.args)
-        print(message)
+        raise gitutils_exception.GitutilsError( ex.args[1])
         return -1
     project.attributes['visibility'] = visibility
     project.save()

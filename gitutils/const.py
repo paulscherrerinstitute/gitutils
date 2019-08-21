@@ -39,6 +39,7 @@ PROJECT_NAME_NOT_FOUND = "Project name not found, please check the configuration
 MULTIPLE_PROJECTS= "Multiple projects with the same name found. Please, use the argument -p to indicate group name and project name or -c to clean existing fork and create a new one."
 DELETING_LOCAL_STORAGE = "Deleting local folder from deleted fork."
 GIT_FORK_PROBLEM_MULTIPLE = "Not possible to fork the requested project. There is already one fork under the personal group with the same name. Use the argument -c to clean previous personal forks."
+FORK_PROBLEM_FOLDER = "Existing folder with the same name. Please indicate -c ......"
 FORK_PROBLEM_PERSONAL = "Not possible to fork a own personal project."
 PROJECT_URL_NOT_FOUND = "Project url not found, please check the configuration details."
 GIT_CREATE_MERGE_MSG = "Creating merge request..."
@@ -54,14 +55,37 @@ GIT_UNABLE_TO_FIND_MASTER_BRANCH = "Unable to find master branch in project to m
 APP_CONFIG_TITLE_DESCRIPTION = 'GITUTILS utility'
 BASEDIR_HELP_MSG = "Base directory to clone configurations to."
 ENDPOINT_HELP_MSG = "Endpoint of the git server. Default: https://git.psi.ch"
-FORK_PROJECT_MESSAGE = "Name of the project to be forked."
-MERGE_PROJECT_MESSAGE = "Name of the project to be merged."
+FORK_PROJECT_MESSAGE = '''(REQUIRED) Indicates the project to be forked. It can be of three different formats:
+\u2022 https://git.psi.ch/<group_name>/<project_name> : The user provides 
+   the direct http to the git repository.
+\u2022 <group_name>/<project_name> : The user provides a combination of 
+   group_name and project_name divided by \"//\".
+\u2022 <project_name> : The user provides the name of the project name. 
+   Gitutils will fetch the name of the group (keep in mind, that this may 
+   cause ambiguity problems).'''
+MERGE_PROJECT_MESSAGE = '''Indicates the project to be forked. It can be of four different formats:
+\u2022 \"\" : The user doesn't provide this argument, the project's group and name 
+      will be fetched from the ```/.git``` folder within the path where the 
+      gitutils is being called.
+\u2022 https://git.psi.ch/<group_name>/<project_name> : The user provides the direct 
+      http to the git repository.
+\u2022 <group_name>/<project_name> : The user provides a combination of group_name and
+      project_name divided by "/".
+\u2022 <project_name> : The user provides the name of the project name. Gitutils will
+      fetch the name of the group (keep in mind, that this may cause ambiguity 
+      problems).'''
+FORK_CLEAN_MSG = '''Indicates to delete any existing fork project under your personal group. 
+This might be necessary to fork and clone into a clean copy of the original 
+repository. The desired forked project must not be a pre-existing forked 
+project under your personal projects.'''
 COMMAND_NOT_FOUND = "Command not found."
 FORK_HELP_MSG = "Creates a fork from the repository."
-FORK_NOCLONE_HELP = "If set no_clone, the repo will not be cloned after the fork."
+FORK_NOCLONE_HELP = '''Indicates that the forked project will not be cloned after forking. A fork 
+will be created on the server-side and no clone nor upstream will be 
+generated on the local git server.'''
 MERGE_HELP_MSG = "Creates a request to merge the defined fork to the original repository."
-MERGE_MESSAGE_TITLE = "Merge request title."
-MERGE_MESSAGE_DESCRIPTION = "Merge request description."
+MERGE_MESSAGE_TITLE = ''' (REQUIRED) The title of the merge request that is going to be created.'''
+MERGE_MESSAGE_DESCRIPTION = '''The description of the merge request that is going to be created.'''
 STORE_TRUE = "store_true"
 ############
 # COMMANDS #

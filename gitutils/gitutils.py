@@ -143,7 +143,7 @@ def main():
     ############
 
     parser = \
-        argparse.ArgumentParser(description=const.APP_CONFIG_TITLE_DESCRIPTION, formatter_class=argparse.RawTextHelpFormatter)
+        argparse.ArgumentParser(description=const.GITUTILS_TITLE_DESCRIPTION, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-e', '--endpoint',
                         help=const.ENDPOINT_HELP_MSG,
                         default=const.ENDPOINT)

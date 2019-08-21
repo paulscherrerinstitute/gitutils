@@ -52,7 +52,7 @@ GIT_UNABLE_TO_FIND_MASTER_BRANCH = "Unable to find master branch in project to m
 #####################
 # PARSE MSGS / HELP #
 #####################
-APP_CONFIG_TITLE_DESCRIPTION = 'GITUTILS utility'
+GITUTILS_TITLE_DESCRIPTION = 'GITUTILS is a tool to facilitate the server-side operations when developing software that uses git repositories.'
 BASEDIR_HELP_MSG = "Base directory to clone configurations to."
 ENDPOINT_HELP_MSG = "Endpoint of the git server. Default: https://git.psi.ch"
 FORK_PROJECT_MESSAGE = '''(REQUIRED) Indicates the project to be forked. It can be of three different formats:

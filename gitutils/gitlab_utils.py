@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from gitutils import const
+from gitutils import gitutils_exception
 import requests
 import json
 import pprint
@@ -114,7 +115,6 @@ def get_groups():
              'id': group.attributes['id']}
     return groups_dict
 
-
 def get_projects():
     """
     Retrieves all the projects of the current user.
@@ -177,7 +177,7 @@ def get_project_web_url(project_name):
             logging.info('Project web url: %s'
                          % project.attributes['web_url'])
             return project.attributes['web_url']
-    raise Exception(const.PROJECT_NAME_NOT_FOUND)
+    raise gitutils_exception.GitutilsError(const.PROJECT_NAME_NOT_FOUND)
 
 
 def checkKey(dict, key):
@@ -213,7 +213,7 @@ def get_project_group(project_name, clean, merge=False):
                     if clean:
                         delete_project(project.attributes['id'])
                     else:
-                        raise Exception(const.GIT_FORK_PROBLEM_MULTIPLE)
+                        raise gitutils_exception.GitutilsError(const.GIT_FORK_PROBLEM_MULTIPLE)
                 else: # not a personal project
                     groupFound = project_path.split('/')[0]
                     count += 1
@@ -222,9 +222,9 @@ def get_project_group(project_name, clean, merge=False):
     if count == 1:
         return groupFound
     elif count >= 2:
-        raise Exception(const.MULTIPLE_PROJECTS)
+        raise gitutils_exception.GitutilsError(const.MULTIPLE_PROJECTS)
     else:
-        raise Exception(const.PROJECT_NAME_NOT_FOUND)
+        raise gitutils_exception.GitutilsError(const.PROJECT_NAME_NOT_FOUND)
 
 
 def get_forked_project(git_repository, git_repository_id):
@@ -269,7 +269,7 @@ def get_branch(project_id):
                      % project_id)
         return 'master'
     else:
-        raise Exception(const.GIT_UNABLE_TO_FIND_MASTER_BRANCH
+        raise gitutils_exception.GitutilsError(const.GIT_UNABLE_TO_FIND_MASTER_BRANCH
                         % project['name'])
 
 
@@ -291,7 +291,7 @@ def get_project_url(group_id, project_name):
             logging.info('Project http url to repo: %s'
                          % project.attributes['http_url_to_repo'])
             return project.attributes['http_url_to_repo']
-    raise Exception(const.PROJECT_URL_NOT_FOUND)
+    raise gitutils_exception.GitutilsError(const.PROJECT_URL_NOT_FOUND)
 
 
 def get_project_id(group_name, project_name):
@@ -314,7 +314,7 @@ def get_project_id(group_name, project_name):
                              group_name, project_name,
                              project.attributes['id']))
                 return project.attributes['id']
-    raise Exception(const.PROJECT_ID_NOT_FOUND)
+    raise gitutils_exception.GitutilsError(const.PROJECT_ID_NOT_FOUND)
 
 
 def get_repo_group_names(config, clean=False):
@@ -363,7 +363,7 @@ def get_repo_group_names(config, clean=False):
 def check_group_clean(group_name, repo_name, clean):
     # If group name == username
     if group_name == get_username():
-        raise RuntimeError(const.FORK_PROBLEM_PERSONAL)
+        raise gitutils_exception.GitutilsError(const.FORK_PROBLEM_PERSONAL)
     else:
         if clean:
             # finds the personal project and deletes it
@@ -379,7 +379,7 @@ def check_group_clean(group_name, repo_name, clean):
             own_projects = get_owned_projects()
             for own_proj in own_projects:
                 if own_proj['name'] == repo_name:
-                    raise RuntimeError(const.FORKED_EXISTS.format(repo_name))
+                    raise gitutils_exception.GitutilsError(const.FORKED_EXISTS.format(repo_name))
     return group_name
 
 def delete_group(group_name):

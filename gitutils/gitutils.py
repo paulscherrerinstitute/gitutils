@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from gitutils import gitlab_utils
+from gitutils import gitutils_exception
 from gitutils import const
 import sys
 import os
@@ -8,9 +9,10 @@ import time
 import subprocess
 import shutil
 import logging
+import argparse
+import textwrap
 
-
-def fork(git_repository_id=None, git_repository='', no_clone=False):
+def fork(git_repository_id=None, git_repository='', no_clone=False, clean=False):
     """
     Creates a fork repository of the repository given as parameter.
     :param git_repository_id: Id of the repository to be pulled.
@@ -24,10 +26,10 @@ def fork(git_repository_id=None, git_repository='', no_clone=False):
 
     git_username = gitlab_utils.get_username()
     if git_username == -1:
-        raise Exception(const.PROBLEM_USERNAME)
+        raise gitutils_exception.GitutilsError(const.PROBLEM_USERNAME)
 
     if git_repository_id is None:
-        raise Exception(const.GIT_UNABLE_TO_FIND_PROJECT_MSG
+        raise gitutils_exception.GitutilsError(const.GIT_UNABLE_TO_FIND_PROJECT_MSG
                         % project['name'])
 
     print(const.FORK_PROJECT % git_repository)
@@ -40,13 +42,15 @@ def fork(git_repository_id=None, git_repository='', no_clone=False):
     if not no_clone:
         # verify if there is an previously existing local folder
         if os.path.exists('./'+git_repository):
-            ## Try to remove tree directory; if failed show an error using try...except on screen
-            print(const.DELETING_LOCAL_STORAGE)
-            try:
-                shutil.rmtree(git_repository)
-            except OSError as e:
-                print ("Error: %s - %s." % (e.filename, e.strerror))
-
+            if clean:
+                ## Try to remove tree directory; if failed show an error using try...except on screen
+                print(const.DELETING_LOCAL_STORAGE)
+                try:
+                    shutil.rmtree(git_repository)
+                except OSError as e:
+                    print ("Error: %s - %s." % (e.filename, e.strerror))
+            else:
+                raise gitutils_exception.GitutilsError(const.FORK_PROBLEM_FOLDER)
         # Clone repository
         time.sleep(2)
         os.system(const.GIT_CLONE_CMD % http_url_to_repo)
@@ -62,7 +66,7 @@ def fork(git_repository_id=None, git_repository='', no_clone=False):
 
         # Creates Add upstream repository
         # Configure Git to sync your fork with the original repository
-        os.system(const.GIT_UPSTREAM_REPO_CMD % http_url_to_repo)
+        os.system(const.GIT_UPSTREAM_REPO_CMD % new_project.attributes['forked_from_project']['http_url_to_repo'])
 
     logging.info('New project forked: [%s] (id: %s) - %s' % (
                  new_project.attributes['path_with_namespace'],
@@ -77,7 +81,8 @@ def fork(git_repository_id=None, git_repository='', no_clone=False):
 def merge(git_repository='',
           git_repository_id='',
           description='',
-          title=''):
+          title='',
+          local_project=False):
     """
     Creates a merge request to merge a forked repository.
     :param git_group_id: Id of the group to be pulled from.
@@ -93,11 +98,11 @@ def merge(git_repository='',
 
     git_username = gitlab_utils.get_username()
     if git_username == -1:
-        raise Exception(const.PROBLEM_USERNAME)
+        raise gitutils_exception.GitutilsError(const.PROBLEM_USERNAME)
 
     # Check to see the directory
-    if not os.path.isfile('.git/HEAD'):
-        raise Exception(const.GIT_MERGE_PROBLEM)
+    if not os.path.isfile('.git/HEAD') and not local_project:
+        raise gitutils_exception.GitutilsError(const.GIT_MERGE_PROBLEM)
 
     # Check if there is already a fork
 
@@ -105,7 +110,7 @@ def merge(git_repository='',
                                                      git_repository_id)
 
     if forked_project is None:
-        raise Exception(const.GIT_MERGE_PROBLEM)
+        raise gitutils_exception.GitutilsError(const.GIT_MERGE_PROBLEM)
     else:
         print(const.GIT_CREATE_MERGE_MSG)
         title = title
@@ -132,14 +137,13 @@ def merge(git_repository='',
 
 
 def main():
-    import argparse
 
     ############
     # GITUTILS #
     ############
 
     parser = \
-        argparse.ArgumentParser(description=const.APP_CONFIG_TITLE_DESCRIPTION)
+        argparse.ArgumentParser(description=const.APP_CONFIG_TITLE_DESCRIPTION, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-e', '--endpoint',
                         help=const.ENDPOINT_HELP_MSG,
                         default=const.ENDPOINT)
@@ -153,11 +157,13 @@ def main():
     ############
 
     parser_fork = subparsers.add_parser('fork',
-                                        help=const.FORK_HELP_MSG)
+                                        help=const.FORK_HELP_MSG,
+                                        formatter_class=argparse.RawTextHelpFormatter)
     parser_fork.add_argument('-p',
                              '--project',
                              required=True,
-                             help=const.FORK_PROJECT_MESSAGE)
+                             help=textwrap.dedent(
+                                 const.FORK_PROJECT_MESSAGE))
     parser_fork.add_argument('-n',
                              '--no_clone',
                              action=const.STORE_TRUE,
@@ -165,7 +171,7 @@ def main():
     parser_fork.add_argument('-c',
                              '--clean',
                              action=const.STORE_TRUE,
-                             help=const.FORK_NOCLONE_HELP)
+                             help=const.FORK_CLEAN_MSG)
 
 
     #############
@@ -173,7 +179,8 @@ def main():
     #############
 
     parser_mr = subparsers.add_parser('merge',
-                                      help=const.MERGE_HELP_MSG)
+                                      help=const.MERGE_HELP_MSG,
+                                      formatter_class=argparse.RawTextHelpFormatter)
     parser_mr.add_argument('-p',
                            '--project',
                            help=const.MERGE_PROJECT_MESSAGE)
@@ -187,17 +194,20 @@ def main():
 
     arguments = parser.parse_args()
 
-    print(arguments.endpoint)
-    quit()
+    #sets the endpoins
+    gitlab_utils.set_endpoint(arguments.endpoint)
 
     # Authenticate user
-    gitlab_utils.authenticate(arguments.endpoint)
-
-
+    gitlab_utils.authenticate()
 
     # retrieve repository and group names
     (repo_name, group_name, project_id) = (None, None, None)
     if arguments.command == 'merge':
+        # Verify if project has been indicated
+        # otherwise it fetches from local folder .git/HEAD
+        no_project_indication = False
+        if not arguments.project:
+            no_project_indication = True
         if not arguments.project:
             repo_name = os.path.basename(os.getcwd())
         else:
@@ -240,12 +250,14 @@ def main():
             if arguments.command == 'fork':
                 fork(git_repository_id=project_id,
                      git_repository=repo_name,
-                     no_clone=arguments.no_clone)
+                     no_clone=arguments.no_clone,
+                     clean = arguments.clean)
             elif arguments.command == 'merge':
                 merge(git_repository=repo_name,
                       git_repository_id=project_id,
                       description=arguments.description,
-                      title=arguments.title)
+                      title=arguments.title,
+                      local_project=no_project_indication)
             else:
                 print(const.COMMAND_NOT_FOUND)
                 parser.print_help()

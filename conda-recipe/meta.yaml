@@ -12,6 +12,7 @@ requirements:
         - python-gitlab
 
 build:
+  noarch: python
   entry_points:
     - gitutils = gitutils.gitutils:main
 

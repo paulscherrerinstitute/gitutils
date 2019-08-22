@@ -35,11 +35,11 @@ optional arguments:
   -h, --help            show this help message and exit
   -p PROJECT, --project PROJECT
                         (REQUIRED) Indicates the project to be forked. It can be of three different formats:
-                        • <https://git.psi.ch>/<group_name>/<project_name> : The user provides
+                        - <https://git.psi.ch>/<group_name>/<project_name> : The user provides
                            the direct http to the git repository.
-                        • <group_name>/<project_name> : The user provides a combination of
+                        - <group_name>/<project_name> : The user provides a combination of
                            group_name and project_name divided by "//".
-                        • <project_name> : The user provides the name of the project name.
+                        - <project_name> : The user provides the name of the project name.
                            Gitutils will fetch the name of the group (keep in mind, that this may
                            cause ambiguity problems).
   -n, --no_clone        Indicates that the forked project will not be cloned after forking. A fork
@@ -62,14 +62,14 @@ optional arguments:
   -h, --help            show this help message and exit
   -p PROJECT, --project PROJECT
                         Indicates the project to be forked. It can be of four different formats:
-                        • "" : The user doesn't provide this argument, the project's group and name
+                        - "" : The user doesn't provide this argument, the project's group and name
                               will be fetched from the ```/.git``` folder within the path where the
                               gitutils is being called.
-                        • https://git.psi.ch/<group_name>/<project_name> : The user provides the direct
+                        - https://git.psi.ch/<group_name>/<project_name> : The user provides the direct
                               http to the git repository.
-                        • <group_name>/<project_name> : The user provides a combination of group_name and
+                        - <group_name>/<project_name> : The user provides a combination of group_name and
                               project_name divided by "/".
-                        • <project_name> : The user provides the name of the project name. Gitutils will
+                        - <project_name> : The user provides the name of the project name. Gitutils will
                               fetch the name of the group (keep in mind, that this may cause ambiguity
                               problems).
   -t TITLE, --title TITLE
@@ -176,14 +176,14 @@ optional arguments:
     ```bash
     > git fetch upstream
     ```
-    
-    > Fetch the branches and their respective commits from the upstream repository. 
-    
+
+    > Fetch the branches and their respective commits from the upstream repository.
+
     ```bash
     > git merge upstream/master
     ```
     > This brings your fork's 'master' branch into sync with the upstream repository without losing your changes.
-    
+
     > You might have to deal with existing conflicts between your changes and the original repo changes. Decide if you want to keep only your branch's changes, keep only the other branch's changes, or make a brand new change, which may incorporate changes from both branches. If this is the case, go back to step 4 after solving the merge conflicts (add, commit and push the resolved merge conflicts files).
 
 8. Finally, create a merge request:

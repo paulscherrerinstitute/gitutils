@@ -38,8 +38,8 @@ def authenticate():
     private_token = None
 
     # Try to take the access token from the .gitlab_token file
-    if os.path.isfile(os.path.expanduser('~') + '/.gitlab_token'):
-        with open(os.path.expanduser('~') + '/.gitlab_token', 'r') as tfile:
+    if os.path.isfile(os.path.expanduser('~') + const.GIT_TOKEN_FILE):
+        with open(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 'r') as tfile:
             private_token = tfile.read().replace('\n', '')
     # if not existant, authenticate with the user and saves it
     if private_token is None or private_token == "":
@@ -49,14 +49,14 @@ def authenticate():
         try:
             access_token = oauth_authentication()['access_token']
         except Exception as ex:
-            raise gitutils_exception.GitutilsError( ex.args[1])
+            raise gitutils_exception.GitutilsError(ex)
 
         # saves token into personal file
         if access_token:
-            with open(os.path.expanduser('~') + '/.gitlab_token', 'w'
+            with open(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 'w'
                       ) as tfile:
                 tfile.write(access_token)
-            os.chmod(os.path.expanduser('~') + '/.gitlab_token', 0o600)
+            os.chmod(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 0o600)
 
         # python-gitlab object
         gl = gitlab.Gitlab(get_endpoint(), oauth_token=access_token,
@@ -151,7 +151,7 @@ def create_group(group_name, description):
                                      'path': group_name,
                                      'description': description})
     except Exception as ex:
-        raise gitutils_exception.GitutilsError( ex.args[1])
+        raise gitutils_exception.GitutilsError(ex)
 
     logging.info('Newly created group: %s - %d' % (
                 newGroup.attributes['name'],
@@ -423,7 +423,7 @@ def create_repo(repo_name, namespace):
                 'name': repo_name,
                 'namespace_id': namespace_group.attributes['id']})
     except Exception as ex:
-        raise gitutils_exception.GitutilsError( ex.args[1])
+        raise gitutils_exception.GitutilsError(ex)
 
     logging.info('%s [%s] - %s' % (project.attributes['name'],
                  project.attributes['path_with_namespace'],
@@ -446,7 +446,7 @@ def get_group_id(group_name):
     try:
         group_id = gl.groups.get(group_name).attributes['id']
     except Exception as ex:
-        raise gitutils_exception.GitutilsError( ex.args[1])
+        raise gitutils_exception.GitutilsError(ex)
 
     logging.info('Group name: %s (id %s)' % (group_name, group_id))
     return group_id
@@ -472,7 +472,7 @@ def get_group_projects(group_name):
             group = gl.groups.get(group_id, lazy=True)
             group_projects = group.projects.list()
         except Exception as ex:
-            raise gitutils_exception.GitutilsError( ex.args[1])
+            raise gitutils_exception.GitutilsError(ex)
 
     # Retrieve the info from each project
 
@@ -503,8 +503,9 @@ def fork_project(project_id):
     try:
         fork = project.forks.create({})
     except Exception as ex:
-        raise gitutils_exception.GitutilsError( ex.args[1])
-
+        raise gitutils_exception.GitutilsError(ex)
+    logging.info('Adding 2 seconds of idle time after forking to let the server process the new fork.')
+    time.sleep(2)
     logging.info('Forked project id %d' % project_id)
     return fork
 
@@ -541,7 +542,7 @@ def create_merge_request(source_project_id,
             'target_project_id': target_project_id,
             })
     except Exception as ex:
-        raise gitutils_exception.GitutilsError( ex.args[1])
+        raise gitutils_exception.GitutilsError(ex)
 
     logging.info('Creating merge request %s (Description: %s). Source project \
                 id/branch: %s - %s. Targer project id/branch: %s - %s' % (
@@ -565,7 +566,7 @@ def get_owned_projects():
     try:
         own_projects = gl.projects.list(owned=True)
     except Exception as ex:
-        raise gitutils_exception.GitutilsError( ex.args[1])
+        raise gitutils_exception.GitutilsError(ex)
 
     projects = []
     for project in own_projects:
@@ -597,7 +598,7 @@ def delete_project(project_id):
     try:
         gl.projects.delete(project_id)
     except Exception as ex:
-        raise gitutils_exception.GitutilsError( ex.args[1])
+        raise gitutils_exception.GitutilsError(ex)
     return 0
 
 
@@ -615,7 +616,7 @@ def update_project_visibility(project_id, visibility):
     try:
         project = gl.projects.get(project_id)
     except Exception as ex:
-        raise gitutils_exception.GitutilsError( ex.args[1])
+        raise gitutils_exception.GitutilsError(ex)
         return -1
     project.attributes['visibility'] = visibility
     project.save()

@@ -35,8 +35,8 @@ PROBLEM_USERNAME = "Problem getting the correct username. Please try again."
 FORKED_EXISTS = "A forked repository with the name {} already exists. Use -c to clean existing fork."
 FORK_PROJECT = "Forking project %s (id: %s)..."
 PROJECT_ID_NOT_FOUND = "Project id not found."
-PROJECT_NAME_NOT_FOUND = "Project name not found. Please, use the argument -p to indicate group name and project name."
-MULTIPLE_PROJECTS= "Multiple projects with the same name found. Please, use the argument -p to indicate group name and project name."
+PROJECT_NAME_NOT_FOUND = "Project name not found. Please, indicate group name and project name."
+MULTIPLE_PROJECTS= "Multiple projects with the same name found. Please, indicate group name and project name."
 DELETING_LOCAL_STORAGE = "Deleting local folder from deleted fork."
 GIT_FORK_PROBLEM_MULTIPLE = "Not possible to fork the requested project. There is already one fork under the personal group with the same name. Use the argument -c to clean previous personal forks."
 FORK_PROBLEM_FOLDER = "Existing folder with the same name. Please indicate -c if you want to delete local files or use the fork command on a different folder."
@@ -50,6 +50,7 @@ GIT_MERGE_PROBLEM = "Cannot create merge request as there is no forked."
 GIT_MERGE_DESCRIPTION_MSG = 'The configuration was changed by %s.'
 GIT_UNABLE_TO_FIND_PROJECT_MSG = "Unable to find project - Aborting...\n"
 GIT_UNABLE_TO_FIND_MASTER_BRANCH = "Unable to find master branch in project to merge - Aborting...\n"
+MERGE_DEFAULT_TITLE = "Merge request submitted by %s."
 #####################
 # PARSE MSGS / HELP #
 #####################
@@ -97,3 +98,4 @@ GIT_CLONE_CMD = "git clone %s"
 GIT_PULL_UPSTREAM_MASTER_CMG = "git pull upstream master"
 GIT_GET_CURRENT_BRANCH = "git rev-parse --abbrev-ref HEAD"
 GIT_IS_REPO_PATH = "git rev-parse --is-inside-work-tree"
+GIT_TOKEN_FILE = "/.gitutils_token"

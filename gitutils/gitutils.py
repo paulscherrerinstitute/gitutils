@@ -54,7 +54,6 @@ def fork(git_repository_id=None, git_repository='', no_clone=False, clean=False)
         http_url_to_original_repo = new_project.attributes['forked_from_project']['http_url_to_repo']
 
         # Clone repository
-        time.sleep(2)
         os.system(const.GIT_CLONE_CMD % http_url_to_repo)
 
         # Change into git repository
@@ -109,12 +108,14 @@ def merge(git_repository='',
 
     forked_project = gitlab_utils.get_forked_project(git_repository,
                                                      git_repository_id)
+    # If no title submitted by the user, default title 
+    if title is None:
+        title = const.MERGE_DEFAULT_TITLE % gitlab_utils.get_username()
 
     if forked_project is None:
         raise gitutils_exception.GitutilsError(const.GIT_MERGE_PROBLEM)
     else:
         print(const.GIT_CREATE_MERGE_MSG)
-        title = title
         final_description = const.GIT_MERGE_DESCRIPTION_MSG \
             % git_username
         if description is not None:
@@ -161,11 +162,7 @@ def main():
     parser_fork = subparsers.add_parser('fork',
                                         help=const.FORK_HELP_MSG,
                                         formatter_class=argparse.RawTextHelpFormatter)
-    parser_fork.add_argument('-p',
-                             '--project',
-                             required=True,
-                             help=textwrap.dedent(
-                                 const.FORK_PROJECT_MESSAGE))
+
     parser_fork.add_argument('-n',
                              '--no_clone',
                              action=const.STORE_TRUE,
@@ -175,6 +172,8 @@ def main():
                              action=const.STORE_TRUE,
                              help=const.FORK_CLEAN_MSG)
 
+    parser_fork.add_argument('project', nargs=1, metavar='project',
+                             help=textwrap.dedent(const.FORK_PROJECT_MESSAGE))
 
     #############
     # MERGE CMD #
@@ -185,7 +184,6 @@ def main():
                                       formatter_class=argparse.RawTextHelpFormatter)
     parser_mr.add_argument('-t',
                            '--title',
-                           required=True,
                            help=const.MERGE_MESSAGE_TITLE)
 
     parser_mr.add_argument('-p',
@@ -197,6 +195,10 @@ def main():
                            help=const.MERGE_MESSAGE_DESCRIPTION)
 
     arguments = parser.parse_args()
+    # verifies if there are any arguments
+    if arguments.command is None:
+        parser.print_help()
+        sys.exit(-1)
 
     #sets the endpoins
     gitlab_utils.set_endpoint(arguments.endpoint)
@@ -230,7 +232,7 @@ def main():
         project_id = gitlab_utils.get_project_id(group_name, repo_name)
     elif arguments.project:
         (repo_name, group_name, project_id, valid) = \
-            gitlab_utils.get_repo_group_names(arguments.project, arguments.clean)
+            gitlab_utils.get_repo_group_names(arguments.project[0], arguments.clean)
         # if project is personal, needs to be deleted
         if group_name == gitlab_utils.get_username():
             if arguments.clean:

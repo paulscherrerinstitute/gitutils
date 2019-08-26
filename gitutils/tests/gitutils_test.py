@@ -17,10 +17,11 @@ class TestGitlabUtils(unittest.TestCase):
         """
 
         global gl
-        gitlab_utils.authenticate(const.ENDPOINT)
+        gitlab_utils.set_endpoint(const.ENDPOINT)
+        gitlab_utils.authenticate()
         gl = gitlab_utils.get_gl()
-        if os.path.isfile(os.path.expanduser('~') + '/.gitlab_token'):
-            with open(os.path.expanduser('~') + '/.gitlab_token', 'r'
+        if os.path.isfile(os.path.expanduser('~') + const.GIT_TOKEN_FILE):
+            with open(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 'r'
                       ) as tfile:
                 private_token = tfile.read().replace('\n', '')
         self.assertEqual(private_token, gl.oauth_token)
@@ -29,7 +30,7 @@ class TestGitlabUtils(unittest.TestCase):
         """
         Test the username
         """
-
+        global gl
         self.assertEqual(gl.user.name, gitlab_utils.get_username())
 
     def test_get_groups(self):

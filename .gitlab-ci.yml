@@ -16,7 +16,7 @@ pylint:
   stage: Static Analysis
   allow_failure: true
   script:
-  - pylint -d C0301 bild/*.py
+  - pylint -d C0301 */*.py
 
 unit_test:
   stage: Test

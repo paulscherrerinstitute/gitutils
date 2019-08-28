@@ -2,7 +2,7 @@
 Gitutils is a tool to facilitate the server-side operations when developing software that uses git repositories. It allows users to create forks and merge requests directly from the command line interface.
 
 ### GIT Credentials
-Gitutils authenticates on the git server using the OAuth2 protocol. If the token is non existant or not valid, gitutils will request username and password and store the token in a file located on the user's home directory called `.gitlab_token`. The user will not be requested for username nor password until the saved token is not valid anymore.
+Gitutils authenticates on the git server using the OAuth2 protocol. If the token is non existant or not valid, gitutils will request username and password and store the token in a file located on the user's home directory called `.gitutils_token`. The user will not be requested for username nor password until the saved token is not valid anymore.
 
 # Usage
 

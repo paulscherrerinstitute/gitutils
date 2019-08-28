@@ -58,22 +58,22 @@ GITUTILS_TITLE_DESCRIPTION = 'GITUTILS is a tool to facilitate the server-side o
 BASEDIR_HELP_MSG = "Base directory to clone configurations to."
 ENDPOINT_HELP_MSG = "Endpoint of the git server. Default: https://git.psi.ch"
 FORK_PROJECT_MESSAGE = '''(REQUIRED) Indicates the project to be forked. It can be of three different formats:
-\u2022 https://git.psi.ch/<group_name>/<project_name> : The user provides 
+- https://git.psi.ch/<group_name>/<project_name> : The user provides 
    the direct http to the git repository.
-\u2022 <group_name>/<project_name> : The user provides a combination of 
+- <group_name>/<project_name> : The user provides a combination of 
    group_name and project_name divided by \"//\".
-\u2022 <project_name> : The user provides the name of the project name. 
+- <project_name> : The user provides the name of the project name. 
    Gitutils will fetch the name of the group (keep in mind, that this may 
    cause ambiguity problems).'''
 MERGE_PROJECT_MESSAGE = '''Indicates the project to be forked. It can be of four different formats:
-\u2022 \"\" : The user doesn't provide this argument, the project's group and name 
+- \"\" : The user doesn't provide this argument, the project's group and name 
       will be fetched from the ```/.git``` folder within the path where the 
       gitutils is being called.
-\u2022 https://git.psi.ch/<group_name>/<project_name> : The user provides the direct 
+- https://git.psi.ch/<group_name>/<project_name> : The user provides the direct 
       http to the git repository.
-\u2022 <group_name>/<project_name> : The user provides a combination of group_name and
+- <group_name>/<project_name> : The user provides a combination of group_name and
       project_name divided by "/".
-\u2022 <project_name> : The user provides the name of the project name. Gitutils will
+- <project_name> : The user provides the name of the project name. Gitutils will
       fetch the name of the group (keep in mind, that this may cause ambiguity 
       problems).'''
 FORK_CLEAN_MSG = '''Indicates to delete any existing fork project under your personal group. 

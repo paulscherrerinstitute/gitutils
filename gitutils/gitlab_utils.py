@@ -62,9 +62,27 @@ def authenticate():
         gl = gitlab.Gitlab(get_endpoint(), oauth_token=access_token,
                            api_version=4)
     else:
-        gl = gitlab.Gitlab(get_endpoint(), oauth_token=private_token,
-                           api_version=4)
-        login = pwd.getpwuid(os.getuid())[0]
+        # uses the stored token
+        try:
+            gl = gitlab.Gitlab(get_endpoint(), oauth_token=private_token,
+                            api_version=4)
+            login = pwd.getpwuid(os.getuid())[0]
+        except:
+            # if something wrong happens, request the login + password
+            # and updates the token on the file
+            print(const.AUTHENTICATE_REQUEST)
+            login = input(const.LOGIN_REQUEST)
+            password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
+            try:
+                access_token = oauth_authentication()['access_token']
+            except Exception as ex:
+                raise gitutils_exception.GitutilsError(ex)
+            # saves token into personal file
+            if access_token:
+                with open(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 'w'
+                        ) as tfile:
+                    tfile.write(access_token)
+                os.chmod(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 0o600)
     gl.auth()
 
 

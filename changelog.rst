@@ -4,10 +4,19 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
-[Unreleased]
+[1.4.4] 2019-08-29
 ------------
+Added
+~~~~~
+-  When an expired token is initially found on the file, gitutils asks the user for login and password in order to update the token within ``~/.gitutils_token``.
+-  Readthedocs documentation finalized.
 
-[1.4.6] - 2019-08-26
+Changed
+~~~~~~~
+-  Changelog is now written on reStructuredText instead of markdown.
+
+
+[1.4.3] - 2019-08-26
 --------------------
 
 Added
@@ -17,7 +26,7 @@ Added
    exception and prints the error in a friendly way.
 -  Gitutils can't be executed from a git-controlled folder.
 
-Changes
+Changed
 ~~~~~~~
 -  Show help when no argument is provided (previously, the token file
    was generated).
@@ -80,4 +89,8 @@ Added
 -  Usage of Python-Gitlab library instead of gitlab api.
 -  Usage of a const.py file with all constant values necessary.
 
-.. note: The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`__, and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`__.
+[Unreleased]
+------------
+
+
+.. note:: The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`__, and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`__.

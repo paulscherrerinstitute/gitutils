@@ -11,6 +11,16 @@ requirements:
         - python
         - python-gitlab
 
+test:
+  imports:
+    - gitutils.gitutils
+    - gitutils.tests
+    - gitlab.v4
+  commands:
+    - export PYTHONPATH="$PYTHONPATH:."
+    - python -c "import sys;print(sys.path)"
+    - pytest
+
 build:
   noarch: python
   entry_points:

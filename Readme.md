@@ -3,9 +3,6 @@ Gitutils is a tool to facilitate the server-side operations when developing soft
 
 A detailed documentation is also found on https://gitutils.readthedocs.io/en/latest/index.html
 
-### GIT Credentials
-Gitutils authenticates on the git server using the OAuth2 protocol. If the token is non existant or not valid, gitutils will request username and password and store the token in a file located on the user's home directory called `.gitutils_token`. The user will not be requested for username nor password until the saved token is not valid anymore.
-
 # Usage
 
 ## gitutils
@@ -59,10 +56,12 @@ optional arguments:
 ## merge
 
 ```bash
-usage: gitutils.py merge [-h] [-p PROJECT] -t TITLE [-d DESCRIPTION]
+usage: gitutils.py merge [-h] [-t TITLE] [-p PROJECT] [-d DESCRIPTION]
 
 optional arguments:
   -h, --help            show this help message and exit
+  -t TITLE, --title TITLE
+                         (REQUIRED) The title of the merge request that is going to be created.
   -p PROJECT, --project PROJECT
                         Indicates the project to be forked. It can be of four different formats:
                         - "" : The user doesn't provide this argument, the project's group and name
@@ -75,8 +74,6 @@ optional arguments:
                         - <project_name> : The user provides the name of the project name. Gitutils will
                               fetch the name of the group (keep in mind, that this may cause ambiguity
                               problems).
-  -t TITLE, --title TITLE
-                         (REQUIRED) The title of the merge request that is going to be created.
   -d DESCRIPTION, --description DESCRIPTION
                         The description of the merge request that is going to be created.
 ```
@@ -88,7 +85,7 @@ optional arguments:
 ### FORK
 
 #### Gitutils fork walk-through
-1. Define a project to fork and issue the command. Once a repository is forked, it also creates a local clone and an upstream link to the reference repository. Arguments: ___-n___, ___-c___. Examples:
+1. Define a project to fork and issue the command. Once a repository is forked, it also creates a local clone and an upstream link to the reference repository. Arguments: ___-n___, ___-c___ and project. Examples:
 - To fork and clone into a repository, use the following command:
 
     ```bash
@@ -200,7 +197,7 @@ optional arguments:
     > gitutils merge  -t <title> -d <description>
     ```
 
-# Development
+# Development & extra details
 
 Checkout the project:
 ```bash
@@ -262,13 +259,16 @@ As this will change the global Python distribution, make sure that only the gitu
 
 Due to problems in synchronization between [readthedocs](https://readthedocs.org) and a third party hosted git repository (https://git.psi.ch/controls_highlevel_applications/gitutils), the readthedocs documentation is generated based on [this](https://github.com/lhdamiani/gitutils) github repository.
 
-To update the documentation run the script
+To update the documentation run the script on the home folder of the documentation repository:
 
 ```
 > python update_doc.py
 ```
 
 The script is located on the home directory of the github-hosted gitutils repository. Once the changes are incorporated the documentation will be automatically updated.
+
+## GIT Credentials
+Gitutils authenticates on the git server using the OAuth2 protocol. If the token is non existant or not valid, gitutils will request username and password and store the token in a file located on the user's home directory (`~/.gitutils_token`). The user will not be requested for username nor password until the saved token is not valid anymore.
 
 # Contact
 Questions or problems: Leonardo Hax Damiani - leonardo.hax@psi.ch

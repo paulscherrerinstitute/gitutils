@@ -35,14 +35,13 @@ def authenticate():
     global login
     global password
     global access_token
-    private_token = None
 
     # Try to take the access token from the .gitlab_token file
     if os.path.isfile(os.path.expanduser('~') + const.GIT_TOKEN_FILE):
         with open(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 'r') as tfile:
-            private_token = tfile.read().replace('\n', '')
+            access_token = tfile.read().replace('\n', '')
     # if not existant, authenticate with the user and saves it
-    if private_token is None or private_token == "":
+    if access_token is None or access_token == "":
         print(const.AUTHENTICATE_REQUEST)
         login = input(const.LOGIN_REQUEST)
         password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
@@ -59,31 +58,46 @@ def authenticate():
             os.chmod(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 0o600)
 
         # python-gitlab object
-        gl = gitlab.Gitlab(get_endpoint(), oauth_token=access_token,
-                           api_version=4)
+        try:
+            gl = gitlab.Gitlab(get_endpoint(), oauth_token=access_token,
+                            api_version=4)
+            gl.auth()
+        except Exception as ex:
+            raise gitutils_exception.GitutilsError(ex)
     else:
         # uses the stored token
         try:
-            gl = gitlab.Gitlab(get_endpoint(), oauth_token=private_token,
+            gl = gitlab.Gitlab(get_endpoint(), oauth_token=access_token,
                             api_version=4)
+            gl.auth()
+            # if successfull, gets the login from the account
             login = pwd.getpwuid(os.getuid())[0]
         except:
             # if something wrong happens, request the login + password
             # and updates the token on the file
-            print(const.AUTHENTICATE_REQUEST)
+            print(const.AUTHENTICATE_REQUEST_INVALID_TOKEN)
             login = input(const.LOGIN_REQUEST)
             password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
             try:
                 access_token = oauth_authentication()['access_token']
             except Exception as ex:
                 raise gitutils_exception.GitutilsError(ex)
+            # Tries to authenticate again
+            try:
+                gl = gitlab.Gitlab(get_endpoint(), oauth_token=access_token,
+                                api_version=4)
+                gl.auth()
+            except Exception as ex:
+                raise gitutils_exception.GitutilsError(ex)
+
             # saves token into personal file
             if access_token:
+                print(const.UPDATE_TOKEN)
                 with open(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 'w'
                         ) as tfile:
                     tfile.write(access_token)
                 os.chmod(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 0o600)
-    gl.auth()
+
 
 
 def set_endpoint(endpoint):

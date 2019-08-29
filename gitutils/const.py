@@ -28,6 +28,8 @@ PASSWORD_URL = "&password="
 ############
 EXCEPTION_TEMPLATE = "An exception of type {0} occurred. Arguments:\n{1!r}"
 AUTHENTICATE_REQUEST = "To access your Gitlab account, please authenticate: "
+AUTHENTICATE_REQUEST_INVALID_TOKEN = "Git token found is not valid. To access your Gitlab account, please authenticate: "
+UPDATE_TOKEN = "Updating token in file ~/.gitutils_token ..."
 LOGIN_REQUEST = "Username:"
 PASSWORD_REQUEST = "Password:"
 NO_GITLAB_TOKEN = "Before executing this script make sure that you have set GITLAB_PRIVATE_TOKEN"

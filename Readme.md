@@ -1,6 +1,8 @@
 # Overview
 Gitutils is a tool to facilitate the server-side operations when developing software that uses git repositories. It allows users to create forks and merge requests directly from the command line interface.
 
+A detailed documentation is also found on https://gitutils.readthedocs.io/en/latest/index.html
+
 ### GIT Credentials
 Gitutils authenticates on the git server using the OAuth2 protocol. If the token is non existant or not valid, gitutils will request username and password and store the token in a file located on the user's home directory called `.gitutils_token`. The user will not be requested for username nor password until the saved token is not valid anymore.
 
@@ -86,26 +88,26 @@ optional arguments:
 ### FORK
 
 #### Gitutils fork walk-through
-1. Define a project to fork and issue the command. Once a repository is forked, it also creates a local clone and an upstream link to the reference repository. Arguments: ___-p___ (___required___), ___-n___, ___-c___. Examples:
+1. Define a project to fork and issue the command. Once a repository is forked, it also creates a local clone and an upstream link to the reference repository. Arguments: ___-n___, ___-c___. Examples:
 - To fork and clone into a repository, use the following command:
 
     ```bash
-    > gitutils fork -p <group_name>/<repository_name>
+    > gitutils fork <group_name>/<repository_name>
     ```
 - To fork and not clone, add the directive ___-n___ at the end of the previous command, as in:
 
     ```bash
-    > gitutils fork -p <group_name>/<repository_name> -n
+    > gitutils fork <group_name>/<repository_name> -n
     ```
 - To delete existing fork and create a clean fork of a repository, use the following command:
 
     ```bash
-    > gitutils fork -p <group_name>/<repository_name> -c
+    > gitutils fork <group_name>/<repository_name> -c
     ```
 - To fork (using the full path), clean existing fork and not clone an existing repository:
  
     ```bash
-    > gitutils fork -p https://git.psi.ch/<group_name>/<repository_name> -n -c
+    > gitutils fork https://git.psi.ch/<group_name>/<repository_name> -n -c
     ```
 
 2. Implement the changes/development necessary on the forked repository.
@@ -129,7 +131,7 @@ optional arguments:
 #### Gitutils merge walk-through
 1. Once all the necessary changes/development have been commited and pushed to a forked repository.
 2. Navigate to the home folder of your forked repository (where the ```/.git``` folder is). Issue the command to merge. Arguments:___-t___(___required___), ___-d___, ___-p___.
-- To create a merge request for a repository, use the following command while on a git repository folder: 
+- To create a merge request for a repository, use the following command while on a git repository folder:
 
     ```bash
     > gitutils merge -t <title> -d <description>
@@ -140,18 +142,18 @@ optional arguments:
     > gitutils merge -p <group_name>/<repository_name> -t <title> -d <description>
     ```
 - To create a merge request indicating the full-path to the repository and without giving a description:
-    
+
     ```bash
     > gitutils merge -p https://git.psi.ch/<group_name>/<repository_name> -t <title>
     ```
 
 > Please note that the ___-t___ title directive is required. GITUTILS will assume the command is being executed on the git repository folder. Alternatively, one can use the directive `-p` to indicate directly which project should be merged.
-      
+
 ### Full walk-through example
 
 1. Fork and clone a repository:
     ```bash
-    > gitutils fork -p <group_name>/<repository_name>
+    > gitutils fork <group_name>/<repository_name>
     ```
 
 2. Change the current working directory to your local project ```cd <repository_name>```.
@@ -192,8 +194,8 @@ optional arguments:
     ```bash
     > gitutils merge -p <group_name>/<repository_name> -t <title> -d <description>
     ```
-    if you are located on the repository folder, simply: 
-    
+    if you are located on the repository folder, simply:
+
     ```bash
     > gitutils merge  -t <title> -d <description>
     ```

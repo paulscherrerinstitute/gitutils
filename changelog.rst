@@ -4,11 +4,6 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
-The format is based on `Keep a
-Changelog <https://keepachangelog.com/en/1.0.0/>`__, and this project
-adheres to `Semantic
-Versioning <https://semver.org/spec/v2.0.0.html>`__.
-
 [Unreleased]
 ------------
 
@@ -20,7 +15,10 @@ Added
 
 -  GitutilsError exception class. It hides stack when reaching an
    exception and prints the error in a friendly way.
--  Gitutils can't be executed from a git-controlled folder. ### Changed
+-  Gitutils can't be executed from a git-controlled folder.
+
+Changes
+~~~~~~~
 -  Show help when no argument is provided (previously, the token file
    was generated).
 -  Project argument when forking is now a positional argument.
@@ -37,16 +35,18 @@ Added
 Added
 ~~~~~
 
--  Unit Tests. ### Changed
+-  Unit Tests.
+
+Changed
+~~~~~~~
 -  Improved readme instructions.
 -  Usage of a generic endpoint function get\_endpoint(), which deals
    with a possible generic endpoint provided by the user as argument.
 -  Python3 correct way of importing modules.
 -  Bugfix: preventing the usage of an empty token from empty but
    existing file. ### Removed
--  Installation script makes no sense when using a conda environment and
+-  Removed installation script makes no sense when using a conda environment and
    installing it.
--  Fixed endpoint.
 
 [1.4.1] - 2019-08-20
 --------------------
@@ -57,7 +57,10 @@ Added
 -  Possibility to clean existing forks and have a fresh fork from a
    reference repository.
 -  Oauth2 authentication token is now saved on a file for future usage.
-   If not valid, it requests again. ### Changed
+   If not valid, it requests again.
+
+Changed
+~~~~~~~
 -  Improved readme instructions.
 -  Not request username/login at every interation.
 -  Removed pull and push commands.
@@ -77,3 +80,4 @@ Added
 -  Usage of Python-Gitlab library instead of gitlab api.
 -  Usage of a const.py file with all constant values necessary.
 
+.. note: The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`__, and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`__.

@@ -258,5 +258,17 @@ As this will change the global Python distribution, make sure that only the gitu
 
 * [Python-Gitlab](https://python-gitlab.readthedocs.io/en/stable/index.html) - A library for command-line interaction with gitlab servers.
 
+## Official documentation
+
+Due to problems in synchronization between [readthedocs](https://readthedocs.org) and a third party hosted git repository (https://git.psi.ch/controls_highlevel_applications/gitutils), the readthedocs documentation is generated based on [this](https://github.com/lhdamiani/gitutils) github repository.
+
+To update the documentation run the script
+
+```
+> python update_doc.py
+```
+
+The script is located on the home directory of the github-hosted gitutils repository. Once the changes are incorporated the documentation will be automatically updated.
+
 # Contact
 Questions or problems: Leonardo Hax Damiani - leonardo.hax@psi.ch

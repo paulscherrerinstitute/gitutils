@@ -11,7 +11,7 @@ Tests
 
 Installation for distribution
 -----------------------------
-The package has to be installed as root on gfalcd.psi.ch::
+The package has to be installed as root on ``gfalcd.psi.ch``::
 
     # Sourcing the python
     $ source /opt/gfa/python

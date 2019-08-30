@@ -649,7 +649,6 @@ def update_project_visibility(project_id, visibility):
         project = gl.projects.get(project_id)
     except Exception as ex:
         raise gitutils_exception.GitutilsError(ex)
-        return -1
     project.attributes['visibility'] = visibility
     project.save()
     return 0

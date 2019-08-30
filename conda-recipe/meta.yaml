@@ -1,6 +1,6 @@
 package:
     name: gitutils
-    version: 1.4.3
+    version: 1.4.4
 source:
     path: ..
 requirements:
@@ -10,16 +10,6 @@ requirements:
     run:
         - python
         - python-gitlab
-
-test:
-  imports:
-    - gitutils.gitutils
-    - gitutils.tests
-    - gitlab.v4
-  commands:
-    - export PYTHONPATH="$PYTHONPATH:."
-    - python -c "import sys;print(sys.path)"
-    - pytest
 
 build:
   noarch: python

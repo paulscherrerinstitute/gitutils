@@ -14,7 +14,7 @@ Added
 Changed
 ~~~~~~~
 -  Changelog is now written on reStructuredText instead of markdown.
-
+-  Bugfix: gitutils merge without indicating the project.
 
 [1.4.3] - 2019-08-26
 --------------------

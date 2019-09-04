@@ -35,7 +35,6 @@ def fork(git_repository_id=None, git_repository='', no_clone=False, clean=False)
         new_project = gitlab_utils.fork_project(git_repository_id)
         http_url_to_repo = new_project.attributes['http_url_to_repo']
     else: #cloning into the new repo
-
         # verify if there is an previously existing local folder
         if os.path.exists('./'+git_repository):
             if clean:
@@ -60,11 +59,15 @@ def fork(git_repository_id=None, git_repository='', no_clone=False, clean=False)
         try:
             os.chdir(git_repository)
         except Exception as ex:
-            raise gitutils_exception.GitutilsError( ex.args[1])
+            raise gitutils_exception.GitutilsError(ex)
 
         # Add upstream repository
         # Configure Git to sync your fork with the original repository
-        os.system(const.GIT_UPSTREAM_REPO_CMD % http_url_to_original_repo)
+        try:
+            os.system(const.GIT_UPSTREAM_REPO_CMD % http_url_to_original_repo)
+        except Exception as ex:
+            print(const.GIT_UPLINK_PROBLEM % http_url_to_original_repo)
+
 
     logging.info('New project forked: [%s] (id: %s) - %s' % (
                  new_project.attributes['path_with_namespace'],
@@ -101,11 +104,21 @@ def merge(git_repository='',
         raise gitutils_exception.GitutilsError(const.PROBLEM_USERNAME)
 
     # Check to see the directory
-    if not os.path.isfile('.git/HEAD') and not local_project:
+    if os.path.isfile('.git/HEAD') and local_project and git_repository is None and git_repository_id is None:
+        with open(".git/config") as git_search:
+            for line in git_search:
+                line = line.rstrip()
+                if "url =" in line:
+                    try:
+                        git_repository = line.split('=')[-1].split('/')[-1].split('.')[0]
+                        git_repository_id = line.split('=')[-1].split('/')[-2]
+                    except Exception as ex:
+                        raise gitutils_exception.GitutilsError(const.GIT_MERGE_PROBLEM)
+    else:
         raise gitutils_exception.GitutilsError(const.GIT_MERGE_PROBLEM)
 
-    # Check if there is already a fork
 
+    # Check if there is already a fork
     forked_project = gitlab_utils.get_forked_project(git_repository,
                                                      git_repository_id)
     # If no title submitted by the user, default title 

@@ -49,6 +49,7 @@ GIT_CREATE_MERGE_MSG = "Creating merge request..."
 DELETING_EXISTING_FORK = "Deleting existing fork..."
 GIT_MERGE_SUCCESS = "Merge request successfully created (merge request id: %s, created at %s)."
 GIT_MERGE_PROBLEM = "Cannot create merge request as there is no forked."
+GIT_UPLINK_PROBLEM = "Problem creating the upstream link. Please do it mannualy with the command: \'git remote add upstream %s\'"
 GIT_MERGE_DESCRIPTION_MSG = 'The configuration was changed by %s.'
 GIT_UNABLE_TO_FIND_PROJECT_MSG = "Unable to find project - Aborting...\n"
 GIT_UNABLE_TO_FIND_MASTER_BRANCH = "Unable to find master branch in project to merge - Aborting...\n"

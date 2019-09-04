@@ -4,93 +4,25 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
-[1.4.4] 2019-08-29
-------------
-Added
-~~~~~
--  When an expired token is initially found on the file, gitutils asks the user for login and password in order to update the token within ``~/.gitutils_token``.
--  Readthedocs documentation finalized.
-
-Changed
-~~~~~~~
--  Changelog is now written on reStructuredText instead of markdown.
--  Bugfix: gitutils merge without indicating the project.
-
-[1.4.3] - 2019-08-26
---------------------
-
-Added
-~~~~~
-
--  GitutilsError exception class. It hides stack when reaching an
-   exception and prints the error in a friendly way.
--  Gitutils can't be executed from a git-controlled folder.
-
-Changed
-~~~~~~~
--  Show help when no argument is provided (previously, the token file
-   was generated).
--  Project argument when forking is now a positional argument.
--  Title for merge request is not required. A default title will be used
-   in case nothing is provided by the user.
--  Usage of a generic endpoint. (set/get\_endpoint function)
--  Name of the file to save the token was changed to
-   ``/.gitutils_token``
--  Bugfix: problem using tuple to print exception error.
-
-[1.4.2] - 2019-08-22
---------------------
-
-Added
-~~~~~
-
--  Unit Tests.
-
-Changed
-~~~~~~~
--  Improved readme instructions.
--  Usage of a generic endpoint function get\_endpoint(), which deals
-   with a possible generic endpoint provided by the user as argument.
--  Python3 correct way of importing modules.
--  Bugfix: preventing the usage of an empty token from empty but
-   existing file. ### Removed
--  Removed installation script makes no sense when using a conda environment and
-   installing it.
-
-[1.4.1] - 2019-08-20
---------------------
-
-Added
-~~~~~
-
--  Possibility to clean existing forks and have a fresh fork from a
-   reference repository.
--  Oauth2 authentication token is now saved on a file for future usage.
-   If not valid, it requests again.
-
-Changed
-~~~~~~~
--  Improved readme instructions.
--  Not request username/login at every interation.
--  Removed pull and push commands.
--  Removal of local directory when '-c' is used.
--  Bugfix: when working on an existing fork, group name and project name
-   can now be fetched from git repository in the folder where gitutils
-   is utilized or directly indicated by the user.
-
-[1.4.0] - 2019-08-19
+[1.0.1] - 2019-09-04
 --------------------
 
 Added
 ~~~~~
 
 -  First release of the gitutils library.
--  Pull, push, fork and merge functions using oath2 authentication.
+-  Gitutils implements fork and merge (server-side) functions using oauth2 authentication.
 -  Usage of Python-Gitlab library instead of gitlab api.
--  Usage of a const.py file with all constant values necessary.
-
-[Unreleased]
-------------
+-  Gitutils recovers from an invalid token (fetched from .gitutils_token) by requesting username and password again.
+-  Gitutils offers a readthedocs documentation.
+-  gitutils argument '-e' to indicate a different repository endpoint.
+-  fork argument 'project' is a positional required argument.
+-  fork argument '-c' to clean existing forks or local folders.
+-  fork argument '-n' to not clone into forked repository.
+-  Allow merge argumentless possibility when executing from within the repository's folder.
+-  Unit tests.
+-  Oauth2 token saved on user's home directory file '.gitutils_token'.
+-  Merge allows possibility to define project, title and description. If merge command is executed inside the forked repository's folder, gitutils detects it and does not need the '-p' argument to indicate the project.
 
 
 .. note:: The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`__, and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`__.

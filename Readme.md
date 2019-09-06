@@ -3,6 +3,8 @@ Gitutils is a tool to facilitate the server-side operations when developing soft
 
 A detailed documentation is also found on https://gitutils.readthedocs.io/en/latest/index.html
 
+A gitutils clean sheet can be downloaded here: https://www.cheatography.com/leonardo-hax-damiani/cheat-sheets/gitutils/
+
 # Usage
 
 ## gitutils
@@ -28,7 +30,7 @@ command:
 
 ## fork
 ```bash
-usage: gitutils.py fork [-h] [-n] [-c] project
+usage: gitutils fork [-h] [-n] [-c] project
 
 positional arguments:
   project         (REQUIRED) Indicates the project to be forked. It can be of three different formats:
@@ -56,12 +58,12 @@ optional arguments:
 ## merge
 
 ```bash
-usage: gitutils.py merge [-h] [-t TITLE] [-p PROJECT] [-d DESCRIPTION]
+usage: gitutils merge [-h] [-t TITLE] [-p PROJECT] [-d DESCRIPTION]
 
 optional arguments:
   -h, --help            show this help message and exit
   -t TITLE, --title TITLE
-                         (REQUIRED) The title of the merge request that is going to be created.
+                         The title of the merge request that is going to be created.
   -p PROJECT, --project PROJECT
                         Indicates the project to be forked. It can be of four different formats:
                         - "" : The user doesn't provide this argument, the project's group and name
@@ -127,7 +129,7 @@ optional arguments:
 
 #### Gitutils merge walk-through
 1. Once all the necessary changes/development have been commited and pushed to a forked repository.
-2. Navigate to the home folder of your forked repository (where the ```/.git``` folder is). Issue the command to merge. Arguments:___-t___(___required___), ___-d___, ___-p___.
+2. Navigate to the home folder of your forked repository (where the ```/.git``` folder is). Issue the command to merge. Arguments:___-t___, ___-d___, ___-p___.
 - To create a merge request for a repository, use the following command while on a git repository folder:
 
     ```bash
@@ -144,7 +146,9 @@ optional arguments:
     > gitutils merge -p https://git.psi.ch/<group_name>/<repository_name> -t <title>
     ```
 
-> Please note that the ___-t___ title directive is required. GITUTILS will assume the command is being executed on the git repository folder. Alternatively, one can use the directive `-p` to indicate directly which project should be merged.
+> If ```-p``` is not indicated, ```gitutils``` fetches the group and project from the ```.git/config``` file (it assumes that the command is executed within the root directory of the git repository). Alternatively, one can use the directive `-p` to indicate directly which project should be merged.
+
+> If title and description are not provided, gitutils uses a default title and description indicating the user who is creating the merge request.
 
 ### Full walk-through example
 

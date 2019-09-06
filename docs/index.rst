@@ -30,5 +30,6 @@ Contents:
     usage
     development
     faq
+    sheet
     changelog
     contact

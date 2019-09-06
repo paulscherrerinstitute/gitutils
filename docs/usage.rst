@@ -2,12 +2,37 @@
 Usage
 #####
 
+Gitutils
+--------
+
+.. code-block:: bash
+
+      usage: gitutils [-h] [-e ENDPOINT] {fork,merge} ...
+
+      GITUTILS is a tool to facilitate the server-side operations when developing software that uses git repositories.
+
+      optional arguments:
+      -h, --help            show this help message and exit
+      -e ENDPOINT, --endpoint ENDPOINT
+                              Endpoint of the git server. Default: https://git.psi.ch
+
+      command:
+      valid commands
+
+      {fork,merge}          commands
+      fork                Creates a fork from the repository.
+      merge               Creates a request to merge the defined fork to the original repository.
+
+.. note:: To see the gitutils usage help, you can use::
+
+      $ gitutils -h
+
 Fork
 ----
 
 .. code-block:: bash
 
-      usage: gitutils.py fork [-h] [-n] [-c] project
+      usage: gitutils fork [-h] [-n] [-c] project
 
       positional arguments:
       project         (REQUIRED) Indicates the project to be forked. It can be of three different formats:
@@ -44,7 +69,7 @@ Merge
       optional arguments:
       -h, --help            show this help message and exit
       -t TITLE, --title TITLE
-                              (REQUIRED) The title of the merge request that is going to be created.
+                              The title of the merge request that is going to be created.
       -p PROJECT, --project PROJECT
                               Indicates the project to be forked. It can be of four different formats:
                               - "" : The user doesn't provide this argument, the project's group and name

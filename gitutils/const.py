@@ -89,7 +89,7 @@ FORK_NOCLONE_HELP = '''Indicates that the forked project will not be cloned afte
 will be created on the server-side and no clone nor upstream will be 
 generated on the local git server.'''
 MERGE_HELP_MSG = "Creates a request to merge the defined fork to the original repository."
-MERGE_MESSAGE_TITLE = ''' (REQUIRED) The title of the merge request that is going to be created.'''
+MERGE_MESSAGE_TITLE = ''' The title of the merge request that is going to be created.'''
 MERGE_MESSAGE_DESCRIPTION = '''The description of the merge request that is going to be created.'''
 STORE_TRUE = "store_true"
 ############

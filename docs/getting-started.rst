@@ -6,25 +6,28 @@ It is assumed that the gitutils' user is familiar with basic git commands (as ad
 
 .. _atlassian tutorial : https://www.atlassian.com/git/tutorials
 
+
+
+
 Fork Walk-through
 -----------------
 1. Define a project to fork and issue the command. Once a repository is forked, it also creates a local clone and an upstream link to the reference repository. Arguments: **-p**, **-n**, **-c**. Examples:
 
     - To fork and clone into a repository, use the following command::
 
-        $ gitutils fork -p <group_name>/<repository_name>
+        $ gitutils fork <group_name>/<repository_name>
 
     - To fork and not clone, add the directive **-n** at the end of the previous command, as in::
 
-            $ gitutils fork -p <group_name>/<repository_name> -n
+            $ gitutils fork <group_name>/<repository_name> -n
 
     - To delete existing fork and create a clean fork of a repository, use the following command::
 
-            $ gitutils fork -p <group_name>/<repository_name> -c
+            $ gitutils fork <group_name>/<repository_name> -c
 
     - To fork (using the full path), clean existing fork and not clone an existing repository::
 
-            $ gitutils fork -p https://git.psi.ch/<group_name>/<repository_name> -n -c
+            $ gitutils fork https://git.psi.ch/<group_name>/<repository_name> -n -c
 
 2. Implement the changes/development necessary on the forked repository.
 3. Add all changes, commit and push the changes to your forked repository using git command line, as in::

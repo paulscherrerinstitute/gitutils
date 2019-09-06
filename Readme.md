@@ -1,7 +1,8 @@
 # Overview
 Gitutils is a tool to facilitate the server-side operations when developing software that uses git repositories. It allows users to create forks and merge requests directly from the command line interface.
 
-A detailed documentation is also found on https://gitutils.readthedocs.io/en/latest/index.html
+[![Documentation Status](https://readthedocs.org/projects/gitutils/badge/?version=latest)](https://gitutils.readthedocs.io/en/latest/?badge=latest) A detailed documentation is also found on https://gitutils.readthedocs.io/en/latest/index.html 
+
 
 A gitutils clean sheet can be downloaded here: https://www.cheatography.com/leonardo-hax-damiani/cheat-sheets/gitutils/
 

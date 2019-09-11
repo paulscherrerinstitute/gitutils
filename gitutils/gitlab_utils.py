@@ -395,7 +395,7 @@ def check_group_clean(group_name, repo_name, clean):
     for projects in projects_from_group:
         if projects['name'] == repo_name:
             found = True
-    if found == false:
+    if found == False:
         raise gitutils_exception.GitutilsError(const.FORK_GROUP_NOT_FOUND)
     # If group name == username
     if group_name == get_username():
@@ -543,8 +543,8 @@ def fork_project(project_id):
         fork = project.forks.create({})
     except Exception as ex:
         raise gitutils_exception.GitutilsError(ex)
-    logging.info('Adding 2 seconds of idle time after forking to let the server process the new fork.')
-    time.sleep(2)
+    logging.info('Adding 3 seconds of idle time after forking to let the server process the new fork.')
+    time.sleep(3)
     logging.info('Forked project id %d' % project_id)
     return fork
 

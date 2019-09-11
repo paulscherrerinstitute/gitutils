@@ -104,18 +104,22 @@ def merge(git_repository='',
         raise gitutils_exception.GitutilsError(const.PROBLEM_USERNAME)
 
     # Check to see the directory
-    if os.path.isfile('.git/HEAD') and local_project and git_repository is None and git_repository_id is None:
+    if os.path.isfile('.git/config') and local_project:
+        next_line = False
         with open(".git/config") as git_search:
-            for line in git_search:
-                line = line.rstrip()
-                if "url =" in line:
-                    try:
-                        git_repository = line.split('=')[-1].split('/')[-1].split('.')[0]
-                        git_repository_id = line.split('=')[-1].split('/')[-2]
-                    except Exception as ex:
-                        raise gitutils_exception.GitutilsError(const.GIT_MERGE_PROBLEM)
+            while git_repository is None and git_repository_id is None:
+                for line in git_search:
+                    line = line.rstrip()
+                    if next_line == True:
+                        try:
+                            git_repository = line.split('=')[-1].split('/')[-1].split('.')[0]
+                            git_repository_id = line.split('=')[-1].split('/')[-2]
+                        except Exception as ex:
+                            raise gitutils_exception.GitutilsError(const.GIT_MERGE_PROBLEM_0)
+                    if "[remote \"origin\"]" in line:
+                        next_line = True
     else:
-        raise gitutils_exception.GitutilsError(const.GIT_MERGE_PROBLEM)
+        raise gitutils_exception.GitutilsError(const.GIT_MERGE_PROBLEM_1)
 
 
     # Check if there is already a fork
@@ -126,7 +130,7 @@ def merge(git_repository='',
         title = const.MERGE_DEFAULT_TITLE % gitlab_utils.get_username()
 
     if forked_project is None:
-        raise gitutils_exception.GitutilsError(const.GIT_MERGE_PROBLEM)
+        raise gitutils_exception.GitutilsError(const.GIT_MERGE_PROBLEM_2)
     else:
         print(const.GIT_CREATE_MERGE_MSG)
         final_description = const.GIT_MERGE_DESCRIPTION_MSG \
@@ -207,6 +211,11 @@ def main():
                            '--description',
                            help=const.MERGE_MESSAGE_DESCRIPTION)
 
+    parser_mr.add_argument('project',
+                            action="store",
+                            help=const.MERGE_PROJECT_POSITIONAL)
+
+
     arguments = parser.parse_args()
     # verifies if there are any arguments
     if arguments.command is None:
@@ -256,9 +265,15 @@ def main():
                 print(const.FORK_PROBLEM_PERSONAL)
                 parser.print_help()
                 sys.exit(-1)
+        if not valid:
+            print(const.PROBLEM_FETCHING_NAME)
+            parser.print_help()
+            sys.exit(-1)
     else:
         parser.print_help()
         sys.exit(-1)
+
+    
 
     # Command, group and repo are ok
     if arguments.command and \

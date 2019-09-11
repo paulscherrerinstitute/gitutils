@@ -224,15 +224,15 @@ def get_project_group(project_name, clean, merge=False):
     :return: Returns the name of the group.
     :rtype: str
     """
-    count = 0
     projects_list = gl.projects.list(search=project_name)
+    list_of_groups =[]
     for project in projects_list:
         if project_name == project.attributes['name']:
             if merge:
                 if checkKey(project.attributes, 'forked_from_project'):
                     groupFound = \
                         project.attributes['path_with_namespace'].split('/')[0]
-                    count += 1
+                    list_of_groups.append(groupFound)
                     logging.info('Project\'s %s group:' % groupFound)
             elif not merge:
                 project_path = project.attributes['path_with_namespace']
@@ -245,13 +245,13 @@ def get_project_group(project_name, clean, merge=False):
                         raise gitutils_exception.GitutilsError(const.GIT_FORK_PROBLEM_MULTIPLE)
                 else: # not a personal project
                     groupFound = project_path.split('/')[0]
-                    count += 1
+                    list_of_groups.append(groupFound)
                     logging.info('Project\'s %s group:' % groupFound)
 
-    if count == 1:
+    if len(list_of_groups) == 1:
         return groupFound
-    elif count >= 2:
-        raise gitutils_exception.GitutilsError(const.MULTIPLE_PROJECTS)
+    elif len(list_of_groups) >= 2:
+        raise gitutils_exception.GitutilsError(const.MULTIPLE_PROJECTS % (list_of_groups))
     else:
         raise gitutils_exception.GitutilsError(const.PROJECT_NAME_NOT_FOUND)
 
@@ -348,8 +348,7 @@ def get_project_id(group_name, project_name):
 
 def get_repo_group_names(config, clean=False):
     """
-    Gets the project name and group name based on the argument given
-    on the cli.
+    Gets the project name and group name based on the argument given on the cli.
     :param config: String given as argument that can be of different
     formats: full path to the project, groupname/projectname or project name.
     :type config: str
@@ -390,6 +389,14 @@ def get_repo_group_names(config, clean=False):
 
 
 def check_group_clean(group_name, repo_name, clean):
+    # verification if group + repo names are good
+    projects_from_group = get_group_projects(group_name)
+    found = False
+    for projects in projects_from_group:
+        if projects['name'] == repo_name:
+            found = True
+    if found == false:
+        raise gitutils_exception.GitutilsError(const.FORK_GROUP_NOT_FOUND)
     # If group name == username
     if group_name == get_username():
         raise gitutils_exception.GitutilsError(const.FORK_PROBLEM_PERSONAL)
@@ -631,6 +638,8 @@ def delete_project(project_id):
         gl.projects.delete(project_id)
     except Exception as ex:
         raise gitutils_exception.GitutilsError(ex)
+    print(const.DELETE_SUCCESS)
+    time.sleep(2)
     return 0
 
 

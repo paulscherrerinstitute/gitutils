@@ -39,7 +39,7 @@ Fork
                         - https://git.psi.ch/<group_name>/<project_name> : The user provides
                         the direct http to the git repository.
                         - <group_name>/<project_name> : The user provides a combination of
-                        group_name and project_name divided by "//".
+                        group_name and project_name divided by "/".
                         - <project_name> : The user provides the name of the project name.
                         Gitutils will fetch the name of the group (keep in mind, that this may
                         cause ambiguity problems).
@@ -64,7 +64,11 @@ Merge
 .. code-block:: bash
 
 
-      usage: gitutils.py merge [-h] [-t TITLE] [-p PROJECT] [-d DESCRIPTION]
+      usage: gitutils merge [-h] [-t TITLE] [-p PROJECT] [-d DESCRIPTION] project
+
+      positional arguments:
+      project               In case the user doesn't define the project using the '-p' flag,
+                              one can indicate the project directly without flags.
 
       optional arguments:
       -h, --help            show this help message and exit
@@ -72,8 +76,8 @@ Merge
                               The title of the merge request that is going to be created.
       -p PROJECT, --project PROJECT
                               Indicates the project to be forked. It can be of four different formats:
-                              - "" : The user doesn't provide this argument, the project's group and name
-                                    will be fetched from the ```/.git``` folder within the path where the
+                              - "" : (DEFAULT) The user doesn't provide this argument, the project's group and name
+                                    will be fetched from the /.git/config folder within the path where the
                                     gitutils is being called.
                               - https://git.psi.ch/<group_name>/<project_name> : The user provides the direct
                                     http to the git repository.

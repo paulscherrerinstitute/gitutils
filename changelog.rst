@@ -4,7 +4,7 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
-[1.0.1] - 2019-09-04
+[1.0.1] - 2019-09-11
 --------------------
 
 Added
@@ -20,6 +20,8 @@ Added
 -  fork argument '-c' to clean existing forks or local folders.
 -  fork argument '-n' to not clone into forked repository.
 -  Allow merge argumentless possibility when executing from within the repository's folder.
+-  Merge allows project indication without the usage of the '-p' flag. Project can also be a positional argument.
+-  When forking a project that is exists in multiple groups, a list of the groups is displayed.
 -  Unit tests.
 -  Oauth2 token saved on user's home directory file '.gitutils_token'.
 -  Merge allows possibility to define project, title and description. If merge command is executed inside the forked repository's folder, gitutils detects it and does not need the '-p' argument to indicate the project.

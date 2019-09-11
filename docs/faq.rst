@@ -20,7 +20,7 @@ It refuses to merge saying that it is not a fork...
 
     Instead of::
 
-        $ gitutils merge <original_fork>/<project_name>
+        $ gitutils merge <original_project>/<project_name>
 
 Why it doesn't asks for authentication?
     At the first run of ``gitutils`` on your local machine, ``gitutils``

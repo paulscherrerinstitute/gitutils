@@ -274,6 +274,10 @@ def get_forked_project(git_repository, git_repository_id):
                 # check whether project is forked from the right project
                 if project['forked_from_project']['name'] == git_repository:
                     forked_project = project
+                else:
+                    raise gitutils_exception.GitutilsError(const.PROJECT_FORK_NAME_ERROR)
+            else:
+                raise gitutils_exception.GitutilsError(const.PROJECT_FOUND_NOT_FORK)
     return forked_project
 
 
@@ -406,10 +410,13 @@ def check_group_clean(group_name, repo_name, clean):
             own_projects = get_owned_projects()
             for own_proj in own_projects:
                 if own_proj['name'] == repo_name:
-                    forked_group = own_proj['forked_from_project']['path_with_namespace'].split('/')[0]
-                    print(const.DELETING_EXISTING_FORK)
-                    delete_project(own_proj['id'])
-                    return forked_group
+                    if 'forked_from_project' in project:
+                        forked_group = own_proj['forked_from_project']['path_with_namespace'].split('/')[0]
+                        print(const.DELETING_EXISTING_FORK)
+                        delete_project(own_proj['id'])
+                        return forked_group
+                    else:
+                        print(const.CLEAN_PROBLEM)
         else:
             # verifies if there is a personal project existing
             own_projects = get_owned_projects()
@@ -485,7 +492,11 @@ def get_group_id(group_name):
     try:
         group_id = gl.groups.get(group_name).attributes['id']
     except Exception as ex:
-        raise gitutils_exception.GitutilsError(ex)
+        # group not found, it should be a personal group
+        try:
+            group_id = gl.users.list(username=group_name)[0].attributes['id']
+        except Exception as ex:
+            raise gitutils_exception.GitutilsError(ex)
 
     logging.info('Group name: %s (id %s)' % (group_name, group_id))
     return group_id
@@ -511,7 +522,11 @@ def get_group_projects(group_name):
             group = gl.groups.get(group_id, lazy=True)
             group_projects = group.projects.list()
         except Exception as ex:
-            raise gitutils_exception.GitutilsError(ex)
+            try:
+                user = gl.users.list(username='babic_a')[0]
+                group_projects = user.projects.list()
+            except Exception as ex:
+                raise gitutils_exception.GitutilsError(ex)
 
     # Retrieve the info from each project
 
@@ -536,9 +551,7 @@ def fork_project(project_id):
     :param project_id: ID of the project that wants to be forked.
     :type project_id: int
     """
-
-    project = gl.projects.get(project_id, lazy=True)
-
+    project = gl.projects.get(project_id)
     try:
         fork = project.forks.create({})
     except Exception as ex:

@@ -38,13 +38,15 @@ FORKED_EXISTS = "A forked repository with the name {} already exists. Use -c to 
 FORK_PROJECT = "Forking project %s (id: %s)..."
 PROJECT_ID_NOT_FOUND = "Project id not found."
 PROJECT_NAME_NOT_FOUND = "Project name not found. Please, indicate group name and project name."
+PROJECT_FOUND_NOT_FORK = "The requested project is not a fork. Gitutils is not able to continue..."
+PROJECT_FORK_NAME_ERROR = "The requested project has been forked from a different repository. Gitutils is not able to continue..."
 MULTIPLE_PROJECTS= "Multiple projects with the same name found under different groups. Please, indicate group name and project name. List of groups found: %s"
 DELETING_LOCAL_STORAGE = "Deleting local folder from deleted fork..."
 GIT_FORK_PROBLEM_MULTIPLE = "Not possible to fork the requested project. There is already one fork under the personal group with the same name. Use the argument -c to clean previous personal forks."
 FORK_PROBLEM_FOLDER = "Existing folder with the same name. Please indicate -c if you want to delete local files or use the fork command on a different folder."
 FORK_PROBLEM_GIT_FOLDER = "Fork is not recommended inside a repository folder. Please execute the fork command outside a repository folder."
-FORK_PROBLEM_PERSONAL = "Not possible to fork a own personal project."
-FORK_GROUP_NOT_FOUND = "The requested fork group has no such project."
+FORK_PROBLEM_PERSONAL = "Not possible to fork your own personal project."
+FORK_GROUP_NOT_FOUND = "The requested fork project could not be found under the specified group."
 PROJECT_URL_NOT_FOUND = "Project url not found, please check the configuration details."
 GIT_CREATE_MERGE_MSG = "Creating merge request..."
 DELETING_EXISTING_FORK = "Deleting existing fork..."
@@ -57,6 +59,7 @@ GIT_MERGE_PROBLEM_1 = "Cannot create merge. Git config file not found and projec
 GIT_MERGE_PROBLEM_2 = "Cannot create merge. Forked project was not found."
 GIT_UPLINK_PROBLEM = "Problem creating the upstream link. Please do it mannualy with the command: \'git remote add upstream %s\'"
 PROBLEM_FETCHING_NAME = "Problem fetching the group and projects name. Please check if the group and projects are correct and if they exist."
+CLEAN_PROBLEM = "Gitutils is not able to delete a repo that is not a fork."
 GIT_MERGE_DESCRIPTION_MSG = 'The configuration was changed by %s.'
 GIT_UNABLE_TO_FIND_PROJECT_MSG = "Unable to find project - Aborting...\n"
 GIT_UNABLE_TO_FIND_MASTER_BRANCH = "Unable to find master branch in project to merge - Aborting...\n"
@@ -86,8 +89,8 @@ MERGE_PROJECT_MESSAGE = '''Indicates the project to be forked. It can be of four
 - <project_name> : The user provides the name of the project name. Gitutils will
       fetch the name of the group (keep in mind, that this may cause ambiguity 
       problems).'''
-MERGE_PROJECT_POSITIONAL = '''Alternative way to define which project should be merged (when the '-p' flag, 
-is not being used)'''
+# MERGE_PROJECT_POSITIONAL = '''Alternative way to define which project should be merged (when the '-p' flag, 
+# is not being used)'''
 FORK_CLEAN_MSG = '''Indicates to delete any existing fork project under your personal group. 
 This might be necessary to fork and clone into a clean copy of the original 
 repository. The desired forked project must not be a pre-existing forked 

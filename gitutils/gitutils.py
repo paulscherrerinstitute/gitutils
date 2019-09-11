@@ -28,6 +28,7 @@ def fork(git_repository_id=None, git_repository='', no_clone=False, clean=False)
     # gitlab_utils.is_git_repo()
     # Message user about forking project
     print(const.FORK_PROJECT % (git_repository, git_repository_id))
+    
 
     # not cloning into the new repo
     if no_clone:
@@ -49,8 +50,11 @@ def fork(git_repository_id=None, git_repository='', no_clone=False, clean=False)
 
         # Forks the repo
         new_project = gitlab_utils.fork_project(git_repository_id)
-        http_url_to_repo = new_project.attributes['http_url_to_repo']
-        http_url_to_original_repo = new_project.attributes['forked_from_project']['http_url_to_repo']
+        try:
+            http_url_to_repo = new_project.attributes['http_url_to_repo']
+            http_url_to_original_repo = new_project.attributes['forked_from_project']['http_url_to_repo']
+        except Exception as ex:
+            raise gitutils_exception.GitutilsError(ex)
 
         # Clone repository
         os.system(const.GIT_CLONE_CMD % http_url_to_repo)
@@ -211,10 +215,6 @@ def main():
                            '--description',
                            help=const.MERGE_MESSAGE_DESCRIPTION)
 
-    parser_mr.add_argument('project',
-                            action="store",
-                            help=const.MERGE_PROJECT_POSITIONAL)
-
 
     arguments = parser.parse_args()
     # verifies if there are any arguments
@@ -273,7 +273,25 @@ def main():
         parser.print_help()
         sys.exit(-1)
 
-    
+
+    # group_id = gitlab_utils.get_group_id('babic_a')
+    # group_id = gitlab_utils.get_group_id('hax_l')
+    # group_id = gitlab_utils.get_group_id('controls_highlevel_applications')
+    # group_id = gitlab_utils.get_group_id('hax_l')
+    # gl = gitlab_utils.get_gl()
+    # # group = gl.groups.get(group_id, lazy=True)
+    # # print(group.projects.list())
+    # projects = gl.projects.list(username='hax_l')
+    # for i in projects:
+    #     print(i.attributes['name'])
+
+
+    # hax = gl.users.list(username='ebner')[0]
+    # print(hax.projects.list())
+    # print('test')
+    # print(group_name, gitlab_utils.get_group_id(group_name))
+    # print(repo_name, project_id)
+    # quit()
 
     # Command, group and repo are ok
     if arguments.command and \

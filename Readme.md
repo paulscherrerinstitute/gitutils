@@ -61,10 +61,6 @@ optional arguments:
 ```bash
 usage: gitutils merge [-h] [-t TITLE] [-p PROJECT] [-d DESCRIPTION] project
 
-positional arguments:
-  project               In case the user doesn't define the project using the '-p' flag,
-                        one can indicate the project directly without flags.
-
 optional arguments:
   -h, --help            show this help message and exit
   -t TITLE, --title TITLE

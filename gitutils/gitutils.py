@@ -273,26 +273,6 @@ def main():
         parser.print_help()
         sys.exit(-1)
 
-
-    # group_id = gitlab_utils.get_group_id('babic_a')
-    # group_id = gitlab_utils.get_group_id('hax_l')
-    # group_id = gitlab_utils.get_group_id('controls_highlevel_applications')
-    # group_id = gitlab_utils.get_group_id('hax_l')
-    # gl = gitlab_utils.get_gl()
-    # # group = gl.groups.get(group_id, lazy=True)
-    # # print(group.projects.list())
-    # projects = gl.projects.list(username='hax_l')
-    # for i in projects:
-    #     print(i.attributes['name'])
-
-
-    # hax = gl.users.list(username='ebner')[0]
-    # print(hax.projects.list())
-    # print('test')
-    # print(group_name, gitlab_utils.get_group_id(group_name))
-    # print(repo_name, project_id)
-    # quit()
-
     # Command, group and repo are ok
     if arguments.command and \
        repo_name is not None and \

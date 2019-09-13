@@ -28,8 +28,6 @@ def fork(git_repository_id=None, git_repository='', no_clone=False, clean=False)
     # gitlab_utils.is_git_repo()
     # Message user about forking project
     print(const.FORK_PROJECT % (git_repository, git_repository_id))
-    
-
     # not cloning into the new repo
     if no_clone:
         # Forks the repo
@@ -106,24 +104,6 @@ def merge(git_repository='',
     git_username = gitlab_utils.get_username()
     if git_username == -1:
         raise gitutils_exception.GitutilsError(const.PROBLEM_USERNAME)
-
-    # Check to see the directory
-    if os.path.isfile('.git/config') and local_project:
-        next_line = False
-        with open(".git/config") as git_search:
-            while git_repository is None and git_repository_id is None:
-                for line in git_search:
-                    line = line.rstrip()
-                    if next_line == True:
-                        try:
-                            git_repository = line.split('=')[-1].split('/')[-1].split('.')[0]
-                            git_repository_id = line.split('=')[-1].split('/')[-2]
-                        except Exception as ex:
-                            raise gitutils_exception.GitutilsError(const.GIT_MERGE_PROBLEM_0)
-                    if "[remote \"origin\"]" in line:
-                        next_line = True
-    else:
-        raise gitutils_exception.GitutilsError(const.GIT_MERGE_PROBLEM_1)
 
 
     # Check if there is already a fork
@@ -232,25 +212,45 @@ def main():
     (repo_name, group_name, project_id) = (None, None, None)
     if arguments.command == 'merge':
         # Verify if project has been indicated
-        # otherwise it fetches from local folder .git/HEAD
-        no_project_indication = False
-        if not arguments.project:
-            no_project_indication = True
-        if not arguments.project:
-            repo_name = os.path.basename(os.getcwd())
-        else:
+        project_indication = False
+        repo_name = os.path.basename(os.getcwd())
+        if arguments.project:
+            project_indication = True
             if const.ENDPOINT in arguments.project:
                 web_url_split = arguments.project.split('/')
                 if len(web_url_split) == 5:
                     repo_name = web_url_split[-1]
+                    group_name = web_url_split[-2]
             elif '/' in arguments.project:
                 # config format: "group_name/project_name"
                 path_with_namespace = arguments.project.split('/')
                 if len(path_with_namespace) == 2:
                     repo_name = path_with_namespace[1]
+                    group_name = path_with_namespace[0]
             else:
                 repo_name = arguments.project
-        group_name = gitlab_utils.get_project_group(repo_name, False, True)
+        else:
+            # Check to see the directory
+            if os.path.isfile('.git/config'):
+                next_line = False
+                git_extracted_repo_name = None
+                with open(".git/config") as git_search:
+                    for line in git_search:
+                        line = line.rstrip()
+                        if next_line == True and git_extracted_repo_name is None:
+                            try:
+                                git_extracted_repo_name = line.split('=')[-1].split('/')[-1].split('.')[0]
+                                group_name = line.split('=')[-1].split('/')[-2]
+                            except Exception as ex:
+                                raise gitutils_exception.GitutilsError(const.GIT_MERGE_PROBLEM_0)
+                        if "[remote \"origin\"]" in line:
+                            next_line = True
+                if git_extracted_repo_name != repo_name:
+                    raise gitutils_exception.GitutilsError(const.GIT_INCONSISTENCY_NAME)
+            else:
+                raise gitutils_exception.GitutilsError(const.GIT_MERGE_PROBLEM_1)
+        if group_name is None:
+            group_name = gitlab_utils.get_project_group(repo_name, False, True, project_indication)
         project_id = gitlab_utils.get_project_id(group_name, repo_name)
     elif arguments.project:
         (repo_name, group_name, project_id, valid) = \
@@ -289,7 +289,7 @@ def main():
                       git_repository_id=project_id,
                       description=arguments.description,
                       title=arguments.title,
-                      local_project=no_project_indication)
+                      local_project=project_indication)
             else:
                 print(const.COMMAND_NOT_FOUND)
                 parser.print_help()

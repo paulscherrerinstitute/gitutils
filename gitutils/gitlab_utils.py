@@ -199,7 +199,6 @@ def get_project_web_url(project_name):
     :return: Returns the web url to the project.
     :rtype: str
     """
-
     projects_list = gl.projects.list(search=project_name)
     for project in projects_list:
         if project_name == project.attributes['name']:
@@ -216,7 +215,7 @@ def checkKey(dict, key):
         return False
 
 
-def get_project_group(project_name, clean, merge=False):
+def get_project_group(project_name, clean, merge, project_indication):
     """
     Function to get the group of a project based on its name.
     :param project_name: Name of the project
@@ -247,12 +246,11 @@ def get_project_group(project_name, clean, merge=False):
                     groupFound = project_path.split('/')[0]
                     list_of_groups.append(groupFound)
                     logging.info('Project\'s %s group:' % groupFound)
-
-    if len(list_of_groups) == 1:
+    if len(list_of_groups) == 1 and project_indication:
         return groupFound
     elif len(list_of_groups) >= 2:
         raise gitutils_exception.GitutilsError(const.MULTIPLE_PROJECTS % (list_of_groups))
-    else:
+    if not project_indication:
         raise gitutils_exception.GitutilsError(const.PROJECT_NAME_NOT_FOUND)
 
 
@@ -340,9 +338,10 @@ def get_project_id(group_name, project_name):
     """
 
     projects_list = gl.projects.list(search=project_name)
+
     for project in projects_list:
         if project.attributes['name'] == project_name:
-            if group_name in project.attributes['path_with_namespace']:
+            if group_name == project.attributes['path_with_namespace'].split('/')[0]:
                 logging.info('Found the project id ( %s - %s ) : %s' % (
                              group_name, project_name,
                              project.attributes['id']))
@@ -364,7 +363,8 @@ def get_repo_group_names(config, clean=False):
     repo_name = None
     group_name = None
     valid = False
-
+    if len(config) > 0:
+        project_indication = True
     # config format: "const.ENDPOINT/group_name/project_name"
     if get_endpoint() in config:
         web_url = config
@@ -372,8 +372,12 @@ def get_repo_group_names(config, clean=False):
         if len(web_url_split) == 5:
             repo_name = web_url_split[-1]
             group_name = web_url_split[-2]
+            if len(repo_name) <= 1 or len(group_name) <= 1:
+                raise gitutils_exception.GitutilsError(const.FULL_GROUP_PROJECT_BAD_FORMAT)
             valid = True
-            group_name = check_group_clean(group_name, repo_name, clean)
+            get_project_group(repo_name, clean, False, project_indication)
+        else:
+            raise gitutils_exception.GitutilsError(const.FULL_GROUP_PROJECT_BAD_FORMAT)
     elif '/' in config:
         # config format: "group_name/project_name"
         path_with_namespace = config.split('/')
@@ -381,49 +385,25 @@ def get_repo_group_names(config, clean=False):
             group_name = path_with_namespace[0]
             repo_name = path_with_namespace[1]
             valid = True
-            group_name = check_group_clean(group_name, repo_name, clean)
+            project_id = get_project_id(group_name, repo_name)
+            project = gl.projects.get(project_id)
+            if group_name != project.attributes['namespace']['name']:
+                raise gitutils_exception.GitutilsError(const.FORK_GROUP_NOT_FOUND)
+            if clean:
+                own_projects = get_owned_projects()
+                for proj in own_projects:
+                    if proj['name'] == repo_name:
+                        delete_project(proj['id'])
+        else:
+            raise gitutils_exception.GitutilsError(const.GROUP_PROJECT_BAD_FORMAT)
     else:
         # config format: "project_name"
         repo_name = config
-        group_name = get_project_group(repo_name, clean, False)
+        group_name = get_project_group(repo_name, clean, False, project_indication)
         # warning if multiple and ERROR out - > ambiguous
         valid = True
     project_id = get_project_id(group_name, repo_name)
     return (repo_name, group_name, project_id, valid)
-
-
-def check_group_clean(group_name, repo_name, clean):
-    # verification if group + repo names are good
-    projects_from_group = get_group_projects(group_name)
-    found = False
-    for projects in projects_from_group:
-        if projects['name'] == repo_name:
-            found = True
-    if found == False:
-        raise gitutils_exception.GitutilsError(const.FORK_GROUP_NOT_FOUND)
-    # If group name == username
-    if group_name == get_username():
-        raise gitutils_exception.GitutilsError(const.FORK_PROBLEM_PERSONAL)
-    else:
-        if clean:
-            # finds the personal project and deletes it
-            own_projects = get_owned_projects()
-            for own_proj in own_projects:
-                if own_proj['name'] == repo_name:
-                    if 'forked_from_project' in project:
-                        forked_group = own_proj['forked_from_project']['path_with_namespace'].split('/')[0]
-                        print(const.DELETING_EXISTING_FORK)
-                        delete_project(own_proj['id'])
-                        return forked_group
-                    else:
-                        print(const.CLEAN_PROBLEM)
-        else:
-            # verifies if there is a personal project existing
-            own_projects = get_owned_projects()
-            for own_proj in own_projects:
-                if own_proj['name'] == repo_name:
-                    raise gitutils_exception.GitutilsError(const.FORKED_EXISTS.format(repo_name))
-    return group_name
 
 def is_git_repo():
     is_git_repo = subprocess.check_output(const.GIT_IS_REPO_PATH, shell=True).decode('UTF-8').split('\n')[0]
@@ -444,7 +424,7 @@ def delete_group(group_name):
     try:
         group.delete()
     except Exception as ex:
-        print(ex.args[1])
+        print(ex)
         returnCode = -1
     logging.info('Deleted group: %s' % group_name)
     return returnCode
@@ -515,23 +495,22 @@ def get_group_projects(group_name):
         group_id = 0
         group_projects = gl.projects.list(owned=True)
     else:
-
         # Retrieve the group's projects
         group_id = get_group_id(group_name)
         try:
-            group = gl.groups.get(group_id, lazy=True)
+            group = gl.groups.get(group_id)
             group_projects = group.projects.list()
         except Exception as ex:
             try:
-                user = gl.users.list(username='babic_a')[0]
+                user = gl.users.list(username=group_name)[0]
                 group_projects = user.projects.list()
             except Exception as ex:
                 raise gitutils_exception.GitutilsError(ex)
 
     # Retrieve the info from each project
-
     projects = []
     for project in group_projects:
+        print(project.attributes['name'])
         logging.info('%s %s [%s] - %s' % (project.attributes['name'],
                      project.attributes['id'],
                      project.attributes['path_with_namespace'],
@@ -555,7 +534,13 @@ def fork_project(project_id):
     try:
         fork = project.forks.create({})
     except Exception as ex:
-        raise gitutils_exception.GitutilsError(ex)
+        error = ex
+        try:
+            error = ex.args[0]['base'][0]
+        except:
+            pass
+        raise gitutils_exception.GitutilsError(error)
+
     logging.info('Adding 3 seconds of idle time after forking to let the server process the new fork.')
     time.sleep(3)
     logging.info('Forked project id %d' % project_id)

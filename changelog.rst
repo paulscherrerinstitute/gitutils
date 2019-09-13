@@ -4,7 +4,7 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
-[1.0.1] - 2019-09-11
+[1.0.1] - 2019-09-13
 --------------------
 
 Added

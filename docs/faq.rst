@@ -2,6 +2,11 @@
 FAQ
 ###
 
+Gitutils can't find a group/project...
+    Gitutils have access only to the groups/projects that your token allows
+    it to access. If your permissions are not valid to access certain groups,
+    even though they might exist you will not be able to fork or merge.
+
 I cannot fork the requested repository...
     It is likely that you need to specify the group and project name in the
     following format::

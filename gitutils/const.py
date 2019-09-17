@@ -75,34 +75,32 @@ GITUTILS_TITLE_DESCRIPTION = 'GITUTILS is a tool to facilitate the server-side o
 BASEDIR_HELP_MSG = "Base directory to clone configurations to."
 ENDPOINT_HELP_MSG = "Endpoint of the git server. Default: https://git.psi.ch"
 FORK_PROJECT_MESSAGE = '''(REQUIRED) Indicates the project to be forked. It can be of three different formats:
-- https://git.psi.ch/<group_name>/<project_name> : The user provides 
+- https://git.psi.ch/<group_name>/<project_name> : The user provides
    the direct http to the git repository.
-- <group_name>/<project_name> : The user provides a combination of 
+- <group_name>/<project_name> : The user provides a combination of
    group_name and project_name divided by \"/\".
-- <project_name> : The user provides the name of the project name. 
-   Gitutils will fetch the name of the group (keep in mind, that this may 
+- <project_name> : The user provides the name of the project name.
+   Gitutils will fetch the name of the group (keep in mind, that this may
    cause ambiguity problems).'''
 MERGE_PROJECT_MESSAGE = '''Indicates the project to be forked. It can be of four different formats:
-- \"\" : (DEFAULT) The user doesn't provide this argument, the project's group and name 
-      will be fetched from the /.git/config folder within the path where the 
+- \"\" : (DEFAULT) The user doesn't provide this argument, the project's group and name
+      will be fetched from the /.git/config folder within the path where the
       gitutils is being called.
-- https://git.psi.ch/<group_name>/<project_name> : The user provides the direct 
+- https://git.psi.ch/<group_name>/<project_name> : The user provides the direct
       http to the git repository.
 - <group_name>/<project_name> : The user provides a combination of group_name and
       project_name divided by "/".
 - <project_name> : The user provides the name of the project name. Gitutils will
-      fetch the name of the group (keep in mind, that this may cause ambiguity 
+      fetch the name of the group (keep in mind, that this may cause ambiguity
       problems).'''
-# MERGE_PROJECT_POSITIONAL = '''Alternative way to define which project should be merged (when the '-p' flag, 
-# is not being used)'''
-FORK_CLEAN_MSG = '''Indicates to delete any existing fork project under your personal group. 
-This might be necessary to fork and clone into a clean copy of the original 
-repository. The desired forked project must not be a pre-existing forked 
+FORK_CLEAN_MSG = '''Indicates to delete any existing fork project under your personal group.
+This might be necessary to fork and clone into a clean copy of the original
+repository. The desired forked project must not be a pre-existing forked
 project under your personal projects.'''
 COMMAND_NOT_FOUND = "Command not found."
 FORK_HELP_MSG = "Creates a fork from the repository."
-FORK_NOCLONE_HELP = '''Indicates that the forked project will not be cloned after forking. A fork 
-will be created on the server-side and no clone nor upstream will be 
+FORK_NOCLONE_HELP = '''Indicates that the forked project will not be cloned after forking. A fork
+will be created on the server-side and no clone nor upstream will be
 generated on the local git server.'''
 MERGE_HELP_MSG = "Creates a request to merge the defined fork to the original repository."
 MERGE_MESSAGE_TITLE = ''' The title of the merge request that is going to be created.'''

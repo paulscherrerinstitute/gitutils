@@ -75,7 +75,7 @@ class TestGitlabUtils(unittest.TestCase):
         Test get_project_group
         """
 
-        group = gitlab_utils.get_project_group('app_config', False, False)
+        group = gitlab_utils.get_project_group('app_config', False, False, False)
         self.assertEqual(group, 'controls_highlevel_applications')
 
     def test_get_group_id(self):
@@ -148,7 +148,7 @@ class TestGitlabUtils(unittest.TestCase):
             gitlab_utils.get_group_projects(group_name)
         if len(projects) >= 1:
             project_name = projects[0]['name']
-            group_name = gitlab_utils.get_project_group(project_name, False, False)
+            group_name = gitlab_utils.get_project_group(project_name, False, False, False)
             self.assertEqual(group_name,
                              'controls_highlevel_applications')
 

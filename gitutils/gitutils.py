@@ -5,7 +5,6 @@ from gitutils import gitutils_exception
 from gitutils import const
 import sys
 import os
-import time
 import shutil
 import logging
 import argparse
@@ -109,7 +108,7 @@ def merge(git_repository='',
     # Check if there is already a fork
     forked_project = gitlab_utils.get_forked_project(git_repository,
                                                      git_repository_id)
-    # If no title submitted by the user, default title 
+    # If no title submitted by the user, default title
     if title is None:
         title = const.MERGE_DEFAULT_TITLE % gitlab_utils.get_username()
 
@@ -241,7 +240,7 @@ def main():
                             try:
                                 git_extracted_repo_name = line.split('=')[-1].split('/')[-1].split('.')[0]
                                 group_name = line.split('=')[-1].split('/')[-2]
-                            except Exception as ex:
+                            except Exception:
                                 raise gitutils_exception.GitutilsError(const.GIT_MERGE_PROBLEM_0)
                         if "[remote \"origin\"]" in line:
                             next_line = True

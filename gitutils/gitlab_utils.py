@@ -3,10 +3,7 @@
 from gitutils import const
 from gitutils import gitutils_exception
 import requests
-import json
-import pprint
 import os
-import sys
 import errno
 import logging
 import gitlab
@@ -208,8 +205,8 @@ def get_project_web_url(project_name):
     raise gitutils_exception.GitutilsError(const.PROJECT_NAME_NOT_FOUND)
 
 
-def checkKey(dict, key):
-    if key in dict:
+def checkKey(dict_to_search, key):
+    if key in dict_to_search:
         return True
     else:
         return False

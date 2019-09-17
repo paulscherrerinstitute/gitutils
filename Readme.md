@@ -4,7 +4,7 @@ Gitutils is a tool to facilitate the server-side operations when developing soft
 [![Documentation Status](https://readthedocs.org/projects/gitutils/badge/?version=latest)](https://gitutils.readthedocs.io/en/latest/?badge=latest) A detailed documentation is also found on https://gitutils.readthedocs.io/en/latest/index.html 
 
 
-A gitutils clean sheet can be downloaded here: https://www.cheatography.com/leonardo-hax-damiani/cheat-sheets/gitutils/
+A gitutils clean sheet can be found [here](cheatsheet.pdf)
 
 # Usage
 

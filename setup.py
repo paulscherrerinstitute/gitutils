@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os
-from setuptools import find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'Readme.md')).read()

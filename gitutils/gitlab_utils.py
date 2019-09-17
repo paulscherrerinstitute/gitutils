@@ -4,7 +4,6 @@ from gitutils import const
 from gitutils import gitutils_exception
 import requests
 import os
-import errno
 import logging
 import gitlab
 import getpass
@@ -69,7 +68,7 @@ def authenticate():
             gl.auth()
             # if successfull, gets the login from the account
             login = pwd.getpwuid(os.getuid())[0]
-        except:
+        except Exception:
             # if something wrong happens, request the login + password
             # and updates the token on the file
             print(const.AUTHENTICATE_REQUEST_INVALID_TOKEN)
@@ -635,67 +634,6 @@ def delete_project(project_id):
     print(const.DELETE_SUCCESS)
     time.sleep(2)
     return 0
-
-
-def update_project_visibility(project_id, visibility):
-    """
-    Update the visibility of the project passed via the excludes parameter
-    :param project_id: ID of the project that will have it's visibility updated
-    :type project_id: int
-    :param visibility: New visibility for the project
-    :type visibility: int
-    :return: Returns 0 if successful or -1 if a problem occured.
-    :rtype: int
-    """
-
-    try:
-        project = gl.projects.get(project_id)
-    except Exception as ex:
-        raise gitutils_exception.GitutilsError(ex)
-    project.attributes['visibility'] = visibility
-    project.save()
-    return 0
-
-
-def update_visibility_all_projects(visibility=10, excludes=[]):
-    """
-    Update the visibility of the projects of all visible groups
-    except the groups passed via the excludes parameter
-    :param visibility: Visibility setting of the project
-    10=internal, 0=private, 20=public - default: 10
-    :param excludes: List of groups to exclude from this bulk update
-    :return:
-    """
-
-    result = get_groups()
-
-    repository_count = 0
-
-    # for all groups
-
-    for (key, group) in result.items():
-        print('Process group: %s' % group['name'])
-
-        # Exclude groups ...
-        if group['name'] in excludes:
-            continue
-
-        group_id = group['id']
-        projects = get_group_projects(group_id)
-        for project in projects:
-            result = update_project_visibility(project['id'],
-                                               visibility=visibility)
-            if result == 0:
-                print('Visibility of project %s updated.' %
-                      project['name'])
-                repository_count += 1
-            else:
-                print('Problem updating project the \
-                      visibility of project %s.' % project['name'])
-    logging.info('Number of repositories changed: %d'
-                 % repository_count)
-    print('Number of repositories changed: %d' % repository_count)
-
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.WARNING)

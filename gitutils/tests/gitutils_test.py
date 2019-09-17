@@ -75,7 +75,7 @@ class TestGitlabUtils(unittest.TestCase):
         Test get_project_group
         """
 
-        group = gitlab_utils.get_project_group('app_config', False, False, False)
+        group = gitlab_utils.get_project_group('app_config', False, False, True)
         self.assertEqual(group, 'controls_highlevel_applications')
 
     def test_get_group_id(self):
@@ -148,7 +148,7 @@ class TestGitlabUtils(unittest.TestCase):
             gitlab_utils.get_group_projects(group_name)
         if len(projects) >= 1:
             project_name = projects[0]['name']
-            group_name = gitlab_utils.get_project_group(project_name, False, False, False)
+            group_name = gitlab_utils.get_project_group(project_name, False, False, True)
             self.assertEqual(group_name,
                              'controls_highlevel_applications')
 
@@ -161,8 +161,8 @@ class TestGitlabUtils(unittest.TestCase):
         if len(owned_projects) >= 1:
             project_id = owned_projects[0]['id']
             project = gl.projects.get(project_id)
-            self.assertEqual(gitlab_utils.get_username(),
-                             project.attributes['owner']['username'])
+            self.assertEqual('controls_highlevel_applications',
+                             project.attributes['namespace']['path'])
 
 
 if __name__ == '__main__':

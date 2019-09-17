@@ -507,7 +507,6 @@ def get_group_projects(group_name):
     # Retrieve the info from each project
     projects = []
     for project in group_projects:
-        print(project.attributes['name'])
         logging.info('%s %s [%s] - %s' % (project.attributes['name'],
                      project.attributes['id'],
                      project.attributes['path_with_namespace'],

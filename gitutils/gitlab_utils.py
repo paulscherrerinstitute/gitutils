@@ -151,15 +151,7 @@ def get_projects():
     """
 
     projects_list = gl.projects.list()
-    projects = []
-    for project in projects_list:
-        logging.info('%s [%s] - %s' % (project.attributes['name'],
-                     project.attributes['path_with_namespace'],
-                     project.attributes['ssh_url_to_repo']))
-        projects.append({'name': project.attributes['name'],
-                         'path': project.attributes['path_with_namespace'],
-                         'url': project.attributes['ssh_url_to_repo']})
-    return projects
+    return get_dict_from_own_projects(projects_list)
 
 
 def create_group(group_name, description):
@@ -504,19 +496,19 @@ def get_group_projects(group_name):
                 raise gitutils_exception.GitutilsError(ex)
 
     # Retrieve the info from each project
-    projects = []
-    for project in group_projects:
-        logging.info('%s %s [%s] - %s' % (project.attributes['name'],
-                     project.attributes['id'],
-                     project.attributes['path_with_namespace'],
-                     project.attributes['http_url_to_repo']))
-        projects.append({
-            'name': project.attributes['name'],
-            'id': project.attributes['id'],
-            'path': project.attributes['path_with_namespace'],
-            'url': project.attributes['http_url_to_repo'],
-            })
-    return projects
+    # projects = []
+    # for project in group_projects:
+    #     logging.info('%s %s [%s] - %s' % (project.attributes['name'],
+    #                  project.attributes['id'],
+    #                  project.attributes['path_with_namespace'],
+    #                  project.attributes['http_url_to_repo']))
+    #     projects.append({
+    #         'name': project.attributes['name'],
+    #         'id': project.attributes['id'],
+    #         'path': project.attributes['path_with_namespace'],
+    #         'url': project.attributes['http_url_to_repo'],
+    #         })
+    return get_dict_from_own_projects(group_projects)
 
 
 def fork_project(project_id):
@@ -587,19 +579,7 @@ def create_merge_request(source_project_id,
     return mr
 
 
-def get_owned_projects():
-    """
-    Retrieves the projects owned by the current user.
-    :return: List of projects containing name, path and url
-    (in a dictionary-type).
-    :rtype: dict
-    """
-
-    try:
-        own_projects = gl.projects.list(owned=True)
-    except Exception as ex:
-        raise gitutils_exception.GitutilsError(ex)
-
+def get_dict_from_own_projects(own_projects):
     projects = []
     for project in own_projects:
         logging.info('%s [%s] - %s' % (project.attributes['name'],
@@ -614,11 +594,24 @@ def get_owned_projects():
             })
 
         # if it's a fork add the source project
-
         if 'forked_from_project' in project.attributes:
             projects[-1]['forked_from_project'] = \
                 project.attributes['forked_from_project']
     return projects
+
+def get_owned_projects():
+    """
+    Retrieves the projects owned by the current user.
+    :return: List of projects containing name, path and url
+    (in a dictionary-type).
+    :rtype: dict
+    """
+
+    try:
+        own_projects = gl.projects.list(owned=True)
+    except Exception as ex:
+        raise gitutils_exception.GitutilsError(ex)
+    return get_dict_from_own_projects(own_projects)
 
 
 def delete_project(project_id):

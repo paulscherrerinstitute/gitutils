@@ -88,29 +88,33 @@ optional arguments:
 ### FORK
 
 #### Gitutils fork walk-through
+
 1. Define a project to fork and issue the command. Once a repository is forked, it also creates a local clone and an upstream link to the reference repository. Arguments: ___-n___, ___-c___ and project. Examples:
-- To fork and clone into a repository, use the following command:
+    - To fork and clone into a repository, use the following command:
 
-    ```bash
-    > gitutils fork <group_name>/<repository_name>
-    ```
-- To fork and not clone, add the directive ___-n___ at the end of the previous command, as in:
+        ```bash
+        > gitutils fork <group_name>/<repository_name>
+        ```
 
-    ```bash
-    > gitutils fork <group_name>/<repository_name> -n
-    ```
-- To delete existing fork and create a clean fork of a repository, use the following command:
+    - To fork and not clone, add the directive ___-n___ at the end of the previous command, as in:
 
-    ```bash
-    > gitutils fork <group_name>/<repository_name> -c
-    ```
-- To fork (using the full path), clean existing fork and not clone an existing repository:
- 
-    ```bash
-    > gitutils fork https://git.psi.ch/<group_name>/<repository_name> -n -c
-    ```
+        ```bash
+        > gitutils fork <group_name>/<repository_name> -n
+        ```
+
+    - To delete existing fork and create a clean fork of a repository, use the following command:
+
+        ```bash
+        > gitutils fork <group_name>/<repository_name> -c
+        ```
+    - To fork (using the full path), clean existing fork and not clone an existing repository:
+    
+        ```bash
+        > gitutils fork https://git.psi.ch/<group_name>/<repository_name> -n -c
+        ```
 
 2. Implement the changes/development necessary on the forked repository.
+
 3. Add all changes, commit and push the changes to your forked repository.
 
     ```bash
@@ -119,7 +123,7 @@ optional arguments:
     > git push
     ```
 
-    > Remarks: When a successful fork happens, it already creates the upstream link. This is done automatically. Therefore, to synchronize your fork with the current state of the original repository and deal with possible merge conflicts, do the following:
+> Remarks: When a successful fork happens, it already creates the upstream link. This is done automatically. Therefore, to synchronize your fork with the current state of the original repository and deal with possible merge conflicts, do the following:
 
     ```bash
     > git fetch upstream
@@ -129,23 +133,26 @@ optional arguments:
 ### MERGE REQUEST
 
 #### Gitutils merge walk-through
+
 1. Once all the necessary changes/development have been commited and pushed to a forked repository.
+
 2. Navigate to the home folder of your forked repository (where the ```/.git``` folder is). Issue the command to merge. Arguments:___-t___, ___-d___, ___-p___.
-- To create a merge request for a repository, use the following command while on a git repository folder:
 
-    ```bash
-    > gitutils merge -t <title> -d <description>
-    ```
-- To create a merge request for a repository by using the argument ```-p``` to indicate the project:
+    - To create a merge request for a repository, use the following command while on a git repository folder:
 
-    ```bash
-    > gitutils merge -p <group_name>/<repository_name> -t <title> -d <description>
-    ```
-- To create a merge request indicating the full-path to the repository and without giving a description:
+        ```bash
+        > gitutils merge -t <title> -d <description>
+        ```
+    - To create a merge request for a repository by using the argument ```-p``` to indicate the project:
 
-    ```bash
-    > gitutils merge -p https://git.psi.ch/<group_name>/<repository_name> -t <title>
-    ```
+        ```bash
+        > gitutils merge -p <group_name>/<repository_name> -t <title> -d <description>
+        ```
+    - To create a merge request indicating the full-path to the repository and without giving a description:
+
+        ```bash
+        > gitutils merge -p https://git.psi.ch/<group_name>/<repository_name> -t <title>
+        ```
 
 > If ```-p``` is not indicated, ```gitutils``` fetches the group and project from the ```.git/config``` file (it assumes that the command is executed within the root directory of the git repository). Alternatively, one can use the directive `-p` to indicate directly which project should be merged.
 
@@ -153,31 +160,33 @@ optional arguments:
 
 ### Full walk-through example
 
-1. Fork and clone a repository:
+ 1. Fork and clone a repository:
     ```bash
     > gitutils fork <group_name>/<repository_name>
     ```
 
-2. Change the current working directory to your local project ```cd <repository_name>```.
+ 2. Change the current working directory to your local project ```cd <repository_name>```.
 
-3. Do the changes and/or development necessary.
+ 3. Do the changes and/or development necessary.
 
-4. Stage your changes to commit by adding them:
+ 4. Stage your changes to commit by adding them:
+
     ```bash
     > git add .
     ```
 
-5. Commit your changes with a descriptive commit_message:
+ 5. Commit your changes with a descriptive commit_message:
+
     ```bash
     > git commit -m <commit_message>
     ```
 
-6. Push changes to the forked repository:
+ 6. Push changes to the forked repository:
     ```bash
     > git push
     ```
 
-7. Once you're ready to create the merge request, fetch and merge changes from original repository:
+ 7. Once you're ready to create the merge request, fetch and merge changes from original repository:
     ```bash
     > git fetch upstream
     ```
@@ -191,7 +200,7 @@ optional arguments:
 
     > You might have to deal with existing conflicts between your changes and the original repo changes. Decide if you want to keep only your branch's changes, keep only the other branch's changes, or make a brand new change, which may incorporate changes from both branches. If this is the case, go back to step 4 after solving the merge conflicts (add, commit and push the resolved merge conflicts files).
 
-8. Finally, create a merge request:
+ 8. Finally, create a merge request:
 
     ```bash
     > gitutils merge -p <group_name>/<repository_name> -t <title> -d <description>

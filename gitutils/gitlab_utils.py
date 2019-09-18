@@ -210,7 +210,6 @@ def get_project_group(project_name, clean, merge, project_indication):
                     groupFound = \
                         project.attributes['path_with_namespace'].split('/')[0]
                     list_of_groups.append(groupFound)
-                    logging.info('Project\'s %s group:' % groupFound)
             elif not merge:
                 project_path = project.attributes['path_with_namespace']
                 # verify if it's a personal project
@@ -223,7 +222,6 @@ def get_project_group(project_name, clean, merge, project_indication):
                 else: # not a personal project
                     groupFound = project_path.split('/')[0]
                     list_of_groups.append(groupFound)
-                    logging.info('Project\'s %s group:' % groupFound)
     if len(list_of_groups) == 1 and project_indication:
         return groupFound
     elif len(list_of_groups) >= 2:

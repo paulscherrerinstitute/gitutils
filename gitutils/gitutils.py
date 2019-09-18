@@ -68,17 +68,13 @@ def fork(git_repository_id=None, git_repository='', no_clone=False, clean=False)
             os.system('git remote add upstream %s' % http_url_to_original_repo)
         except Exception as ex:
             print(const.GIT_UPLINK_PROBLEM % http_url_to_original_repo)
-
-
-    logging.info('New project forked: [%s] (id: %s) - %s' % (
+    info_msg = 'New project forked: [%s] (id: %s) - %s' % (
                  new_project.attributes['path_with_namespace'],
                  new_project.attributes['id'],
-                 new_project.attributes['http_url_to_repo']))
-    print('New project forked: [%s] (id: %s) - %s' % (
-           new_project.attributes['path_with_namespace'],
-           new_project.attributes['id'],
-           new_project.attributes['http_url_to_repo']))
+                 new_project.attributes['http_url_to_repo'])
 
+    logging.info(info_msg)
+    print(info_msg)
 
 def merge(git_repository='',
           git_repository_id='',

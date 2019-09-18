@@ -31,15 +31,12 @@ def authenticate():
     global login
     global password
     global access_token
-
     # Try to take the access token from the .gitlab_token file
-    if os.path.isfile(os.path.expanduser('~') + const.GIT_TOKEN_FILE):
-        with open(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 'r') as tfile:
-            access_token = tfile.read().replace('\n', '')
+    access_token = parse_access_token()
     # if not existant, authenticate with the user and saves it
     if access_token is None or access_token == "":
         print(const.AUTHENTICATE_REQUEST)
-        access_token = get_access_token()
+        access_token = get_user_password()()
 
         # saves token into personal file
         save_token(access_token)
@@ -56,14 +53,18 @@ def authenticate():
             login = pwd.getpwuid(os.getuid())[0]
         except Exception:
             print(const.AUTHENTICATE_REQUEST_INVALID_TOKEN)
-            access_token = get_access_token()
+            access_token = get_user_password()()
             # Tries to authenticate again
             connect_gl(access_token)
 
             # saves token into personal file
             save_token(access_token)
+def parse_access_token():
+    if os.path.isfile(os.path.expanduser('~') + const.GIT_TOKEN_FILE):
+        with open(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 'r') as tfile:
+            return tfile.read().replace('\n', '')
 
-def get_access_token()
+def get_user_password()()
     login = input(const.LOGIN_REQUEST)
     password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
     try:
@@ -493,47 +494,40 @@ def fork_project(project_id):
     return fork
 
 
-def create_merge_request(source_project_id,
-                         source_branch,
-                         target_project_id,
-                         target_branch,
-                         title,
-                         description):
+def create_merge_request(source_tuple,
+                         target_tuple,
+                         merge_def):
     """
     Creates a merge request based on the parameters given.
-    :param project_id: ID of the project for the merge request.
-    :type project_id: int
-    :param target_branch: Name of the target branch.
-    :type project_id: str
-    :param source_branch: Name of the source branch.
-    :type source_branch: str
-    :param title: Name of the merge request.
-    :type title: str
-    :param description: Description of the merge request.
-    :type description: str
+    :param source_tuple: Tuple from the source project containing id and source branch
+    :type source_tuple: tuple
+    :param target_tuple: Tuple from the target project containing id and source branch
+    :type target_tuple: tuple
+    :param merge_def: Definition of the new merge request containing title and description
+    :type merge_def: tuepl
     :return: Returns 0 if successful or -1 if a problem occured.
     :rtype: int
     """
 
-    project = gl.projects.get(source_project_id, lazy=True)
+    project = gl.projects.get(source_tuple[0], lazy=True)
     try:
         mr = project.mergerequests.create({
             'source_branch': 'master',
             'target_branch': 'master',
-            'title': title,
-            'description': description,
-            'target_project_id': target_project_id,
+            'title': merge_def[0],
+            'description': merge_def[1],
+            'target_project_id': target_tuple[0],
             })
     except Exception as ex:
         raise gitutils_exception.GitutilsError(ex)
 
     logging.info('Creating merge request %s (Description: %s). Source project \
                 id/branch: %s - %s. Targer project id/branch: %s - %s' % (
-                title,
-                description,
-                source_project_id,
+                merge_def[0],
+                merge_def[1],
+                source_tuple[0],
                 'master',
-                target_project_id,
+                target_tuple[0],
                 'master'))
     return mr
 

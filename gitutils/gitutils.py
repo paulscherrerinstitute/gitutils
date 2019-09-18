@@ -122,12 +122,9 @@ def merge(git_repository='',
         target_branch = 'master'
 
         merge_request = gitlab_utils.create_merge_request(
-            git_repository_id,
-            source_branch,
-            forked_project['forked_from_project']['id'],
-            target_branch,
-            title,
-            final_description)
+            (git_repository_id, source_branch),
+            (forked_project['forked_from_project']['id'], target_branch),
+            (title, final_description)
 
         if merge_request.attributes['id']:
             print (const.GIT_MERGE_SUCCESS \

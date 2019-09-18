@@ -39,12 +39,7 @@ def authenticate():
     # if not existant, authenticate with the user and saves it
     if access_token is None or access_token == "":
         print(const.AUTHENTICATE_REQUEST)
-        login = input(const.LOGIN_REQUEST)
-        password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
-        try:
-            access_token = oauth_authentication()['access_token']
-        except Exception as ex:
-            raise gitutils_exception.GitutilsError(ex)
+        access_token = get_access_token()
 
         # saves token into personal file
         save_token(access_token)
@@ -60,20 +55,22 @@ def authenticate():
             # if successfull, gets the login from the account
             login = pwd.getpwuid(os.getuid())[0]
         except Exception:
-            # if something wrong happens, request the login + password
-            # and updates the token on the file
             print(const.AUTHENTICATE_REQUEST_INVALID_TOKEN)
-            login = input(const.LOGIN_REQUEST)
-            password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
-            try:
-                access_token = oauth_authentication()['access_token']
-            except Exception as ex:
-                raise gitutils_exception.GitutilsError(ex)
+            access_token = get_access_token()
             # Tries to authenticate again
             connect_gl(access_token)
 
             # saves token into personal file
             save_token(access_token)
+
+def get_access_token()
+    login = input(const.LOGIN_REQUEST)
+    password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
+    try:
+        access_token = oauth_authentication()['access_token']
+    except Exception as ex:
+        raise gitutils_exception.GitutilsError(ex)
+    return access_token
 
 def connect_gl(access_token):
     global gl
@@ -314,12 +311,11 @@ def get_project_id(group_name, project_name):
     projects_list = gl.projects.list(search=project_name)
 
     for project in projects_list:
-        if project.attributes['name'] == project_name:
-            if group_name == project.attributes['path_with_namespace'].split('/')[0]:
-                logging.info('Found the project id ( %s - %s ) : %s' % (
-                             group_name, project_name,
-                             project.attributes['id']))
-                return project.attributes['id']
+        if project.attributes['name'] == project_name and group_name == project.attributes['path_with_namespace'].split('/')[0]:
+            logging.info('Found the project id ( %s - %s ) : %s' % (
+                            group_name, project_name,
+                            project.attributes['id']))
+            return project.attributes['id']
     raise gitutils_exception.GitutilsError(const.PROJECT_ID_NOT_FOUND)
 
 

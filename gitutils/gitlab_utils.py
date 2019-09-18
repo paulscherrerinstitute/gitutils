@@ -47,19 +47,10 @@ def authenticate():
             raise gitutils_exception.GitutilsError(ex)
 
         # saves token into personal file
-        if access_token:
-            with open(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 'w'
-                      ) as tfile:
-                tfile.write(access_token)
-            os.chmod(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 0o600)
+        save_token(access_token)
 
         # python-gitlab object
-        try:
-            gl = gitlab.Gitlab(get_endpoint(), oauth_token=access_token,
-                            api_version=4)
-            gl.auth()
-        except Exception as ex:
-            raise gitutils_exception.GitutilsError(ex)
+        connect_gl(access_token)
     else:
         # uses the stored token
         try:
@@ -79,22 +70,26 @@ def authenticate():
             except Exception as ex:
                 raise gitutils_exception.GitutilsError(ex)
             # Tries to authenticate again
-            try:
-                gl = gitlab.Gitlab(get_endpoint(), oauth_token=access_token,
-                                api_version=4)
-                gl.auth()
-            except Exception as ex:
-                raise gitutils_exception.GitutilsError(ex)
+            connect_gl(access_token)
 
             # saves token into personal file
-            if access_token:
-                print(const.UPDATE_TOKEN)
-                with open(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 'w'
-                        ) as tfile:
-                    tfile.write(access_token)
-                os.chmod(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 0o600)
+            save_token(access_token)
 
+def connect_gl(access_token):
+    global gl
+    try:
+        gl = gitlab.Gitlab(get_endpoint(), oauth_token=access_token,
+                        api_version=4)
+        gl.auth()
+    except Exception as ex:
+        raise gitutils_exception.GitutilsError(ex)
 
+def save_token(access_token):
+    if access_token:
+        with open(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 'w'
+                    ) as tfile:
+            tfile.write(access_token)
+        os.chmod(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 0o600)
 
 def set_endpoint(endpoint):
     global user_defined_endpoint
@@ -133,10 +128,11 @@ def get_groups():
     """
 
     groups = gl.groups.list()
+    return create_group_dict(groups)
+
+def create_group_dict(groups):
     groups_dict = dict()
     for group in groups:
-        logging.info('%s - %d' % (group.attributes['name'],
-                     group.attributes['id']))
         groups_dict[group.attributes['name']] = \
             {'name': group.attributes['name'],
              'id': group.attributes['id']}
@@ -172,10 +168,6 @@ def create_group(group_name, description):
                                      'description': description})
     except Exception as ex:
         raise gitutils_exception.GitutilsError(ex)
-
-    logging.info('Newly created group: %s - %d' % (
-                newGroup.attributes['name'],
-                newGroup.attributes['id']))
     return exitCode
 
 
@@ -190,8 +182,6 @@ def get_project_web_url(project_name):
     projects_list = gl.projects.list(search=project_name)
     for project in projects_list:
         if project_name == project.attributes['name']:
-            logging.info('Project web url: %s'
-                         % project.attributes['web_url'])
             return project.attributes['web_url']
     raise gitutils_exception.GitutilsError(const.PROJECT_NAME_NOT_FOUND)
 
@@ -307,8 +297,6 @@ def get_project_url(group_id, project_name):
     projects_list = gl.projects.list(search=project_name)
     for project in projects_list:
         if project.attributes['name'] == project_name:
-            logging.info('Project http url to repo: %s'
-                         % project.attributes['http_url_to_repo'])
             return project.attributes['http_url_to_repo']
     raise gitutils_exception.GitutilsError(const.PROJECT_URL_NOT_FOUND)
 
@@ -438,10 +426,6 @@ def create_repo(repo_name, namespace):
                 'namespace_id': namespace_group.attributes['id']})
     except Exception as ex:
         raise gitutils_exception.GitutilsError(ex)
-
-    logging.info('%s [%s] - %s' % (project.attributes['name'],
-                 project.attributes['path_with_namespace'],
-                 project.attributes['ssh_url_to_repo']))
     return {'name': project.attributes['name'],
             'path': project.attributes['path_with_namespace'],
             'url': project.attributes['ssh_url_to_repo']}
@@ -494,20 +478,6 @@ def get_group_projects(group_name):
                 group_projects = user.projects.list()
             except Exception as ex:
                 raise gitutils_exception.GitutilsError(ex)
-
-    # Retrieve the info from each project
-    # projects = []
-    # for project in group_projects:
-    #     logging.info('%s %s [%s] - %s' % (project.attributes['name'],
-    #                  project.attributes['id'],
-    #                  project.attributes['path_with_namespace'],
-    #                  project.attributes['http_url_to_repo']))
-    #     projects.append({
-    #         'name': project.attributes['name'],
-    #         'id': project.attributes['id'],
-    #         'path': project.attributes['path_with_namespace'],
-    #         'url': project.attributes['http_url_to_repo'],
-    #         })
     return get_dict_from_own_projects(group_projects)
 
 
@@ -577,9 +547,6 @@ def create_merge_request(source_project_id,
 def get_dict_from_own_projects(own_projects):
     projects = []
     for project in own_projects:
-        logging.info('%s [%s] - %s' % (project.attributes['name'],
-                     project.attributes['path_with_namespace'],
-                     project.attributes['ssh_url_to_repo']))
         projects.append({
             'name': project.attributes['name'],
             'path': project.attributes['path_with_namespace'],

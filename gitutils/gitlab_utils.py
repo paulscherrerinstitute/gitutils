@@ -521,12 +521,7 @@ def fork_project(project_id):
     try:
         fork = project.forks.create({})
     except Exception as ex:
-        error = None
-        try:
-            error = ex.args[0]['base'][0]
-        except Exception:
-            error = ex
-        raise gitutils_exception.GitutilsError(error)
+        raise gitutils_exception.GitutilsError(ex)
 
     logging.info('Adding 3 seconds of idle time after forking to let the server process the new fork.')
     time.sleep(3)

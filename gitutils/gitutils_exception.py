@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import sys
-import inspect
 
 class NoTraceBackWithLineNumber(Exception):
     def __init__(self, msg):

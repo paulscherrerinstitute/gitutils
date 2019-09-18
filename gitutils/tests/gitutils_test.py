@@ -29,7 +29,6 @@ class TestGitlabUtils(unittest.TestCase):
         """
         Test the username
         """
-        global gl
         self.assertEqual(gl.user.name, gitlab_utils.get_username())
 
     def test_get_groups(self):
@@ -135,6 +134,7 @@ class TestGitlabUtils(unittest.TestCase):
         (repo_name, group_name, project_id, valid) = \
             gitlab_utils.get_repo_group_names('app_config', False)
         self.assertEqual(repo_name, 'app_config')
+        self.assertEqual(valid, True)
         self.assertEqual(group_name, 'controls_highlevel_applications')
         self.assertEqual(project_id, 941)
 

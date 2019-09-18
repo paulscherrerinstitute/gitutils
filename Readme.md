@@ -1,10 +1,12 @@
+[![Conda](https://img.shields.io/conda/pn/paulscherrerinstitute/gitutils?color=success)](https://anaconda.org/paulscherrerinstitute/gitutils) [![Documentation Status](https://readthedocs.org/projects/gitutils/badge/?version=latest)](https://gitutils.readthedocs.io/en/latest) [![GitHub](https://img.shields.io/github/license/paulscherrerinstitute/gitutils)](https://github.com/paulscherrerinstitute/gitutils/blob/master/LICENSE) ![GitHub Release Date](https://img.shields.io/github/release-date/paulscherrerinstitute/gitutils) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f62b70884d5d4dd9896be7ba7d637626)](https://www.codacy.com/manual/lhdamiani/gitutils?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=paulscherrerinstitute/gitutils&amp;utm_campaign=Badge_Grade) [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/) [![Ask Me Anything !](https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg)](https://github.com/paulscherrerinstitute/gitutils/issues/new)
+
+
 # Overview
 Gitutils is a tool to facilitate the server-side operations when developing software that uses git repositories. It allows users to create forks and merge requests directly from the command line interface.
 
-[![Documentation Status](https://readthedocs.org/projects/gitutils/badge/?version=latest)](https://gitutils.readthedocs.io/en/latest/?badge=latest) A detailed documentation is also found on https://gitutils.readthedocs.io/en/latest/index.html 
+[Detailed readthedocs documentation](https://gitutils.readthedocs.io/en/latest/index.html)
 
-
-A gitutils clean sheet can be found [here](cheatsheet.pdf)
+[Gitutils cheat sheet](cheatsheet.pdf)
 
 # Usage
 
@@ -284,5 +286,6 @@ The script is located on the home directory of the github-hosted gitutils reposi
 ## GIT Credentials
 Gitutils authenticates on the git server using the OAuth2 protocol. If the token is non existant or not valid, gitutils will request username and password and store the token in a file located on the user's home directory (`~/.gitutils_token`). The user will not be requested for username nor password until the saved token is not valid anymore.
 
-# Contact
+# Contact / Questions
 Questions or problems: Leonardo Hax Damiani - leonardo.hax@psi.ch
+

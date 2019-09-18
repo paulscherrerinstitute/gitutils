@@ -36,7 +36,7 @@ def authenticate():
     # if not existant, authenticate with the user and saves it
     if access_token is None or access_token == "":
         print(const.AUTHENTICATE_REQUEST)
-        access_token = get_user_password()()
+        access_token = get_user_password()
 
         # saves token into personal file
         save_token(access_token)
@@ -53,18 +53,32 @@ def authenticate():
             login = pwd.getpwuid(os.getuid())[0]
         except Exception:
             print(const.AUTHENTICATE_REQUEST_INVALID_TOKEN)
-            access_token = get_user_password()()
+            access_token = get_user_password()
             # Tries to authenticate again
             connect_gl(access_token)
 
             # saves token into personal file
             save_token(access_token)
+
 def parse_access_token():
     if os.path.isfile(os.path.expanduser('~') + const.GIT_TOKEN_FILE):
         with open(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 'r') as tfile:
             return tfile.read().replace('\n', '')
 
-def get_user_password()()
+def check_existing_local_git():
+    # verify if there is an previously existing local folder
+    if os.path.exists('./'+git_repository):
+        if clean:
+            ## Try to remove tree directory; if failed show an error using try...except on screen
+            print(const.DELETING_LOCAL_STORAGE)
+            try:
+                shutil.rmtree(git_repository)
+            except OSError as e:
+                print ("Error: %s - %s." % (e.filename, e.strerror))
+        else:
+            raise gitutils_exception.GitutilsError(const.FORK_PROBLEM_FOLDER)
+
+def get_user_password()
     login = input(const.LOGIN_REQUEST)
     password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
     try:

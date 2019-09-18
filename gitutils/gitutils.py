@@ -34,16 +34,7 @@ def fork(git_repository_id=None, git_repository='', no_clone=False, clean=False)
         http_url_to_repo = new_project.attributes['http_url_to_repo']
     else: #cloning into the new repo
         # verify if there is an previously existing local folder
-        if os.path.exists('./'+git_repository):
-            if clean:
-                ## Try to remove tree directory; if failed show an error using try...except on screen
-                print(const.DELETING_LOCAL_STORAGE)
-                try:
-                    shutil.rmtree(git_repository)
-                except OSError as e:
-                    print ("Error: %s - %s." % (e.filename, e.strerror))
-            else:
-                raise gitutils_exception.GitutilsError(const.FORK_PROBLEM_FOLDER)
+        gitlab_utils.check_existing_local_git()
 
         # Forks the repo
         new_project = gitlab_utils.fork_project(git_repository_id)

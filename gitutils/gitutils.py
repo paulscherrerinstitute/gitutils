@@ -54,7 +54,7 @@ def fork(git_repository_id=None, git_repository='', no_clone=False, clean=False)
             raise gitutils_exception.GitutilsError(ex)
 
         # Clone repository
-        os.system(const.GIT_CLONE_CMD % http_url_to_repo)
+        os.system('git clone %s' % http_url_to_repo)
 
         # Change into git repository
         try:
@@ -65,7 +65,7 @@ def fork(git_repository_id=None, git_repository='', no_clone=False, clean=False)
         # Add upstream repository
         # Configure Git to sync your fork with the original repository
         try:
-            os.system(const.GIT_UPSTREAM_REPO_CMD % http_url_to_original_repo)
+            os.system('git remote add upstream %s' % http_url_to_original_repo)
         except Exception as ex:
             print(const.GIT_UPLINK_PROBLEM % http_url_to_original_repo)
 

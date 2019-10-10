@@ -191,8 +191,8 @@ def create_group(group_name, description):
     exitCode = 0
     try:
         gl.groups.create({'name': group_name,
-                            'path': group_name,
-                            'description': description})
+                          'path': group_name,
+                          'description': description})
     except Exception as ex:
         raise gitutils_exception.GitutilsError(ex)
     return exitCode
@@ -273,17 +273,17 @@ def get_forked_project(git_repository, git_repository_id):
     projects = get_owned_projects()
     for project in projects:
         if project['username'] == get_username(
-        ) and project['name'] == git_repository:
-            if 'forked_from_project' in project:
-                # check whether project is forked from the right project
-                if project['forked_from_project']['name'] == git_repository:
-                    forked_project = project
-                else:
-                    raise gitutils_exception.GitutilsError(
-                        const.PROJECT_FORK_NAME_ERROR)
+        ) and project['name'] == git_repository
+        and 'forked_from_project' in project:
+            # check if project is forked from the right project
+            if project['forked_from_project']['name'] == git_repository:
+                forked_project = project
             else:
                 raise gitutils_exception.GitutilsError(
-                    const.PROJECT_FOUND_NOT_FORK)
+                    const.PROJECT_FORK_NAME_ERROR)
+        else:
+            raise gitutils_exception.GitutilsError(
+                const.PROJECT_FOUND_NOT_FORK)
     return forked_project
 
 

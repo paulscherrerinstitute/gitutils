@@ -71,20 +71,21 @@ def parse_access_token():
 
 def check_existing_local_git(clean, git_repository):
     # verify if there is an previously existing local folder
-    if os.path.exists('./' + git_repository):
-        if clean:
-            # Try to remove tree directory; if failed show an error using
-            # try...except on screen
-            print(const.DELETING_LOCAL_STORAGE)
-            try:
-                shutil.rmtree(git_repository)
-            except OSError as e:
-                print("Error: %s - %s." % (e.filename, e.strerror))
-        else:
-            raise gitutils_exception.GitutilsError(const.FORK_PROBLEM_FOLDER)
+    if os.path.exists('./' + git_repository) and clean:
+        # Try to remove tree directory; if failed show an error using
+        # try...except on screen
+        print(const.DELETING_LOCAL_STORAGE)
+        try:
+            shutil.rmtree(git_repository)
+        except OSError as e:
+            print("Error: %s - %s." % (e.filename, e.strerror))
+    elif os.path.exists('./' + git_repository):
+        raise gitutils_exception.GitutilsError(const.FORK_PROBLEM_FOLDER)
 
 
 def get_user_password():
+    global login
+    global password
     login = input(const.LOGIN_REQUEST)
     password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
     try:
@@ -189,9 +190,9 @@ def create_group(group_name, description):
 
     exitCode = 0
     try:
-        newGroup = gl.groups.create({'name': group_name,
-                                     'path': group_name,
-                                     'description': description})
+        gl.groups.create({'name': group_name,
+                            'path': group_name,
+                            'description': description})
     except Exception as ex:
         raise gitutils_exception.GitutilsError(ex)
     return exitCode
@@ -505,18 +506,18 @@ def get_group_projects(group_name):
     if group_name == get_username():
         group_id = 0
         group_projects = gl.projects.list(owned=True)
-    else:
-        # Retrieve the group's projects
-        group_id = get_group_id(group_name)
+        return get_dict_from_own_projects(group_projects)
+    # Retrieve the group's projects
+    group_id = get_group_id(group_name)
+    try:
+        group = gl.groups.get(group_id)
+        group_projects = group.projects.list()
+    except Exception as ex:
         try:
-            group = gl.groups.get(group_id)
-            group_projects = group.projects.list()
+            user = gl.users.list(username=group_name)[0]
+            group_projects = user.projects.list()
         except Exception as ex:
-            try:
-                user = gl.users.list(username=group_name)[0]
-                group_projects = user.projects.list()
-            except Exception as ex:
-                raise gitutils_exception.GitutilsError(ex)
+            raise gitutils_exception.GitutilsError(ex)
     return get_dict_from_own_projects(group_projects)
 
 

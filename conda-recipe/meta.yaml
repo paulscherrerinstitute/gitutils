@@ -1,6 +1,6 @@
 package:
     name: gitutils
-    version: 1.0.1
+    version: 1.0.2
 source:
     path: ..
 requirements:
@@ -13,7 +13,7 @@ requirements:
 
 build:
   noarch: python
-  number: 6
+  number: 1
   entry_points:
     - gitutils = gitutils.gitutils:main
 

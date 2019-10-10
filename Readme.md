@@ -273,15 +273,9 @@ As this will change the global Python distribution, make sure that only the gitu
 
 ## Official documentation
 
-Due to problems in synchronization between [readthedocs](https://readthedocs.org) and a third party hosted git repository (https://git.psi.ch/controls_highlevel_applications/gitutils), the readthedocs documentation is generated based on [this](https://github.com/lhdamiani/gitutils) github repository.
+The readthedocs documentation is generated based on the files inside the ```docs``` folder in the github repository. 
 
-To update the documentation run the script on the home folder of the documentation repository:
-
-```
-> python update_doc.py
-```
-
-The script is located on the home directory of the github-hosted gitutils repository. Once the changes are incorporated the documentation will be automatically updated.
+[Detailed readthedocs documentation](https://gitutils.readthedocs.io/en/latest/index.html)
 
 ## GIT Credentials
 Gitutils authenticates on the git server using the OAuth2 protocol. If the token is non existant or not valid, gitutils will request username and password and store the token in a file located on the user's home directory (`~/.gitutils_token`). The user will not be requested for username nor password until the saved token is not valid anymore.

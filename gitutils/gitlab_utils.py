@@ -8,6 +8,7 @@ import logging
 import gitlab
 import getpass
 import time
+import shutil
 import pwd
 import subprocess
 
@@ -25,6 +26,7 @@ user_defined_endpoint = None
 
 def get_gl():
     return gl
+
 
 def authenticate():
     global gl
@@ -47,7 +49,7 @@ def authenticate():
         # uses the stored token
         try:
             gl = gitlab.Gitlab(get_endpoint(), oauth_token=access_token,
-                            api_version=4)
+                               api_version=4)
             gl.auth()
             # if successfull, gets the login from the account
             login = pwd.getpwuid(os.getuid())[0]
@@ -60,25 +62,29 @@ def authenticate():
             # saves token into personal file
             save_token(access_token)
 
+
 def parse_access_token():
     if os.path.isfile(os.path.expanduser('~') + const.GIT_TOKEN_FILE):
         with open(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 'r') as tfile:
             return tfile.read().replace('\n', '')
 
-def check_existing_local_git():
+
+def check_existing_local_git(clean, git_repository):
     # verify if there is an previously existing local folder
-    if os.path.exists('./'+git_repository):
+    if os.path.exists('./' + git_repository):
         if clean:
-            ## Try to remove tree directory; if failed show an error using try...except on screen
+            # Try to remove tree directory; if failed show an error using
+            # try...except on screen
             print(const.DELETING_LOCAL_STORAGE)
             try:
                 shutil.rmtree(git_repository)
             except OSError as e:
-                print ("Error: %s - %s." % (e.filename, e.strerror))
+                print("Error: %s - %s." % (e.filename, e.strerror))
         else:
             raise gitutils_exception.GitutilsError(const.FORK_PROBLEM_FOLDER)
 
-def get_user_password()
+
+def get_user_password():
     login = input(const.LOGIN_REQUEST)
     password = getpass.getpass(prompt=const.PASSWORD_REQUEST)
     try:
@@ -87,29 +93,34 @@ def get_user_password()
         raise gitutils_exception.GitutilsError(ex)
     return access_token
 
+
 def connect_gl(access_token):
     global gl
     try:
         gl = gitlab.Gitlab(get_endpoint(), oauth_token=access_token,
-                        api_version=4)
+                           api_version=4)
         gl.auth()
     except Exception as ex:
         raise gitutils_exception.GitutilsError(ex)
 
+
 def save_token(access_token):
     if access_token:
         with open(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 'w'
-                    ) as tfile:
+                  ) as tfile:
             tfile.write(access_token)
         os.chmod(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 0o600)
+
 
 def set_endpoint(endpoint):
     global user_defined_endpoint
     user_defined_endpoint = endpoint
 
+
 def get_endpoint():
     global user_defined_endpoint
     return user_defined_endpoint
+
 
 def get_username():
     """
@@ -119,6 +130,7 @@ def get_username():
     """
     global login
     return login
+
 
 def oauth_authentication():
     """
@@ -142,6 +154,7 @@ def get_groups():
     groups = gl.groups.list()
     return create_group_dict(groups)
 
+
 def create_group_dict(groups):
     groups_dict = dict()
     for group in groups:
@@ -149,6 +162,7 @@ def create_group_dict(groups):
             {'name': group.attributes['name'],
              'id': group.attributes['id']}
     return groups_dict
+
 
 def get_projects():
     """
@@ -214,7 +228,7 @@ def get_project_group(project_name, clean, merge, project_indication):
     :rtype: str
     """
     projects_list = gl.projects.list(search=project_name)
-    list_of_groups =[]
+    list_of_groups = []
     for project in projects_list:
         if project_name == project.attributes['name']:
             if merge:
@@ -230,14 +244,16 @@ def get_project_group(project_name, clean, merge, project_indication):
                     if clean:
                         delete_project(project.attributes['id'])
                     else:
-                        raise gitutils_exception.GitutilsError(const.GIT_FORK_PROBLEM_MULTIPLE)
-                else: # not a personal project
+                        raise gitutils_exception.GitutilsError(
+                            const.GIT_FORK_PROBLEM_MULTIPLE)
+                else:  # not a personal project
                     groupFound = project_path.split('/')[0]
                     list_of_groups.append(groupFound)
     if len(list_of_groups) == 1 and project_indication:
         return groupFound
     elif len(list_of_groups) >= 2:
-        raise gitutils_exception.GitutilsError(const.MULTIPLE_PROJECTS % (list_of_groups))
+        raise gitutils_exception.GitutilsError(
+            const.MULTIPLE_PROJECTS % (list_of_groups))
     if not project_indication:
         raise gitutils_exception.GitutilsError(const.PROJECT_NAME_NOT_FOUND)
 
@@ -255,15 +271,18 @@ def get_forked_project(git_repository, git_repository_id):
     forked_project = None
     projects = get_owned_projects()
     for project in projects:
-        if project['username'] == get_username() and project['name'] == git_repository:
+        if project['username'] == get_username(
+        ) and project['name'] == git_repository:
             if 'forked_from_project' in project:
                 # check whether project is forked from the right project
                 if project['forked_from_project']['name'] == git_repository:
                     forked_project = project
                 else:
-                    raise gitutils_exception.GitutilsError(const.PROJECT_FORK_NAME_ERROR)
+                    raise gitutils_exception.GitutilsError(
+                        const.PROJECT_FORK_NAME_ERROR)
             else:
-                raise gitutils_exception.GitutilsError(const.PROJECT_FOUND_NOT_FORK)
+                raise gitutils_exception.GitutilsError(
+                    const.PROJECT_FOUND_NOT_FORK)
     return forked_project
 
 
@@ -288,8 +307,9 @@ def get_branch(project_id):
                      % project_id)
         return 'master'
     else:
-        raise gitutils_exception.GitutilsError(const.GIT_UNABLE_TO_FIND_MASTER_BRANCH
-                        % project['name'])
+        raise gitutils_exception.GitutilsError(
+            const.GIT_UNABLE_TO_FIND_MASTER_BRANCH %
+            project['name'])
 
 
 def get_project_url(group_id, project_name):
@@ -326,10 +346,11 @@ def get_project_id(group_name, project_name):
     projects_list = gl.projects.list(search=project_name)
 
     for project in projects_list:
-        if project.attributes['name'] == project_name and group_name == project.attributes['path_with_namespace'].split('/')[0]:
+        if project.attributes['name'] == project_name and group_name == project.attributes['path_with_namespace'].split(
+                '/')[0]:
             logging.info('Found the project id ( %s - %s ) : %s' % (
-                            group_name, project_name,
-                            project.attributes['id']))
+                group_name, project_name,
+                project.attributes['id']))
             return project.attributes['id']
     raise gitutils_exception.GitutilsError(const.PROJECT_ID_NOT_FOUND)
 
@@ -358,11 +379,13 @@ def get_repo_group_names(config, clean=False):
             repo_name = web_url_split[-1]
             group_name = web_url_split[-2]
             if len(repo_name) <= 1 or len(group_name) <= 1:
-                raise gitutils_exception.GitutilsError(const.FULL_GROUP_PROJECT_BAD_FORMAT)
+                raise gitutils_exception.GitutilsError(
+                    const.FULL_GROUP_PROJECT_BAD_FORMAT)
             valid = True
             get_project_group(repo_name, clean, False, project_indication)
         else:
-            raise gitutils_exception.GitutilsError(const.FULL_GROUP_PROJECT_BAD_FORMAT)
+            raise gitutils_exception.GitutilsError(
+                const.FULL_GROUP_PROJECT_BAD_FORMAT)
     elif '/' in config:
         # config format: "group_name/project_name"
         path_with_namespace = config.split('/')
@@ -373,27 +396,34 @@ def get_repo_group_names(config, clean=False):
             project_id = get_project_id(group_name, repo_name)
             project = gl.projects.get(project_id)
             if group_name != project.attributes['namespace']['name']:
-                raise gitutils_exception.GitutilsError(const.FORK_GROUP_NOT_FOUND)
+                raise gitutils_exception.GitutilsError(
+                    const.FORK_GROUP_NOT_FOUND)
             if clean:
                 own_projects = get_owned_projects()
                 for proj in own_projects:
                     if proj['name'] == repo_name:
                         delete_project(proj['id'])
         else:
-            raise gitutils_exception.GitutilsError(const.GROUP_PROJECT_BAD_FORMAT)
+            raise gitutils_exception.GitutilsError(
+                const.GROUP_PROJECT_BAD_FORMAT)
     else:
         # config format: "project_name"
         repo_name = config
-        group_name = get_project_group(repo_name, clean, False, project_indication)
+        group_name = get_project_group(
+            repo_name, clean, False, project_indication)
         # warning if multiple and ERROR out - > ambiguous
         valid = True
     project_id = get_project_id(group_name, repo_name)
     return (repo_name, group_name, project_id, valid)
 
+
 def is_git_repo():
-    is_git_repo = subprocess.check_output(const.GIT_IS_REPO_PATH, shell=True).decode('UTF-8').split('\n')[0]
+    is_git_repo = subprocess.check_output(
+        const.GIT_IS_REPO_PATH,
+        shell=True).decode('UTF-8').split('\n')[0]
     if 'true' in is_git_repo:
         raise gitutils_exception.GitutilsError(const.FORK_PROBLEM_GIT_FOLDER)
+
 
 def delete_group(group_name):
     """
@@ -431,8 +461,8 @@ def create_repo(repo_name, namespace):
     namespace_group = gl.groups.get(namespace, lazy=True)
     try:
         project = gl.projects.create({
-                'name': repo_name,
-                'namespace_id': namespace_group.attributes['id']})
+            'name': repo_name,
+            'namespace_id': namespace_group.attributes['id']})
     except Exception as ex:
         raise gitutils_exception.GitutilsError(ex)
     return {'name': project.attributes['name'],
@@ -502,7 +532,8 @@ def fork_project(project_id):
     except Exception as ex:
         raise gitutils_exception.GitutilsError(ex)
 
-    logging.info('Adding 3 seconds of idle time after forking to let the server process the new fork.')
+    logging.info(
+        'Adding 3 seconds of idle time after forking to let the server process the new fork.')
     time.sleep(3)
     logging.info('Forked project id %d' % project_id)
     return fork
@@ -531,18 +562,18 @@ def create_merge_request(source_tuple,
             'title': merge_def[0],
             'description': merge_def[1],
             'target_project_id': target_tuple[0],
-            })
+        })
     except Exception as ex:
         raise gitutils_exception.GitutilsError(ex)
 
     logging.info('Creating merge request %s (Description: %s). Source project \
                 id/branch: %s - %s. Targer project id/branch: %s - %s' % (
-                merge_def[0],
-                merge_def[1],
-                source_tuple[0],
-                'master',
-                target_tuple[0],
-                'master'))
+        merge_def[0],
+        merge_def[1],
+        source_tuple[0],
+        'master',
+        target_tuple[0],
+        'master'))
     return mr
 
 
@@ -555,13 +586,14 @@ def get_dict_from_own_projects(own_projects):
             'url': project.attributes['ssh_url_to_repo'],
             'username': project.attributes['namespace']['name'],
             'id': project.attributes['id'],
-            })
+        })
 
         # if it's a fork add the source project
         if 'forked_from_project' in project.attributes:
             projects[-1]['forked_from_project'] = \
                 project.attributes['forked_from_project']
     return projects
+
 
 def get_owned_projects():
     """
@@ -591,6 +623,7 @@ def delete_project(project_id):
     print(const.DELETE_SUCCESS)
     time.sleep(2)
     return 0
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.WARNING)

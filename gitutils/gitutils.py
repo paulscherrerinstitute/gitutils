@@ -14,7 +14,8 @@ def fork(
         git_repository_id=None,
         git_repository='',
         no_clone=False,
-        clean=False):
+        clean=False,
+        fork_group_indication):
     """
     Creates a fork repository of the repository given as parameter.
     :param git_repository_id: Id of the repository to be pulled.
@@ -34,14 +35,14 @@ def fork(
     # not cloning into the new repo
     if no_clone:
         # Forks the repo
-        new_project = gitlab_utils.fork_project(git_repository_id)
+        new_project = gitlab_utils.fork_project(git_repository_id, fork_group_indication)
         http_url_to_repo = new_project.attributes['http_url_to_repo']
     else:  # cloning into the new repo
         # verify if there is an previously existing local folder
         gitlab_utils.check_existing_local_git(clean, git_repository)
 
         # Forks the repo
-        new_project = gitlab_utils.fork_project(git_repository_id)
+        new_project = gitlab_utils.fork_project(git_repository_id, fork_group_indication)
         try:
             http_url_to_repo = new_project.attributes['http_url_to_repo']
             http_url_to_original_repo = new_project.attributes[
@@ -161,6 +162,9 @@ def main():
                              '--no_clone',
                              action=const.STORE_TRUE,
                              help=const.FORK_NOCLONE_HELP)
+    parser_fork.add_argument('-g',
+                             '--group',
+                             help=const.FORK_GROUP_MSG)
     parser_fork.add_argument('-c',
                              '--clean',
                              action=const.STORE_TRUE,
@@ -246,6 +250,8 @@ def main():
             else:
                 raise gitutils_exception.GitutilsError(
                     const.GIT_MERGE_PROBLEM_1)
+        # if arguments.group is not None:
+        #     group_name = arguments.group
         if group_name is None:
             group_name = gitlab_utils.get_project_group(
                 repo_name, False, True, project_indication)

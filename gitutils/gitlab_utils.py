@@ -523,7 +523,7 @@ def get_group_projects(group_name):
     return get_dict_from_own_projects(group_projects)
 
 
-def fork_project(project_id):
+def fork_project(project_id, group_indication):
     """
     Creates a fork of the project given as parameter.
     :param project_id: ID of the project that wants to be forked.
@@ -531,7 +531,10 @@ def fork_project(project_id):
     """
     project = gl.projects.get(project_id)
     try:
-        fork = project.forks.create({})
+        if group_indication:
+            fork = project.forks.create({'namespace':group_indication})
+        else:
+            fork = project.forks.create({})
     except Exception as ex:
         raise gitutils_exception.GitutilsError(ex)
 

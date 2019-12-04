@@ -605,9 +605,8 @@ def get_owned_projects():
     (in a dictionary-type).
     :rtype: dict
     """
-
     try:
-        own_projects = gl.projects.list(owned=True, all=True)
+        own_projects = gl.projects.list(owned=True)
     except Exception as ex:
         raise gitutils_exception.GitutilsError(ex)
     return get_dict_from_own_projects(own_projects)
@@ -618,13 +617,21 @@ def delete_project(project_id):
     Deletes the project given as parameter
     :return:
     """
-
-    try:
-        gl.projects.delete(project_id)
-    except Exception as ex:
-        raise gitutils_exception.GitutilsError(ex)
-    print(const.DELETE_SUCCESS)
-    time.sleep(2)
+    # check if the project id is owned by user
+    proj_list = get_dict_from_own_projects(gl.projects.list(owned=True))
+    check_allowed = False
+    for i in proj_list:
+        if i['id'] == project_id and i['path'].split('/')[0] == get_username():
+            check_allowed = True
+    if check_allowed:
+        try:
+            gl.projects.delete(project_id)
+        except Exception as ex:
+            raise gitutils_exception.GitutilsError(ex)
+        print(const.DELETE_SUCCESS)
+        time.sleep(2)
+    else:
+        raise gitutils_exception.GitutilsError(const.NO_PERSONAL_FORK)
     return 0
 
 

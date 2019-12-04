@@ -54,6 +54,7 @@ GROUP_PROJECT_BAD_FORMAT = "Please use the following format: <group_name>/<proje
 FULL_GROUP_PROJECT_BAD_FORMAT = "Please use the following format: https://git.psi.ch/<group_name>/<project_name>"
 GIT_CREATE_MERGE_MSG = "Creating merge request..."
 DELETING_EXISTING_FORK = "Deleting existing fork..."
+NO_PERSONAL_FORK = "Impossible to delete. The desired project is not under your personal projects."
 DELETE_SUCCESS = "Project successfully deleted. Waiting 2 seconds of idle time after deleting a project to let the server process it."
 GIT_MERGE_SUCCESS = "Merge request successfully created (merge request id: %s, created at %s)."
 GIT_CONFIG = "Forked group and project extracted from .git/config: "

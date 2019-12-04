@@ -163,6 +163,27 @@ class TestGitlabUtils(unittest.TestCase):
             self.assertEqual('controls_highlevel_applications',
                              project.attributes['namespace']['path'])
 
+    def test_get_all_projects(self):
+        """
+        Test the retrieval of all projects following a name, overwriting the 
+        default of 20 projects per list.
+        """
+        # PROVISORY: A known project with 20+ forks
+        project_name = 'sf_daq_sources'
+        projects_list = gl.projects.list(search=project_name, all=True)
+        self.assertGreater(len(projects_list), 20)
+        
+    def test_get_all_groups(self):
+        """
+        Test the retrieval of all projects, overwriting the 
+        default of 20 projects per list.
+        """
+        # PROVISORY: a known group with 20+ projects
+        group_name = 'High Performance Detectors Integration'
+        group = gl.groups.list(all=True, search=group_name)[0]
+        proj_list = group.projects.list(all=True)
+        self.assertGreater(len(proj_list), 20)
+
 
 if __name__ == '__main__':
     unittest.main()

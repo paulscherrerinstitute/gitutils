@@ -153,7 +153,7 @@ def get_groups():
     :rtype: dict
     """
 
-    groups = gl.groups.list()
+    groups = gl.groups.list(all=True)
     return create_group_dict(groups)
 
 
@@ -174,7 +174,7 @@ def get_projects():
     :rtype: list
     """
 
-    projects_list = gl.projects.list()
+    projects_list = gl.projects.list(all=True)
     return get_dict_from_own_projects(projects_list)
 
 
@@ -207,7 +207,7 @@ def get_project_web_url(project_name):
     :return: Returns the web url to the project.
     :rtype: str
     """
-    projects_list = gl.projects.list(search=project_name)
+    projects_list = gl.projects.list(search=project_name, all=True)
     for project in projects_list:
         if project_name == project.attributes['name']:
             return project.attributes['web_url']
@@ -229,7 +229,7 @@ def get_project_group(project_name, clean, merge, project_indication):
     :return: Returns the name of the group.
     :rtype: str
     """
-    projects_list = gl.projects.list(search=project_name)
+    projects_list = gl.projects.list(search=project_name, all=True)
     list_of_groups = []
     for project in projects_list:
         if project_name == project.attributes['name']:
@@ -327,7 +327,7 @@ def get_project_url(group_id, project_name):
     :rtype: str
     """
 
-    projects_list = gl.projects.list(search=project_name)
+    projects_list = gl.projects.list(search=project_name, all=True)
     for project in projects_list:
         if project.attributes['name'] == project_name:
             return project.attributes['http_url_to_repo']
@@ -346,7 +346,7 @@ def get_project_id(group_name, project_name):
     :rtype: str
     """
 
-    projects_list = gl.projects.list(search=project_name)
+    projects_list = gl.projects.list(search=project_name,all=True)
 
     for project in projects_list:
         if project.attributes['name'] == project_name and group_name == project.attributes['path_with_namespace'].split(
@@ -488,7 +488,7 @@ def get_group_id(group_name):
     except Exception as ex:
         # group not found, it should be a personal group
         try:
-            group_id = gl.users.list(username=group_name)[0].attributes['id']
+            group_id = gl.users.list(username=group_name, all=True)[0].attributes['id']
         except Exception as ex:
             raise gitutils_exception.GitutilsError(ex)
 
@@ -507,17 +507,17 @@ def get_group_projects(group_name):
     """
     if group_name == get_username():
         group_id = 0
-        group_projects = gl.projects.list(owned=True)
+        group_projects = gl.projects.list(owned=True, all=True)
         return get_dict_from_own_projects(group_projects)
     # Retrieve the group's projects
     group_id = get_group_id(group_name)
     try:
         group = gl.groups.get(group_id)
-        group_projects = group.projects.list()
+        group_projects = group.projects.list(all=True)
     except Exception as ex:
         try:
-            user = gl.users.list(username=group_name)[0]
-            group_projects = user.projects.list()
+            user = gl.users.list(username=group_name, all=True)[0]
+            group_projects = user.projects.list(all=True)
         except Exception as ex:
             raise gitutils_exception.GitutilsError(ex)
     return get_dict_from_own_projects(group_projects)
@@ -607,7 +607,7 @@ def get_owned_projects():
     """
 
     try:
-        own_projects = gl.projects.list(owned=True)
+        own_projects = gl.projects.list(owned=True, all=True)
     except Exception as ex:
         raise gitutils_exception.GitutilsError(ex)
     return get_dict_from_own_projects(own_projects)

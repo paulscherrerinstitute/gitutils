@@ -98,6 +98,7 @@ FORK_CLEAN_MSG = '''Indicates to delete any existing fork project under your per
 This might be necessary to fork and clone into a clean copy of the original
 repository. The desired forked project must not be a pre-existing forked
 project under your personal projects.'''
+FORK_GROUP_MSG = ''' Indicates the group that the fork is going to be created. The default is the username.'''
 COMMAND_NOT_FOUND = "Command not found."
 FORK_HELP_MSG = "Creates a fork from the repository."
 FORK_NOCLONE_HELP = '''Indicates that the forked project will not be cloned after forking. A fork

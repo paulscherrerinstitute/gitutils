@@ -11,6 +11,7 @@ import time
 import shutil
 import pwd
 import subprocess
+import urllib
 
 
 # Gitlab API Documenation: http://doc.gitlab.com/ce/api/
@@ -141,8 +142,8 @@ def oauth_authentication():
     (access_token, toke_type, refresh_token, scope and created_at)
     :rtype: dict
     """
-    return requests.post(const.OATH_REQUEST + get_username() +
-                         const.PASSWORD_URL + password).json()
+    return requests.post(const.OATH_REQUEST + urllib.parse.quote(get_username()) +
+                         const.PASSWORD_URL + urllib.parse.quote(password)).json()
 
 
 def get_groups():
@@ -275,7 +276,7 @@ def get_forked_project(git_repository, git_repository_id):
         if project['username'] == get_username() \
                 and project['name'] == git_repository \
                 and 'forked_from_project' in project:
-            
+
             # check if project is forked from the right project
             if project['forked_from_project']['name'] == git_repository:
                 forked_project = project

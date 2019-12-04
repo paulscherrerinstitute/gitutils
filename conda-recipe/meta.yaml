@@ -1,6 +1,6 @@
 package:
     name: gitutils
-    version: 1.0.2
+    version: "{{ load_setup_py_data().version }}"
 source:
     path: ..
 requirements:

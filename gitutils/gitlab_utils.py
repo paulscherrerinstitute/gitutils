@@ -272,9 +272,10 @@ def get_forked_project(git_repository, git_repository_id):
     forked_project = None
     projects = get_owned_projects()
     for project in projects:
-        if project['username'] == get_username(
-        ) and project['name'] == git_repository
-        and 'forked_from_project' in project:
+        if project['username'] == get_username() \
+                and project['name'] == git_repository \
+                and 'forked_from_project' in project:
+            
             # check if project is forked from the right project
             if project['forked_from_project']['name'] == git_repository:
                 forked_project = project

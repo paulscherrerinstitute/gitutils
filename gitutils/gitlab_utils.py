@@ -12,7 +12,7 @@ import shutil
 import pwd
 import subprocess
 import urllib
-
+import click
 
 # Gitlab API Documenation: http://doc.gitlab.com/ce/api/
 # Python-Gitlab Documetation:
@@ -68,6 +68,30 @@ def parse_access_token():
     if os.path.isfile(os.path.expanduser('~') + const.GIT_TOKEN_FILE):
         with open(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 'r') as tfile:
             return tfile.read().replace('\n', '')
+
+def check_existing_remote_git(clean, git_repository_id, group_name):
+    proj = gl.projects.get(git_repository_id)
+    # verifies if such project already exists remotely under
+    # any personal project
+    projs = get_owned_projects()
+    check_exist = False
+    id_to_delete = -1
+    for own_p in projs:
+        if own_p['name'] == proj.name and own_p['username'] == group_name:
+            check_exist = True
+            id_to_delete = own_p['id']
+
+    # project exists not clean -> raise error
+    if check_exist:
+        if not clean:
+            raise gitutils_exception.GitutilsError(const.FORK_PROBLEM_REMOTE)
+        else:
+            # project exists and clean -> clean
+            print('damn. this should be deleted')
+            delete_project(id_to_delete)
+
+    # if check_exist is false -> good to go
+    return 0
 
 
 def check_existing_local_git(clean, git_repository):
@@ -131,7 +155,8 @@ def get_username():
     :rtype: str
     """
     global login
-    return login
+    # return login
+    return 'hax_l'
 
 
 def oauth_authentication():
@@ -254,8 +279,13 @@ def get_project_group(project_name, clean, merge, project_indication):
     if len(list_of_groups) == 1 and project_indication:
         return groupFound
     elif len(list_of_groups) >= 2:
-        raise gitutils_exception.GitutilsError(
-            const.MULTIPLE_PROJECTS % (list_of_groups))
+        # if there is a personal group
+        if get_username() in list_of_groups:
+            print(const.GROUP_NOT_SPECIFIED_ASSUME_USER)
+            return get_username()
+        else:
+            raise gitutils_exception.GitutilsError(
+                const.MULTIPLE_PROJECTS % (list_of_groups))
     if not project_indication:
         raise gitutils_exception.GitutilsError(const.PROJECT_NAME_NOT_FOUND)
 
@@ -326,12 +356,11 @@ def get_project_url(group_id, project_name):
     :return: Returns the http url to the project.
     :rtype: str
     """
-
     projects_list = gl.projects.list(search=project_name, all=True)
     for project in projects_list:
-        if project.attributes['name'] == project_name:
+        if project.attributes['name'] == project_name and group_id == project.namespace['id']:
             return project.attributes['http_url_to_repo']
-    raise gitutils_exception.GitutilsError(const.PROJECT_URL_NOT_FOUND)
+    return ''
 
 
 def get_project_id(group_name, project_name):
@@ -358,7 +387,7 @@ def get_project_id(group_name, project_name):
     raise gitutils_exception.GitutilsError(const.PROJECT_ID_NOT_FOUND)
 
 
-def get_repo_group_names(config, clean=False):
+def get_repo_group_names(config, group_indication, clean=False):
     """
     Gets the project name and group name based on the argument given on the cli.
     :param config: String given as argument that can be of different
@@ -370,7 +399,7 @@ def get_repo_group_names(config, clean=False):
     """
 
     repo_name = None
-    group_name = None
+    group_name = group_indication
     valid = False
     if len(config) > 0:
         project_indication = True
@@ -404,7 +433,7 @@ def get_repo_group_names(config, clean=False):
             if clean:
                 own_projects = get_owned_projects()
                 for proj in own_projects:
-                    if proj['name'] == repo_name:
+                    if proj['name'] == repo_name and group_indication == project.attributes['namespace']['name']:
                         delete_project(proj['id'])
         else:
             raise gitutils_exception.GitutilsError(
@@ -531,7 +560,7 @@ def fork_project(project_id, group_indication):
     """
     project = gl.projects.get(project_id)
     try:
-        if group_indication:
+        if group_indication != get_username():
             fork = project.forks.create({'namespace':group_indication})
         else:
             fork = project.forks.create({})
@@ -634,7 +663,16 @@ def delete_project(project_id):
         print(const.DELETE_SUCCESS)
         time.sleep(2)
     else:
-        raise gitutils_exception.GitutilsError(const.NO_PERSONAL_FORK)
+        print(const.NO_PERSONAL_FORK)
+        if click.confirm('Do you want to continue?', default=True):
+            try:
+                gl.projects.delete(project_id)
+            except Exception as ex:
+                raise gitutils_exception.GitutilsError(ex)
+            print(const.DELETE_SUCCESS)
+            time.sleep(2)
+        else:
+            raise gitutils_exception.GitutilsError(const.NO_PERSONAL_FORK)
     return 0
 
 

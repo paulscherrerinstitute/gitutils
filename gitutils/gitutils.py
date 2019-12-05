@@ -5,17 +5,19 @@ import os
 import logging
 import argparse
 import textwrap
-from gitutils import gitlab_utils
-from gitutils import gitutils_exception
-from gitutils import const
+
+##### MOVE BACK TO from gitutils import blablabal
+import gitlab_utils
+import gitutils_exception
+import const
 
 
 def fork(
+        fork_group_indication='',
         git_repository_id=None,
         git_repository='',
         no_clone=False,
-        clean=False,
-        fork_group_indication):
+        clean=False):
     """
     Creates a fork repository of the repository given as parameter.
     :param git_repository_id: Id of the repository to be pulled.
@@ -34,22 +36,24 @@ def fork(
     print(const.FORK_PROJECT % (git_repository, git_repository_id))
     # not cloning into the new repo
     if no_clone:
+        # verify if there is an previously existing remote folder
+        gitlab_utils.check_existing_remote_git(clean, git_repository, fork_group_indication)
         # Forks the repo
         new_project = gitlab_utils.fork_project(git_repository_id, fork_group_indication)
         http_url_to_repo = new_project.attributes['http_url_to_repo']
     else:  # cloning into the new repo
         # verify if there is an previously existing local folder
         gitlab_utils.check_existing_local_git(clean, git_repository)
-
-        # Forks the repo
-        new_project = gitlab_utils.fork_project(git_repository_id, fork_group_indication)
+        # verify if there is an previously existing remote folder
+        gitlab_utils.check_existing_remote_git(clean, git_repository_id, fork_group_indication)
         try:
+            # Forks the repo
+            new_project = gitlab_utils.fork_project(git_repository_id, fork_group_indication)
             http_url_to_repo = new_project.attributes['http_url_to_repo']
             http_url_to_original_repo = new_project.attributes[
                 'forked_from_project']['http_url_to_repo']
         except Exception as ex:
             raise gitutils_exception.GitutilsError(ex)
-
         # Clone repository
         os.system('git clone %s' % http_url_to_repo)
 
@@ -198,12 +202,15 @@ def main():
     if arguments.command is None:
         parser.print_help()
         sys.exit(-1)
-
+    
     # sets the endpoins
     gitlab_utils.set_endpoint(arguments.endpoint)
 
     # Authenticate user
     gitlab_utils.authenticate()
+
+    if not arguments.group:
+        arguments.group = gitlab_utils.get_username()
 
     # retrieve repository and group names
     (repo_name, group_name, project_id) = (None, None, None)
@@ -258,7 +265,7 @@ def main():
         project_id = gitlab_utils.get_project_id(group_name, repo_name)
     elif arguments.project:
         (repo_name, group_name, project_id, valid) = gitlab_utils.get_repo_group_names(
-            arguments.project[0], arguments.clean)
+            arguments.project[0], arguments.group, arguments.clean)
         # if project is personal, needs to be deleted
         if group_name == gitlab_utils.get_username():
             if arguments.clean:
@@ -284,7 +291,8 @@ def main():
        project_id is not None:
         try:
             if arguments.command == 'fork':
-                fork(git_repository_id=project_id,
+                fork(fork_group_indication=arguments.group,
+                    git_repository_id=project_id,
                      git_repository=repo_name,
                      no_clone=arguments.no_clone,
                      clean=arguments.clean)

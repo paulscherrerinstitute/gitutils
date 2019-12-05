@@ -10,6 +10,6 @@ setup(name='gitutils',
       description="GITUTILS is a tool to facilitate the server-side operations when developing software that uses git repositories.",
       long_description=README,
       author='Paul Scherrer Institute (PSI)',
-      url='https://git.psi.ch/controls_highlevel_applications/gitutils',
+      url='https://github.com/paulscherrerinstitute/gitutils',
       packages=['gitutils'],
       )

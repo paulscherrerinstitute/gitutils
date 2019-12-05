@@ -18,5 +18,5 @@ build:
     - gitutils = gitutils.gitutils:main
 
 about:
-    home: https://git.psi.ch/controls_highlevel_applications/ch.psi.gitutils
+    home: https://github.com/paulscherrerinstitute/gitutils
     summary: "GITUTILS is a tool to facilitate the server-side operations when developing software that uses git repositories."

@@ -37,7 +37,7 @@ def fork(
     # not cloning into the new repo
     if no_clone:
         # verify if there is an previously existing remote folder
-        gitlab_utils.check_existing_remote_git(clean, git_repository, fork_group_indication)
+        gitlab_utils.check_existing_remote_git(clean, git_repository_id, fork_group_indication)
         # Forks the repo
         new_project = gitlab_utils.fork_project(git_repository_id, fork_group_indication)
         http_url_to_repo = new_project.attributes['http_url_to_repo']
@@ -166,14 +166,15 @@ def main():
                              '--no_clone',
                              action=const.STORE_TRUE,
                              help=const.FORK_NOCLONE_HELP)
-    parser_fork.add_argument('-g',
-                             '--group',
-                             help=const.FORK_GROUP_MSG)
+
     parser_fork.add_argument('-c',
                              '--clean',
                              action=const.STORE_TRUE,
                              help=const.FORK_CLEAN_MSG)
 
+    parser_fork.add_argument('-g',
+                             '--group',
+                             help=const.FORK_GROUP_MSG)
     parser_fork.add_argument('project', nargs=1, metavar='project',
                              help=textwrap.dedent(const.FORK_PROJECT_MESSAGE))
 

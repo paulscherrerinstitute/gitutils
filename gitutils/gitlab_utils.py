@@ -69,8 +69,19 @@ def parse_access_token():
         with open(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 'r') as tfile:
             return tfile.read().replace('\n', '')
 
+def check_group_exists(group_name):
+    groups = gl.groups.list(search=group_name, all=True)
+    if not groups:
+        raise gitutils_exception.GitutilsError(const.GROUP_PARAMETER_EMPTY)
+    return 0
+
 def check_existing_remote_git(clean, git_repository_id, group_name):
     proj = gl.projects.get(git_repository_id)
+
+    # verifies if the group_name exists
+    check_group_exists(group_name)
+
+
     # verifies if such project already exists remotely under
     # any personal project
     projs = get_owned_projects()
@@ -80,16 +91,13 @@ def check_existing_remote_git(clean, git_repository_id, group_name):
         if own_p['name'] == proj.name and own_p['username'] == group_name:
             check_exist = True
             id_to_delete = own_p['id']
-
     # project exists not clean -> raise error
     if check_exist:
         if not clean:
             raise gitutils_exception.GitutilsError(const.FORK_PROBLEM_REMOTE)
         else:
             # project exists and clean -> clean
-            print('damn. this should be deleted')
             delete_project(id_to_delete)
-
     # if check_exist is false -> good to go
     return 0
 
@@ -663,7 +671,7 @@ def delete_project(project_id):
         print(const.DELETE_SUCCESS)
         time.sleep(2)
     else:
-        print(const.NO_PERSONAL_FORK)
+        print(const.NO_PERSONAL_FORK_PERMISSIONS, )
         if click.confirm('Do you want to continue?', default=True):
             try:
                 gl.projects.delete(project_id)

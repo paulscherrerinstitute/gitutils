@@ -33,27 +33,29 @@ command:
 
 ## fork
 ```bash
-usage: gitutils fork [-h] [-n] [-c] project
+usage: gitutils.py fork [-h] [-n] [-c] [-g GROUP] project
 
 positional arguments:
-  project         (REQUIRED) Indicates the project to be forked. It can be of three different formats:
-                  - https://git.psi.ch/<group_name>/<project_name> : The user provides
-                     the direct http to the git repository.
-                  - <group_name>/<project_name> : The user provides a combination of
-                     group_name and project_name divided by "/".
-                  - <project_name> : The user provides the name of the project name.
-                     Gitutils will fetch the name of the group (keep in mind, that this may
-                     cause ambiguity problems).
+  project               (REQUIRED) Indicates the project to be forked. It can be of three different formats:
+                        - https://git.psi.ch/<group_name>/<project_name> : The user provides
+                           the direct http to the git repository.
+                        - <group_name>/<project_name> : The user provides a combination of
+                           group_name and project_name divided by "/".
+                        - <project_name> : The user provides the name of the project name.
+                           Gitutils will fetch the name of the group (keep in mind, that this may
+                           cause ambiguity problems).
 
 optional arguments:
-  -h, --help      show this help message and exit
-  -n, --no_clone  Indicates that the forked project will not be cloned after forking. A fork
-                  will be created on the server-side and no clone nor upstream will be
-                  generated on the local git server.
-  -c, --clean     Indicates to delete any existing fork project under your personal group.
-                  This might be necessary to fork and clone into a clean copy of the original
-                  repository. The desired forked project must not be a pre-existing forked
-                  project under your personal projects.
+  -h, --help            show this help message and exit
+  -n, --no_clone        Indicates that the forked project will not be cloned after forking. A fork
+                        will be created on the server-side and no clone nor upstream will be
+                        generated on the local git server.
+  -c, --clean           Indicates to delete any existing fork project under your personal group.
+                        This might be necessary to fork and clone into a clean copy of the original
+                        repository. The desired forked project must not be a pre-existing forked
+                        project under your personal projects.
+  -g GROUP, --group GROUP
+                         Indicates the group that the fork is going to be created. The default is the username.
 ```
 
 > To see the fork help message use: ```> gitutils fork -h```
@@ -115,6 +117,12 @@ optional arguments:
         > gitutils fork https://git.psi.ch/<group_name>/<repository_name> -n -c
         ```
 
+    - To fork into a different group, use the ___-g___ to indicate which group:
+    
+        ```bash
+        > gitutils fork -g <destination_group> https://git.psi.ch/<group_name>/<repository_name>
+        ```
+
 2. Implement the changes/development necessary on the forked repository.
 
 3. Add all changes, commit and push the changes to your forked repository.
@@ -125,12 +133,14 @@ optional arguments:
     > git push
     ```
 
-> Remarks: When a successful fork happens, it already creates the upstream link. This is done automatically. Therefore, to synchronize your fork with the current state of the original repository and deal with possible merge conflicts, do the following:
+> Remark: When a successful fork happens, it already creates the upstream link. This is done automatically. Therefore, to synchronize your fork with the current state of the original repository and deal with possible merge conflicts, do the following:
 
     ```bash
     > git fetch upstream
     > git merge upstream/master
     ```
+
+> Tip: To update your current fork state, use the fork command with -c directive. It will delete your personal fork and pull the latest state of the original project.
 
 ### MERGE REQUEST
 

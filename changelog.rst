@@ -4,6 +4,18 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
+[1.0.3] - 2019-12-06
+Added
+~~~~~
+
+-  New parameter on the fork command. -g indicates the group/namespace that the fork will be created. Permissions to do operations in different groups are needed.
+
+Changed
+~~~~~~~
+
+-  Username and password are now appropriately url encoded by using urllib.parse.quote.
+-  Python-Gitlab method returns only 20 itens per search. Fixed by additions parameter all=True in all retrieval of projects or groups.
+
 [1.0.1] - 2019-09-13
 --------------------
 

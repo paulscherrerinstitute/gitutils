@@ -163,8 +163,7 @@ def get_username():
     :rtype: str
     """
     global login
-    # return login
-    return 'hax_l'
+    return login
 
 
 def oauth_authentication():

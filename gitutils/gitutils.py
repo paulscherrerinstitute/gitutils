@@ -6,10 +6,9 @@ import logging
 import argparse
 import textwrap
 
-##### MOVE BACK TO from gitutils import blablabal
-import gitlab_utils
-import gitutils_exception
-import const
+from gitutils import gitlab_utils
+from gitutils import gitutils_exception
+from gitutils import const
 
 
 def fork(

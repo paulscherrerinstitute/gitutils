@@ -69,18 +69,20 @@ def parse_access_token():
         with open(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 'r') as tfile:
             return tfile.read().replace('\n', '')
 
+
 def check_group_exists(group_name):
     groups = gl.groups.list(search=group_name, all=True)
     if not groups:
         raise gitutils_exception.GitutilsError(const.GROUP_PARAMETER_EMPTY)
     return 0
 
+
 def check_existing_remote_git(clean, git_repository_id, group_name):
     proj = gl.projects.get(git_repository_id)
 
     # verifies if the group_name exists
-    check_group_exists(group_name)
-
+    # TODO it seems that user names are not full projects
+    # check_group_exists(group_name)
 
     # verifies if such project already exists remotely under
     # any personal project
@@ -91,6 +93,8 @@ def check_existing_remote_git(clean, git_repository_id, group_name):
         if own_p['name'] == proj.name and own_p['username'] == group_name:
             check_exist = True
             id_to_delete = own_p['id']
+            break  # If we find something we can abort the loop
+
     # project exists not clean -> raise error
     if check_exist:
         if not clean:
@@ -246,7 +250,7 @@ def get_project_web_url(project_name):
     raise gitutils_exception.GitutilsError(const.PROJECT_NAME_NOT_FOUND)
 
 
-def checkKey(dict_to_search, key):
+def check_key(dict_to_search, key):
     if key in dict_to_search:
         return True
     else:
@@ -266,7 +270,7 @@ def get_project_group(project_name, clean, merge, project_indication):
     for project in projects_list:
         if project_name == project.attributes['name']:
             if merge:
-                if checkKey(project.attributes, 'forked_from_project'):
+                if check_key(project.attributes, 'forked_from_project'):
                     groupFound = \
                         project.attributes['path_with_namespace'].split('/')[0]
                     list_of_groups.append(groupFound)
@@ -568,7 +572,7 @@ def fork_project(project_id, group_indication):
     project = gl.projects.get(project_id)
     try:
         if group_indication != get_username():
-            fork = project.forks.create({'namespace':group_indication})
+            fork = project.forks.create({'namespace': group_indication})
         else:
             fork = project.forks.create({})
     except Exception as ex:
@@ -681,12 +685,3 @@ def delete_project(project_id):
         else:
             raise gitutils_exception.GitutilsError(const.NO_PERSONAL_FORK)
     return 0
-
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.WARNING)
-
-    if not access_token:
-        print(const.NO_GITLAB_TOKEN)
-
-    update_visibility_all_projects(excludes=['remote_data_transfers'])

@@ -145,9 +145,11 @@ def main():
     parser = argparse.ArgumentParser(
         description=const.GITUTILS_TITLE_DESCRIPTION,
         formatter_class=argparse.RawTextHelpFormatter)
+
     parser.add_argument('-e', '--endpoint',
                         help=const.ENDPOINT_HELP_MSG,
                         default=const.ENDPOINT)
+
     subparsers = parser.add_subparsers(title='command',
                                        description='valid commands',
                                        dest='command',
@@ -174,6 +176,7 @@ def main():
     parser_fork.add_argument('-g',
                              '--group',
                              help=const.FORK_GROUP_MSG)
+
     parser_fork.add_argument('project', nargs=1, metavar='project',
                              help=textwrap.dedent(const.FORK_PROJECT_MESSAGE))
 
@@ -195,7 +198,6 @@ def main():
     parser_mr.add_argument('-d',
                            '--description',
                            help=const.MERGE_MESSAGE_DESCRIPTION)
-
 
     arguments = parser.parse_args()
     # verifies if there are any arguments
@@ -266,6 +268,7 @@ def main():
     elif arguments.project:
         (repo_name, group_name, project_id, valid) = gitlab_utils.get_repo_group_names(
             arguments.project[0], arguments.group, arguments.clean)
+
         # if project is personal, needs to be deleted
         if group_name == gitlab_utils.get_username():
             if arguments.clean:

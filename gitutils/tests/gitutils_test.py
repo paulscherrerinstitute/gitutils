@@ -63,9 +63,9 @@ class TestGitlabUtils(unittest.TestCase):
 
         dict_projects = gitlab_utils.get_owned_projects()
         if len(dict_projects) >= 1:
-            self.assertEqual(gitlab_utils.checkKey(dict_projects[0],
+            self.assertEqual(gitlab_utils.check_key(dict_projects[0],
                              'name'), True)
-            self.assertEqual(gitlab_utils.checkKey(dict_projects[0],
+            self.assertEqual(gitlab_utils.check_key(dict_projects[0],
                              'notKey'), False)
 
     def test_get_project_group(self):

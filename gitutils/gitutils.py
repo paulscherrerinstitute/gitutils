@@ -39,7 +39,7 @@ def fork(
         gitlab_utils.check_existing_remote_git(clean, git_repository_id, fork_group_indication)
         # Forks the repo
         new_project = gitlab_utils.fork_project(git_repository_id, fork_group_indication)
-        http_url_to_repo = new_project.attributes['http_url_to_repo']
+        # http_url_to_repo = new_project.attributes['http_url_to_repo']
     else:  # cloning into the new repo
         # verify if there is an previously existing local folder
         gitlab_utils.check_existing_local_git(clean, git_repository)
@@ -48,9 +48,9 @@ def fork(
         try:
             # Forks the repo
             new_project = gitlab_utils.fork_project(git_repository_id, fork_group_indication)
-            http_url_to_repo = new_project.attributes['http_url_to_repo']
+            http_url_to_repo = new_project.attributes['ssh_url_to_repo']
             http_url_to_original_repo = new_project.attributes[
-                'forked_from_project']['http_url_to_repo']
+                'forked_from_project']['ssh_url_to_repo']
         except Exception as ex:
             raise gitutils_exception.GitutilsError(ex)
         # Clone repository

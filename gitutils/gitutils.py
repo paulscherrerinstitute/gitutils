@@ -211,7 +211,7 @@ def main():
     # Authenticate user
     gitlab_utils.authenticate()
 
-    if not arguments.group:
+    if arguments.command == 'fork' and not arguments.group:
         arguments.group = gitlab_utils.get_username()
 
     # retrieve repository and group names

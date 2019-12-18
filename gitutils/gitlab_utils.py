@@ -321,6 +321,7 @@ def get_forked_project(git_repository, git_repository_id):
             # check if project is forked from the right project
             if project['forked_from_project']['name'] == git_repository:
                 forked_project = project
+                break
             else:
                 raise gitutils_exception.GitutilsError(
                     const.PROJECT_FORK_NAME_ERROR)

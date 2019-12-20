@@ -357,22 +357,22 @@ def get_branch(project_id):
             project['name'])
 
 
-def get_project_url(group_id, project_name):
-    """
-    Function to get the project http url attribute of a project based on
-    its group id and name.
-    :param project_name: Name of the project
-    :type project_name: str
-    :param group_id: Id of the group
-    :type group_id: int
-    :return: Returns the http url to the project.
-    :rtype: str
-    """
-    projects_list = gl.projects.list(search=project_name, all=True)
-    for project in projects_list:
-        if project.attributes['name'] == project_name and group_id == project.namespace['id']:
-            return project.attributes['http_url_to_repo']
-    return ''
+# def get_project_url(group_id, project_name):
+#     """
+#     Function to get the project http url attribute of a project based on
+#     its group id and name.
+#     :param project_name: Name of the project
+#     :type project_name: str
+#     :param group_id: Id of the group
+#     :type group_id: int
+#     :return: Returns the http url to the project.
+#     :rtype: str
+#     """
+#     projects_list = gl.projects.list(search=project_name, all=True)
+#     for project in projects_list:
+#         if project.attributes['name'] == project_name and group_id == project.namespace['id']:
+#             return project.attributes['http_url_to_repo']
+#     return ''
 
 
 def get_project_id(group_name, project_name):
@@ -577,7 +577,10 @@ def fork_project(project_id, group_indication):
         else:
             fork = project.forks.create({})
     except Exception as ex:
-        raise gitutils_exception.GitutilsError(ex)
+        if ex.error_message['path'][0] == const.GIT_PATHNAME_IS_TAKEN:
+            raise gitutils_exception.GitutilsError(const.FORKED_EXISTS)
+        else:
+            raise gitutils_exception.GitutilsError(ex)
 
     logging.info(
         'Adding 3 seconds of idle time after forking to let the server process the new fork.')

@@ -85,14 +85,14 @@ class TestGitlabUtils(unittest.TestCase):
             gitlab_utils.get_group_id('controls_highlevel_applications')
         self.assertEqual(group_id, 84)
 
-    def test_get_project_url(self):
-        """
-        Test get_project_url
-        """
+    # def test_get_project_url(self):
+    #     """
+    #     Test get_project_url
+    #     """
 
-        http_url_to_repo = gitlab_utils.get_project_url(84, 'app_config')
-        default = 'https://git.psi.ch/controls_highlevel_applications/app_config.git'
-        self.assertEqual(http_url_to_repo, default)
+        # http_url_to_repo = gitlab_utils.get_project_url(84, 'app_config')
+    #     default = 'https://git.psi.ch/controls_highlevel_applications/app_config.git'
+    #     self.assertEqual(http_url_to_repo, default)
 
     def test_get_project_id(self):
         """

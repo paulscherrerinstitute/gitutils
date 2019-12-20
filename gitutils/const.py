@@ -34,7 +34,7 @@ LOGIN_REQUEST = "Username:"
 PASSWORD_REQUEST = "Password:"
 NO_GITLAB_TOKEN = "Before executing this script make sure that you have set GITLAB_PRIVATE_TOKEN"
 PROBLEM_USERNAME = "Problem getting the correct username. Please try again."
-FORKED_EXISTS = "A forked repository with the name {} already exists. Use -c to clean existing fork."
+FORKED_EXISTS = "A forked repository with the same name already exists. Use -c to clean existing fork."
 FORK_PROJECT = "Forking project %s (id: %s)..."
 PROJECT_ID_NOT_FOUND = "Project id not found. Please, indicate group name and project name or check if you have permission to access such group/project."
 PROJECT_NAME_NOT_FOUND = "Project name not found. Please, indicate group name and project name or check if you have permission to access such group/project."
@@ -70,8 +70,10 @@ GIT_UPLINK_PROBLEM = "Problem creating the upstream link. Please do it mannualy 
 PROBLEM_FETCHING_NAME = "Problem fetching the group and projects name. Please check if the group and projects are correct and if you have the correct permissions to access such repository."
 CLEAN_PROBLEM = "Gitutils is not able to delete a repo that is not a fork."
 GIT_MERGE_DESCRIPTION_MSG = 'The configuration was changed by %s.'
+SSH_GIT_GIT = 'git@git'
 GIT_UNABLE_TO_FIND_PROJECT_MSG = "Unable to find project - Aborting...\n"
 GIT_UNABLE_TO_FIND_MASTER_BRANCH = "Unable to find master branch in project to merge - Aborting...\n"
+GIT_PATHNAME_IS_TAKEN = 'has already been taken'
 MERGE_DEFAULT_TITLE = "Merge request submitted by %s."
 #####################
 # PARSE MSGS / HELP #

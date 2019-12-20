@@ -9,6 +9,7 @@ import textwrap
 from gitutils import gitlab_utils
 from gitutils import gitutils_exception
 from gitutils import const
+
 import time
 
 
@@ -50,6 +51,7 @@ def fork(
             # Forks the repo
             new_project = gitlab_utils.fork_project(git_repository_id, fork_group_indication)
             http_url_to_repo = new_project.attributes['http_url_to_repo']
+            ssh_url_to_repo = new_project.attributes['ssh_url_to_repo']
             http_url_to_original_repo = new_project.attributes[
                 'forked_from_project']['http_url_to_repo']
         except Exception as ex:
@@ -57,7 +59,7 @@ def fork(
         # Clone repository
 
         time.sleep(2) # waiting another 2 seconds before cloning - AFS gitserver issue
-        os.system('git clone %s' % http_url_to_repo)
+        os.system('git clone %s' % ssh_url_to_repo)
 
         # Change into git repository
         try:
@@ -247,13 +249,26 @@ def main():
                     for line in git_search:
                         line = line.rstrip()
                         if next_line is True and git_extracted_repo_name is None:
-                            try:
-                                git_extracted_repo_name = line.split(
-                                    '=')[-1].split('/')[-1].split('.')[0]
-                                group_name = line.split('=')[-1].split('/')[-2]
-                            except Exception:
-                                raise gitutils_exception.GitutilsError(
-                                    const.GIT_MERGE_PROBLEM_0)
+                            # Detect if ssh or http has been used to clone
+                            if const.SSH_GIT_GIT in line:
+                                try:
+                                    group_name = line.split('=')[-1].split(
+                                        '/')[0].split(':')[-1]
+                                    git_extracted_repo_name = line.split('=')[-1].split(
+                                        '/')[-1][:-4]
+                                    break
+                                except:
+                                    raise gitutils_exception.GitutilsError(
+                                        const.GIT_MERGE_PROBLEM_0)
+                            else:
+                                try:
+                                    git_extracted_repo_name = line.split(
+                                        '=')[-1].split('/')[-1].split('.')[0]
+                                    group_name = line.split('=')[-1].split('/')[-2]
+                                    break
+                                except Exception:
+                                    raise gitutils_exception.GitutilsError(
+                                        const.GIT_MERGE_PROBLEM_0)
                         if "[remote \"origin\"]" in line:
                             next_line = True
                 if git_extracted_repo_name != repo_name:
@@ -262,8 +277,7 @@ def main():
             else:
                 raise gitutils_exception.GitutilsError(
                     const.GIT_MERGE_PROBLEM_1)
-        # if arguments.group is not None:
-        #     group_name = arguments.group
+
         if group_name is None:
             group_name = gitlab_utils.get_project_group(
                 repo_name, False, True, project_indication)

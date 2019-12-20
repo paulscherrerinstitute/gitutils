@@ -247,8 +247,13 @@ def main():
                 git_extracted_repo_name = None
                 with open(".git/config") as git_search:
                     for line in git_search:
-                        line = line.rstrip()
+                        line = line.strip()
                         if next_line is True and git_extracted_repo_name is None:
+
+                            if not line.startswith("url ="):
+                                # go to next line
+                                continue
+
                             # Detect if ssh or http has been used to clone
                             if const.SSH_GIT_GIT in line:
                                 try:
@@ -256,7 +261,6 @@ def main():
                                         '/')[0].split(':')[-1]
                                     git_extracted_repo_name = line.split('=')[-1].split(
                                         '/')[-1][:-4]
-                                    break
                                 except:
                                     raise gitutils_exception.GitutilsError(
                                         const.GIT_MERGE_PROBLEM_0)
@@ -265,10 +269,10 @@ def main():
                                     git_extracted_repo_name = line.split(
                                         '=')[-1].split('/')[-1].split('.')[0]
                                     group_name = line.split('=')[-1].split('/')[-2]
-                                    break
                                 except Exception:
                                     raise gitutils_exception.GitutilsError(
                                         const.GIT_MERGE_PROBLEM_0)
+                            break
                         if "[remote \"origin\"]" in line:
                             next_line = True
                 if git_extracted_repo_name != repo_name:

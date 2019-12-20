@@ -4,6 +4,12 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
+[1.0.10] - 2019-12-20
+Changed
+~~~~~~~
+
+-  Gitutils now uses SSH to perform git commands. HTTP has issues due to security/access.
+
 [1.0.2] - 2019-12-06
 Added
 ~~~~~

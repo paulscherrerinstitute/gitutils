@@ -4,6 +4,12 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
+[1.0.11] - 2020-01-06
+Added
+~~~~~~~
+
+- Gitutils login function allow users to retrieve the token without any related gitutils function.
+
 [1.0.10] - 2019-12-20
 Changed
 ~~~~~~~

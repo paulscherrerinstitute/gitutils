@@ -110,6 +110,10 @@ FORK_HELP_MSG = "Creates a fork from the repository."
 FORK_NOCLONE_HELP = '''Indicates that the forked project will not be cloned after forking. A fork
 will be created on the server-side and no clone nor upstream will be
 generated on the local git server.'''
+LOGIN_HELP_MSG = "Fetches the token for the usage of gitutils and stores it on the user's home directory file (~/.gitutils_token)."
+LOGIN_TEST = "As a verification for the gitlab token, a list of projects will be fetched..."
+LOGIN_PROBLEM = "Problem with the token. Please, check your credentials."
+LOGIN_SUCCESS = "Credentials successfully stored and token is valid.."
 MERGE_HELP_MSG = "Creates a request to merge the defined fork to the original repository."
 MERGE_MESSAGE_TITLE = ''' The title of the merge request that is going to be created.'''
 MERGE_MESSAGE_DESCRIPTION = '''The description of the merge request that is going to be created.'''

@@ -58,7 +58,7 @@ GIT_CREATE_MERGE_MSG = "Creating merge request..."
 DELETING_EXISTING_FORK = "Deleting existing fork..."
 NO_PERSONAL_FORK = "Impossible to delete. The desired project is not under your personal projects."
 NO_PERSONAL_FORK_PERMISSIONS = "The desired project is not under your personal projects, this action depends on your permissions."
-DELETE_SUCCESS = "Project successfully deleted. Waiting 2 seconds of idle time after deleting a project to let the server process it."
+DELETE_SUCCESS = "Project successfully deleted. Waiting 4 seconds of idle time after deleting a project to let the server process it."
 GROUP_PARAMETER_EMPTY = "The group provided as parameter was not found. Please check for typo or if the group really exists."
 GIT_MERGE_SUCCESS = "Merge request successfully created (merge request id: %s, created at %s)."
 GIT_CONFIG = "Forked group and project extracted from .git/config: "
@@ -111,7 +111,7 @@ FORK_NOCLONE_HELP = '''Indicates that the forked project will not be cloned afte
 will be created on the server-side and no clone nor upstream will be
 generated on the local git server.'''
 LOGIN_HELP_MSG = "Fetches the token for the usage of gitutils and stores it on the user's home directory file (~/.gitutils_token)."
-LOGIN_TEST = "As a verification for the gitlab token, a list of projects will be fetched..."
+LOGIN_TEST = "As a verification for the gitutils-gitlab token, the owned projects will be fetched..."
 LOGIN_PROBLEM = "Problem with the token. Please, check your credentials."
 LOGIN_SUCCESS = "Credentials successfully stored and token is valid.."
 MERGE_HELP_MSG = "Creates a request to merge the defined fork to the original repository."

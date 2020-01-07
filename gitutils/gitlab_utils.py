@@ -577,6 +577,7 @@ def fork_project(project_id, group_indication):
         else:
             fork = project.forks.create({})
     except Exception as ex:
+        print(ex)
         if ex.error_message['path'][0] == const.GIT_PATHNAME_IS_TAKEN:
             raise gitutils_exception.GitutilsError(const.FORKED_EXISTS)
         else:
@@ -584,7 +585,7 @@ def fork_project(project_id, group_indication):
 
     logging.info(
         'Adding 3 seconds of idle time after forking to let the server process the new fork.')
-    time.sleep(3)
+    time.sleep(4)
     logging.info('Forked project id %d' % project_id)
     return fork
 
@@ -644,7 +645,6 @@ def get_dict_from_own_projects(own_projects):
                 project.attributes['forked_from_project']
     return projects
 
-
 def get_owned_projects():
     """
     Retrieves the projects owned by the current user.
@@ -676,7 +676,7 @@ def delete_project(project_id):
         except Exception as ex:
             raise gitutils_exception.GitutilsError(ex)
         print(const.DELETE_SUCCESS)
-        time.sleep(2)
+        time.sleep(4)
     else:
         print(const.NO_PERSONAL_FORK_PERMISSIONS, )
         if click.confirm('Do you want to continue?', default=True):
@@ -685,7 +685,7 @@ def delete_project(project_id):
             except Exception as ex:
                 raise gitutils_exception.GitutilsError(ex)
             print(const.DELETE_SUCCESS)
-            time.sleep(2)
+            time.sleep(4)
         else:
             raise gitutils_exception.GitutilsError(const.NO_PERSONAL_FORK)
     return 0

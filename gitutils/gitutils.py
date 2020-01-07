@@ -5,12 +5,11 @@ import os
 import logging
 import argparse
 import textwrap
+import time
 
 from gitutils import gitlab_utils
 from gitutils import gitutils_exception
 from gitutils import const
-
-import time
 
 
 def fork(
@@ -294,6 +293,16 @@ def main():
             group_name = gitlab_utils.get_project_group(
                 repo_name, False, True, project_indication)
         project_id = gitlab_utils.get_project_id(group_name, repo_name)
+    elif arguments.command == 'login':
+        # login/user has already been requested and token retrieved
+        # verifies if access if correctly done
+        print(const.LOGIN_TEST)
+        dict_proj = gitlab_utils.get_owned_projects()
+        if len(dict_proj) > 0:
+            print(const.LOGIN_SUCCESS)
+            sys.exit(-1)
+        else:
+            print(const.LOGIN_PROBLEM)
     elif arguments.project and arguments.command == 'fork':
         (repo_name, group_name, project_id, valid) = gitlab_utils.get_repo_group_names(
             arguments.project[0], arguments.group, arguments.clean)
@@ -312,16 +321,6 @@ def main():
             print(const.PROBLEM_FETCHING_NAME)
             parser.print_help()
             sys.exit(-1)
-    elif arguments.command == 'login':
-        # login/user has already been requested and token retrieved
-        # verifies if access if correctly done
-        print(const.LOGIN_TEST)
-        dict_proj = gitlab_utils.get_projects()
-        if len(dict_proj) > 0:
-            print(const.LOGIN_SUCCESS)
-            sys.exit(-1)
-        else:
-            print(const.LOGIN_PROBLEM)
     else:
         parser.print_help()
         sys.exit(-1)

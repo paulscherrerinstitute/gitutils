@@ -111,7 +111,7 @@ FORK_NOCLONE_HELP = '''Indicates that the forked project will not be cloned afte
 will be created on the server-side and no clone nor upstream will be
 generated on the local git server.'''
 LOGIN_HELP_MSG = "Fetches the token for the usage of gitutils and stores it on the user's home directory file (~/.gitutils_token)."
-LOGIN_TEST = "As a verification for the gitutils-gitlab token, the owned projects will be fetched..."
+LOGIN_TEST = "As a verification for the gitutils-gitlab token, gitutils will fetch the list of groups..."
 LOGIN_PROBLEM = "Problem with the token. Please, check your credentials."
 LOGIN_SUCCESS = "Credentials successfully stored and token is valid.."
 MERGE_HELP_MSG = "Creates a request to merge the defined fork to the original repository."

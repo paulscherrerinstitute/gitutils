@@ -6,8 +6,11 @@ It is assumed that the gitutils' user is familiar with basic git commands (as ad
 
 .. _atlassian tutorial : https://www.atlassian.com/git/tutorials
 
+Before any command, a token will be fetched to validate the access to the gitlab server. If the user wants to create the token without any specific command, one can use::
 
+    $ gitutils login
 
+A file (~/.gitutils_token) will be created on the home directory and it will store the token. 
 
 Fork Walk-through
 -----------------

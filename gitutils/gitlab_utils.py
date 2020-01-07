@@ -13,7 +13,7 @@ import pwd
 import subprocess
 import urllib
 import click
-
+import sys
 # Gitlab API Documenation: http://doc.gitlab.com/ce/api/
 # Python-Gitlab Documetation:
 #       https://python-gitlab.readthedocs.io/en/stable/index.html
@@ -167,8 +167,23 @@ def get_username():
     :rtype: str
     """
     global login
-    return login
+    # return login
+    return 'hax_l'
 
+def is_empty(any_structure):
+    if any_structure:
+        return False
+    else:
+        return True
+
+def verify_token():
+    global gl
+    if is_empty(gl.groups.list()):
+        print(const.LOGIN_PROBLEM)
+        sys.exit(-1)
+    else:
+        print(const.LOGIN_SUCCESS)
+        sys.exit(-1)
 
 def oauth_authentication():
     """

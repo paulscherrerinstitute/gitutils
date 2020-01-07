@@ -22,6 +22,7 @@ Gitutils
       {fork,merge}          commands
       fork                Creates a fork from the repository.
       merge               Creates a request to merge the defined fork to the original repository.
+      login               Fetches the token for the usage of gitutils and stores it on the user's home directory file (~/.gitutils_token).
 
 .. note:: To see the gitutils usage help, you can use::
 

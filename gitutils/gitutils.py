@@ -7,10 +7,13 @@ import argparse
 import textwrap
 import time
 
-from gitutils import gitlab_utils
-from gitutils import gitutils_exception
-from gitutils import const
+# from gitutils import gitlab_utils
+# from gitutils import gitutils_exception
+# from gitutils import const
 
+import gitlab_utils
+import gitutils_exception
+import const
 
 def fork(
         fork_group_indication='',
@@ -297,7 +300,8 @@ def main():
         # login/user has already been requested and token retrieved
         # verifies if access if correctly done
         print(const.LOGIN_TEST)
-        dict_proj = gitlab_utils.get_owned_projects()
+        status = gitlab_utils.verify_token()
+        print(status)
         if len(dict_proj) > 0:
             print(const.LOGIN_SUCCESS)
             sys.exit(-1)

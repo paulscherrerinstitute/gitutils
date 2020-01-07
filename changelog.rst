@@ -4,11 +4,16 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
-[1.0.11] - 2020-01-06
+[1.0.12] - 2020-01-06
 Added
-~~~~~~~
+~~~~~
 
 - Gitutils login function allow users to retrieve the token without any related gitutils function.
+
+Changed
+~~~~~~~
+
+- Increased sleep time after deletion of project because the server wasn't processing it in time.
 
 [1.0.10] - 2019-12-20
 Changed

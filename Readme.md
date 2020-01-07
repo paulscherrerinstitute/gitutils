@@ -27,6 +27,7 @@ command:
   {fork,merge}          commands
     fork                Creates a fork from the repository.
     merge               Creates a request to merge the defined fork to the original repository.
+    login               Fetches the token for the usage of gitutils and stores it on the user's home directory file (~/.gitutils_token).
 ```
 
 > To see the gitutils help message use: ```> gitutils -h```. If not specified otherwise the default endpoint is ```https://git.psi.ch```.
@@ -88,6 +89,16 @@ optional arguments:
 > To see the merge help message use: ```> gitutils merge -h```
 
 ## Examples
+
+### LOGIN
+
+1. The login command creates the token file and stores it for further usage. 
+    - To fetch the token and create/update, use the following command:
+
+        ```bash
+        > gitutils login
+        ```
+> After the username and password are provided the token is fetched and saved on the local home directory in ~/.gitutils_token. As a verification, a list of owned projects will be fetched to validate the token.
 
 ### FORK
 

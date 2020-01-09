@@ -629,6 +629,8 @@ def create_merge_request(source_tuple,
             'target_project_id': target_tuple[0],
         })
     except Exception as ex:
+        if const.MERGE_DUPLICATED in ex.error_message[0]:
+            raise gitutils_exception.GitutilsDebug(const.MERGE_DUPLICATED)
         raise gitutils_exception.GitutilsError(ex)
 
     logging.info('Creating merge request %s (Description: %s). Source project \

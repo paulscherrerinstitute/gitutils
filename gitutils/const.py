@@ -71,6 +71,7 @@ PROBLEM_FETCHING_NAME = "Problem fetching the group and projects name. Please ch
 CLEAN_PROBLEM = "Gitutils is not able to delete a repo that is not a fork."
 GIT_MERGE_DESCRIPTION_MSG = 'The configuration was changed by %s.'
 SSH_GIT_GIT = 'git@git'
+MERGE_DUPLICATED = 'Another open merge request already exists for this source branch'
 GIT_UNABLE_TO_FIND_PROJECT_MSG = "Unable to find project - Aborting...\n"
 GIT_UNABLE_TO_FIND_MASTER_BRANCH = "Unable to find master branch in project to merge - Aborting...\n"
 GIT_PATHNAME_IS_TAKEN = 'has already been taken'

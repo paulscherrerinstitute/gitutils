@@ -111,21 +111,21 @@ optional arguments:
         > gitutils fork <group_name>/<repository_name>
         ```
 
-    - To fork and not clone, add the directive ___-n___ at the end of the previous command, as in:
+    - To fork and not clone, add the directive ___-n___ :
 
         ```bash
-        > gitutils fork <group_name>/<repository_name> -n
+        > gitutils fork -n <group_name>/<repository_name>
         ```
 
     - To delete existing fork and create a clean fork of a repository, use the following command:
 
         ```bash
-        > gitutils fork <group_name>/<repository_name> -c
+        > gitutils fork -c <group_name>/<repository_name>
         ```
     - To fork (using the full path), clean existing fork and not clone an existing repository:
     
         ```bash
-        > gitutils fork https://git.psi.ch/<group_name>/<repository_name> -n -c
+        > gitutils fork -n -c https://git.psi.ch/<group_name>/<repository_name>
         ```
 
     - To fork into a different group, use the ___-g___ to indicate which group:

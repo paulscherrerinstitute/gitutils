@@ -11,8 +11,8 @@ Gitutils is a python tool to facilitate the server-side operations when developi
 # Usage
 
 ## gitutils
-```
-usage: gitutils.py [-h] [-e ENDPOINT] {fork,merge} ...
+```bash
+usage: gitutils.py [-h] [-e ENDPOINT] {fork,merge,clonegroup,login} ...
 
 GITUTILS is a tool to facilitate the server-side operations when developing software that uses git repositories.
 
@@ -24,9 +24,11 @@ optional arguments:
 command:
   valid commands
 
-  {fork,merge}          commands
+  {fork,merge,clonegroup,login}
+                        commands
     fork                Creates a fork from the repository.
     merge               Creates a request to merge the defined fork to the original repository.
+    clonegroup          Clones all existing projects within a group.
     login               Fetches the token for the usage of gitutils and stores it on the user's home directory file (~/.gitutils_token).
 ```
 
@@ -34,7 +36,7 @@ command:
 
 ## fork
 ```bash
-usage: gitutils.py fork [-h] [-n] [-c] [-g GROUP] project
+usage: gitutils fork [-h] [-n] [-c] [-g GROUP] project
 
 positional arguments:
   project               (REQUIRED) Indicates the project to be forked. It can be of three different formats:
@@ -88,6 +90,19 @@ optional arguments:
 
 > To see the merge help message use: ```> gitutils merge -h```
 
+## Clonegroup
+```bash
+usage: gitutils.py clonegroup [-h] group
+
+positional arguments:
+  group       Group name
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+> To see the merge help message use: ```> gitutils clonegroup -h```
+
 ## Examples
 
 ### LOGIN
@@ -99,6 +114,17 @@ optional arguments:
         > gitutils login
         ```
 > After the username and password are provided the token is fetched and saved on the local home directory in ~/.gitutils_token. As a verification, a list of owned projects will be fetched to validate the token.
+
+### CLONEGROUP
+
+1. The clonegroup command clones all the existing projects from a specified group.
+    - To clone all projects of ```group_name```:
+
+        ```bash
+        > gitutils clonegroup <group_name>
+        ```
+        
+    > This will clone each repo into its specific folder, depending on the amount of projects this command might take a while. Additionally, a 2 seconds sleep time had to be added in between clones in order not to be blocked by Gitlab API.
 
 ### FORK
 

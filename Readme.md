@@ -101,7 +101,7 @@ optional arguments:
   -h, --help  show this help message and exit
 ```
 
-> To see the merge help message use: ```> gitutils clonegroup -h```
+> To see the clonegroup help message use: ```> gitutils clonegroup -h```
 
 ## Examples
 

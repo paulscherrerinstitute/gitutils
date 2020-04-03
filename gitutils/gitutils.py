@@ -78,7 +78,27 @@ def fork(
 
     logging.info(info_msg)
     print(info_msg)
-
+def clonegroup(group_name=''):
+    """
+    Based on the group name, it clones all existing 
+    projects from the specified group.
+    : param group_name : Name of group to be cloned 
+    : type group_name : str
+    """
+    # check if group exists
+    gitlab_utils.check_group_exists(group_name)
+    # Gets all the projects from the group
+    projects = gitlab_utils.get_group_projects(group_name)
+    # clones all the projects from group
+    for i in projects:
+        # clones into repo
+        os.system('git clone %s' % i['url'])
+        # 2 sec sleep time in between:
+        # Gitlab API refuses if there's no sleep in between 
+        # error: ssh_exchange_identification: read: Connection reset by peer
+        time.sleep(2)
+    # Finishing up, message to user
+    print("All projects have been cloned. Exiting now...")
 
 def merge(git_repository='',
           git_repository_id='',
@@ -202,6 +222,17 @@ def main():
                            '--description',
                            help=const.MERGE_MESSAGE_DESCRIPTION)
 
+    ###################
+    # CLONE GROUP CMD #
+    ###################
+
+    parser_cg = subparsers.add_parser('clonegroup',
+                                      help=const.CLONEGROUP_HELP_MSG,
+                                      formatter_class=argparse.RawTextHelpFormatter)
+
+    parser_cg.add_argument('group', nargs=1, metavar='group',
+                             help=textwrap.dedent(const.CLONEGROUP_GROUP_NAME))
+
     #############
     # LOGIN CMD #
     #############
@@ -297,6 +328,13 @@ def main():
         # verifies if access if correctly done
         print(const.LOGIN_TEST)
         gitlab_utils.verify_token()
+    elif arguments.command == 'clonegroup':
+        if not arguments.group:
+            print(const.CLONEGROUP_PROBLEM)
+            sys.exit(-1)
+        repo_name = 'all'
+        group_name = arguments.group[0]
+        project_id = 'all'
     elif arguments.project and arguments.command == 'fork':
         (repo_name, group_name, project_id, valid) = gitlab_utils.get_repo_group_names(
             arguments.project[0], arguments.group, arguments.clean)
@@ -336,6 +374,8 @@ def main():
                       git_repository_id=project_id,
                       description=arguments.description,
                       title=arguments.title)
+            elif arguments.command == 'clonegroup':
+                clonegroup(group_name=group_name)
             else:
                 print(const.COMMAND_NOT_FOUND)
                 parser.print_help()

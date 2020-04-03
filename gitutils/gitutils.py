@@ -229,9 +229,7 @@ def main():
     parser_cg = subparsers.add_parser('clonegroup',
                                       help=const.CLONEGROUP_HELP_MSG,
                                       formatter_class=argparse.RawTextHelpFormatter)
-    # parser_cg.add_argument('-g',
-    #                        '--group',
-    #                        help=const.CLONEGROUP_GROUP_NAME)
+
     parser_cg.add_argument('group', nargs=1, metavar='group',
                              help=textwrap.dedent(const.CLONEGROUP_GROUP_NAME))
 

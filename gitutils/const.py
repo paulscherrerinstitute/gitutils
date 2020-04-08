@@ -1,6 +1,16 @@
 from urllib.parse import urljoin
 
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 ######################
 # NOTIFICATION LEVEL #
 ######################
@@ -50,6 +60,7 @@ FORK_PROBLEM_REMOTE = "Existing repo with the same name. Please indicate -c if y
 FORK_PROBLEM_GIT_FOLDER = "Fork is not recommended inside a repository folder. Please execute the fork command outside a repository folder."
 FORK_PROBLEM_PERSONAL = "Not possible to fork your own personal project."
 CLONEGROUP_PROBLEM = "Not possible to clonegroup if the group name parameter is not provided. Use 'gitutils clonegroup -h' for help."
+SEARCHFILE_PROBLEM = "Not possible to search for a file if the group or file are not provided. Use 'gitutils search -h' for help."
 FORK_GROUP_NOT_FOUND = "The requested fork project could not be found under the specified group or check if you have permission to access such group/project."
 GROUP_NAME_PROBLEM = "The requested project was found under a different group or check if you have permission to access such group/project."
 PROJECT_URL_NOT_FOUND = "Project url not found, please check the configuration details or check if you have permission to access such group/project.."
@@ -121,6 +132,9 @@ MERGE_MESSAGE_TITLE = ''' The title of the merge request that is going to be cre
 MERGE_MESSAGE_DESCRIPTION = '''The description of the merge request that is going to be created.'''
 CLONEGROUP_HELP_MSG = "Clones all existing projects within a group."
 CLONEGROUP_GROUP_NAME = "Group name"
+SEARCHFILE_HELP_MSG = "Search for a file within a group."
+SEARCHFILE_FILE_MSG = "File name."
+SEARCHFILE_GROUP_MSG = "Group name"
 STORE_TRUE = "store_true"
 ############
 # COMMANDS #

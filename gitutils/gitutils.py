@@ -7,9 +7,44 @@ import argparse
 import textwrap
 import time
 
-from gitutils import gitlab_utils
-from gitutils import gitutils_exception
-from gitutils import const
+# from gitutils import gitlab_utils
+# from gitutils import gitutils_exception
+# from gitutils import const
+
+import gitlab_utils
+import gitutils_exception
+import const
+from spinner import Spinner
+
+def search(group_indication, file_name):
+    results = [] 
+    # Gets all the projects from the specified group
+    print('Gitutils searching for file: '+file_name+' within group '+group_indication+'...')
+    searching = 1
+    # with Spinner() and searching == 1:
+    projects = gitlab_utils.get_group_projects(group_indication)
+    for i in projects:
+        # print(i)
+        # For every project's branch
+        for b in i['branches']:
+            # gets the project tree for the branch
+            project_tree = gitlab_utils.get_project_tree(i.get('id'), b.name)
+            for j in project_tree:
+                # print(j)
+                if file_name == j.get('name'):
+                    if j.get('type') == 'blob':
+                        results.append({
+                            'webpath':const.ENDPOINT+"/"+group_indication+"/"+i.get('name')+"/blob/"+b.name+"/"+j.get('path'),
+                            'branch':b.name,
+                            'project_id': i.get('id')
+                        })
+            # spinner.setBusy(False)
+
+    for i in results:
+        print(i)
+
+    quit()
+
 
 def fork(
         fork_group_indication='',
@@ -78,6 +113,7 @@ def fork(
 
     logging.info(info_msg)
     print(info_msg)
+
 def clonegroup(group_name=''):
     """
     Based on the group name, it clones all existing 
@@ -222,6 +258,17 @@ def main():
                            '--description',
                            help=const.MERGE_MESSAGE_DESCRIPTION)
 
+    ###############
+    # SEARCH FILE #
+    ###############
+    parser_sf = subparsers.add_parser('search',
+                                    help=const.SEARCHFILE_HELP_MSG,
+                                    formatter_class=argparse.RawTextHelpFormatter)
+    parser_sf.add_argument('group', nargs=1, metavar='group',
+                             help=textwrap.dedent(const.SEARCHFILE_GROUP_MSG))
+    parser_sf.add_argument('file', nargs=1, metavar='file',
+                             help=textwrap.dedent(const.SEARCHFILE_FILE_MSG))
+
     ###################
     # CLONE GROUP CMD #
     ###################
@@ -335,6 +382,13 @@ def main():
         repo_name = 'all'
         group_name = arguments.group[0]
         project_id = 'all'
+    elif arguments.command == 'search':
+        if not arguments.group or not arguments.file:
+            print(const.SEARCHFILE_PROBLEM)
+            sys.exit(-1)
+        repo_name = 'all'
+        group_name = arguments.group[0]
+        project_id = 'all'
     elif arguments.project and arguments.command == 'fork':
         (repo_name, group_name, project_id, valid) = gitlab_utils.get_repo_group_names(
             arguments.project[0], arguments.group, arguments.clean)
@@ -376,6 +430,8 @@ def main():
                       title=arguments.title)
             elif arguments.command == 'clonegroup':
                 clonegroup(group_name=group_name)
+            elif arguments.command == 'search':
+                search(group_name, arguments.file[0])
             else:
                 print(const.COMMAND_NOT_FOUND)
                 parser.print_help()

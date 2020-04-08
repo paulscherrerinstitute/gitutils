@@ -63,6 +63,11 @@ def authenticate():
             # saves token into personal file
             save_token(access_token)
 
+def get_project(project_id):
+    return gl.projects.get(project_id)
+
+def get_project_tree(project_id, branch):
+    return get_project(project_id).repository_tree(recursive=True, all=True, branch=branch)
 
 def parse_access_token():
     if os.path.isfile(os.path.expanduser('~') + const.GIT_TOKEN_FILE):
@@ -247,7 +252,6 @@ def create_group(group_name, description):
     except Exception as ex:
         raise gitutils_exception.GitutilsError(ex)
     return exitCode
-
 
 def get_project_web_url(project_name):
     """
@@ -652,6 +656,7 @@ def get_dict_from_own_projects(own_projects):
             'path': project.attributes['path_with_namespace'],
             'url': project.attributes['ssh_url_to_repo'],
             'username': project.attributes['namespace']['name'],
+            'branches': get_project(project.attributes['id']).branches.list(),
             'id': project.attributes['id'],
         })
 

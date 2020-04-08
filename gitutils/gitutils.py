@@ -17,29 +17,13 @@ import const
 from spinner import Spinner
 
 def search(group_indication, file_name):
-    results = [] 
     # Gets all the projects from the specified group
     print('Gitutils searching for file: '+file_name+' within group '+group_indication+'...')
-    searching = 1
-    # with Spinner() and searching == 1:
-    projects = gitlab_utils.get_group_projects(group_indication)
-    for i in projects:
-        # print(i)
-        # For every project's branch
-        for b in i['branches']:
-            # gets the project tree for the branch
-            project_tree = gitlab_utils.get_project_tree(i.get('id'), b.name)
-            for j in project_tree:
-                # print(j)
-                if file_name == j.get('name'):
-                    if j.get('type') == 'blob':
-                        results.append({
-                            'webpath':const.ENDPOINT+"/"+group_indication+"/"+i.get('name')+"/blob/"+b.name+"/"+j.get('path'),
-                            'branch':b.name,
-                            'project_id': i.get('id')
-                        })
-            # spinner.setBusy(False)
+    # Gets the results
+    with Spinner():
+        results = gitlab_utils.find_file(file_name, group_indication)
 
+    # TODO IMPROVE RESULTS OUTPUT VISUALIZATION
     for i in results:
         print(i)
 

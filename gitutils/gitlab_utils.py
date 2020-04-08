@@ -253,6 +253,27 @@ def create_group(group_name, description):
         raise gitutils_exception.GitutilsError(ex)
     return exitCode
 
+
+def find_file(file_name,group_indication):
+    results =[]
+    projects = get_group_projects(group_indication)
+    for i in projects:
+        # print(i)
+        # For every project's branch
+        for b in i['branches']:
+            # gets the project tree for the branch
+            project_tree = get_project_tree(i.get('id'), b.name)
+            for j in project_tree:
+                # print(j)
+                if file_name == j.get('name'):
+                    if j.get('type') == 'blob':
+                        results.append({
+                            'webpath':const.ENDPOINT+"/"+group_indication+"/"+i.get('name')+"/blob/"+b.name+"/"+j.get('path'),
+                            'branch':b.name,
+                            'project_id': i.get('id')
+                        })
+    return results
+
 def get_project_web_url(project_name):
     """
     Function to get the web_url attribute of a project based on its name.

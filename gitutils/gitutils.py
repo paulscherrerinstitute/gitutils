@@ -17,18 +17,13 @@ import const
 from spinner import Spinner
 
 def search(group_indication, file_name):
-    # Gets all the projects from the specified group
-    print('Gitutils searching for file: '+file_name+' within group '+group_indication+'...')
-    # Gets the results
+    # Initial message
+    print(const.SEARCHFILE_INIT_MSG % (const.bcolors.BOLD, group_indication, const.bcolors.ENDC, const.bcolors.BOLD, file_name, const.bcolors.ENDC))
+    # # Gets all the projects from the specified group and gets the results
     with Spinner():
         results = gitlab_utils.find_file(file_name, group_indication)
-
-    # TODO IMPROVE RESULTS OUTPUT VISUALIZATION
-    for i in results:
-        print(i)
-
-    quit()
-
+    # Display the results
+    gitlab_utils.print_search_output(group_indication, file_name, results)
 
 def fork(
         fork_group_indication='',

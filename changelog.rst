@@ -4,6 +4,25 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
+[1.0.15] - 2020-04-08
+Added
+~~~~~
+
+- Gitutils search function allows users to search for a specific file inside the projects of a group.
+- Gitutils grep function allows users to search for specific term inside a specific project.
+
+
+[1.0.14] - 2020-04-03
+Added
+~~~~~
+
+- Gitutils clonegroup function allows users to clone into all projects of a existing group.
+
+Changed
+~~~~~~~
+
+- Improved readme with new command and new help messages.
+
 [1.0.12] - 2020-01-06
 Added
 ~~~~~

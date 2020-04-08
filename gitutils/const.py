@@ -135,6 +135,8 @@ CLONEGROUP_GROUP_NAME = "Group name"
 SEARCHFILE_HELP_MSG = "Search for a file within a group."
 SEARCHFILE_FILE_MSG = "File name."
 SEARCHFILE_GROUP_MSG = "Group name"
+SEARCHFILE_INIT_MSG = '\nGitutils searching inside group%s %s %sfor file%s %s %s...'
+SEARCHFILE_EMPTY = "The file %s %s %s was not found in such group."
 STORE_TRUE = "store_true"
 ############
 # COMMANDS #

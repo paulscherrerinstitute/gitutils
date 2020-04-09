@@ -7,17 +7,25 @@ import argparse
 import textwrap
 import time
 
-# from gitutils import gitlab_utils
-# from gitutils import gitutils_exception
-# from gitutils import const
-
-import gitlab_utils
-import gitutils_exception
-import const
+from gitutils import gitlab_utils
+from gitutils import gitutils_exception
+from gitutils import const
 from spinner import Spinner
 
 
 def grep(group_name, project_name, project_id, search_term):
+    """
+    Grep command searches in filenames and content for a term in a specific project.
+    :param group_name: Name of the group.
+    :type group_name: str
+    :param project_name: Name of the project.
+    :type project_name: str
+    :param project_id: Id of the project.
+    :type project_id: int
+    :param search_term: Term to search in the content of files and filenames.
+    :type search_term: str
+    :return:
+    """
     # Initial message
     print(const.GREPFILE_INIT_MSG % (const.bcolors.BOLD, project_name, const.bcolors.ENDC, const.bcolors.BOLD, search_term, const.bcolors.ENDC))
     # Gets all the projects from the specified group and gets the results
@@ -27,6 +35,14 @@ def grep(group_name, project_name, project_id, search_term):
     gitlab_utils.print_grep_output(project_name, project_id, search_term, results)
 
 def search(group_indication, file_name):
+    """
+    Search command searches for filenames inside a specified group.
+    :param group_indication: Name of the group.
+    :type group_indication: str
+    :param file_name: Name of the file to be searched.
+    :type file_name: str
+    :return:
+    """
     # Initial message
     print(const.SEARCHFILE_INIT_MSG % (const.bcolors.BOLD, group_indication, const.bcolors.ENDC, const.bcolors.BOLD, file_name, const.bcolors.ENDC))
     # # Gets all the projects from the specified group and gets the results

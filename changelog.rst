@@ -4,12 +4,16 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
-[1.0.15] - 2020-04-08
+[1.0.15] - 2020-04-09
 Added
 ~~~~~
 
-- Gitutils search function allows users to search for a specific file inside the projects of a group.
-- Gitutils grep function allows users to search for specific term inside a specific project.
+- Gitutils search allows users to search for a specific filenames inside the projects of a group.
+- Gitutils grep allows users to search for specific filenames and terms inside a specific project.
+
+Changed
+~~~~~~~
+- Improved readme with the instructions for the new commands.
 
 
 [1.0.14] - 2020-04-03

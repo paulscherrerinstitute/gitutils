@@ -12,7 +12,8 @@ Gitutils is a python tool to facilitate the server-side operations when developi
 
 ## gitutils
 ```bash
-usage: gitutils.py [-h] [-e ENDPOINT] {fork,merge,clonegroup,login} ...
+usage: gitutils.py [-h] [-e ENDPOINT]
+                   {fork,merge,search,grep,clonegroup,login} ...
 
 GITUTILS is a tool to facilitate the server-side operations when developing software that uses git repositories.
 
@@ -24,10 +25,12 @@ optional arguments:
 command:
   valid commands
 
-  {fork,merge,clonegroup,login}
+  {fork,merge,search,grep,clonegroup,login}
                         commands
     fork                Creates a fork from the repository.
     merge               Creates a request to merge the defined fork to the original repository.
+    search              Search for a file within a group.
+    grep                Search for a term inside the files of a project.
     clonegroup          Clones all existing projects within a group.
     login               Fetches the token for the usage of gitutils and stores it on the user's home directory file (~/.gitutils_token).
 ```
@@ -90,7 +93,7 @@ optional arguments:
 
 > To see the merge help message use: ```> gitutils merge -h```
 
-## Clonegroup
+## clonegroup
 ```bash
 usage: gitutils.py clonegroup [-h] group
 
@@ -102,6 +105,32 @@ optional arguments:
 ```
 
 > To see the merge help message use: ```> gitutils clonegroup -h```
+
+## search
+```bash
+usage: gitutils.py search [-h] group file
+
+positional arguments:
+  group       Group\'s name
+  file        File\'s name.
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+> To see the merge help message use: ```> gitutils search -h```
+
+## grep
+```bash
+usage: gitutils.py grep [-h] project term
+
+positional arguments:
+  project     Project\'s name.
+  term        Term to search.
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+> To see the merge help message use: ```> gitutils grep -h```
 
 ## Examples
 
@@ -125,6 +154,54 @@ optional arguments:
         ```
         
     > This will clone each repo into its specific folder, depending on the amount of projects this command might take a while. Additionally, a 2 seconds sleep time had to be added in between clones in order not to be blocked by Gitlab API.
+
+### SEARCH
+
+1. The search command will search for a specific file within all projects of a specified group .
+    - To search for the file ```file_name``` within group ```group_name```:
+
+        ```bash
+        > gitutils search <group_name> <file_name>
+        ```
+        > Keep in mind that depending the number of projects inside that group, this task can take some seconds...
+
+    - The output will be enumerated according to this example:
+
+        ```bash
+        Gitutils searching inside group <group_name> for file <file_name> ...
+            X )   <file_name>  :
+                            Group: <group_name>
+                            Project: <project_name> (id XXXX)
+                            Branch: <branch_name>
+                            Path: <path/to/file_name>
+
+                            Weblink: https://git.psi.ch/path/to/file_name
+        ```
+        > Where ```X``` is the counter of file_name found and ```XXXX``` is the project id.
+
+### GREP
+
+1. The grep command will search for a term within both filenames and contents of all files within a specified proejct. 
+    - To search for the term ```search_term``` within project ```project_name```:
+
+        ```bash
+        > gitutils grep <project_name> <search_term>
+        ```
+        > Keep in mind that depending the number of files (and their sizes), this task can take some seconds...
+
+    - The output will be enumerated according to this example:
+
+        ```bash
+        Gitutils searching inside project <project_name> for term <search_term>...
+        X )   <search_term>  :
+
+                Weblink: https://git.psi.ch/path/to/<file_name>#LXX
+
+                Lorem ipsum dolor sit amet, consectetur
+                do eiusmod tempor <search_term> ut labore 
+                ex ea commodo consequat.
+        ```
+        > Where ```X``` indicates the number of matches and ```LX``` indicates the line that it was found.
 
 ### FORK
 

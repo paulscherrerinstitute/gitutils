@@ -111,8 +111,8 @@ optional arguments:
 usage: gitutils.py search [-h] group file
 
 positional arguments:
-  group       Group\'s name
-  file        File\'s name.
+  group       Group's name
+  file        File's name.
 
 optional arguments:
   -h, --help  show this help message and exit
@@ -124,7 +124,7 @@ optional arguments:
 usage: gitutils.py grep [-h] project term
 
 positional arguments:
-  project     Project\'s name.
+  project     Project's name.
   term        Term to search.
 
 optional arguments:

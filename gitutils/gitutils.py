@@ -10,6 +10,46 @@ import time
 from gitutils import gitlab_utils
 from gitutils import gitutils_exception
 from gitutils import const
+from spinner import Spinner
+
+
+def grep(group_name, project_name, project_id, search_term):
+    """
+    Grep command searches in filenames and content for a term in a specific project.
+    :param group_name: Name of the group.
+    :type group_name: str
+    :param project_name: Name of the project.
+    :type project_name: str
+    :param project_id: Id of the project.
+    :type project_id: int
+    :param search_term: Term to search in the content of files and filenames.
+    :type search_term: str
+    :return:
+    """
+    # Initial message
+    print(const.GREPFILE_INIT_MSG % (const.bcolors.BOLD, project_name, const.bcolors.ENDC, const.bcolors.BOLD, search_term, const.bcolors.ENDC))
+    # Gets all the projects from the specified group and gets the results
+    with Spinner():
+        results = gitlab_utils.grep_file_in_project(search_term, project_id,project_name,group_name)
+    # Display the results
+    gitlab_utils.print_grep_output(project_name, project_id, search_term, results)
+
+def search(group_indication, file_name):
+    """
+    Search command searches for filenames inside a specified group.
+    :param group_indication: Name of the group.
+    :type group_indication: str
+    :param file_name: Name of the file to be searched.
+    :type file_name: str
+    :return:
+    """
+    # Initial message
+    print(const.SEARCHFILE_INIT_MSG % (const.bcolors.BOLD, group_indication, const.bcolors.ENDC, const.bcolors.BOLD, file_name, const.bcolors.ENDC))
+    # # Gets all the projects from the specified group and gets the results
+    with Spinner():
+        results = gitlab_utils.find_file(file_name, group_indication)
+    # Display the results
+    gitlab_utils.print_search_output(group_indication, file_name, results)
 
 def fork(
         fork_group_indication='',
@@ -78,6 +118,7 @@ def fork(
 
     logging.info(info_msg)
     print(info_msg)
+
 def clonegroup(group_name=''):
     """
     Based on the group name, it clones all existing 
@@ -222,6 +263,28 @@ def main():
                            '--description',
                            help=const.MERGE_MESSAGE_DESCRIPTION)
 
+    ###############
+    # SEARCH FILE #
+    ###############
+    parser_sf = subparsers.add_parser('search',
+                                    help=const.SEARCHFILE_HELP_MSG,
+                                    formatter_class=argparse.RawTextHelpFormatter)
+    parser_sf.add_argument('group', nargs=1, metavar='group',
+                             help=textwrap.dedent(const.SEARCHFILE_GROUP_MSG))
+    parser_sf.add_argument('file', nargs=1, metavar='file',
+                             help=textwrap.dedent(const.SEARCHFILE_FILE_MSG))
+
+    #############
+    # GREP TERM #
+    #############
+    parser_grep = subparsers.add_parser('grep',
+                                    help=const.GREPFILE_HELP_MSG,
+                                    formatter_class=argparse.RawTextHelpFormatter)
+    parser_grep.add_argument('project', nargs=1, metavar='project',
+                             help=textwrap.dedent(const.GREP_PROJECT_MSG))
+    parser_grep.add_argument('term', nargs=1, metavar='term',
+                             help=textwrap.dedent(const.GREP_TERM_MSG))
+
     ###################
     # CLONE GROUP CMD #
     ###################
@@ -335,6 +398,26 @@ def main():
         repo_name = 'all'
         group_name = arguments.group[0]
         project_id = 'all'
+    elif arguments.command == 'search':
+        if not arguments.group or not arguments.file:
+            print(const.SEARCHFILE_PROBLEM)
+            sys.exit(-1)
+        repo_name = 'all'
+        group_name = arguments.group[0]
+        project_id = 'all'
+    elif arguments.command == 'grep':
+        if not arguments.project or not arguments.term:
+            print(const.GREPFILE_PROBLEM)
+            sys.exit(-1)
+        # Initially we assume there's no group indication
+        repo_name = arguments.project[0]
+        # if there's group indication
+        if '/' in repo_name:
+            group_name = repo_name.split('/')[0]
+            repo_name = repo_name.split('/')[1]
+        else:    
+            group_name = gitlab_utils.get_project_group_simplified(repo_name)
+        project_id = gitlab_utils.get_project_id(group_name, repo_name)
     elif arguments.project and arguments.command == 'fork':
         (repo_name, group_name, project_id, valid) = gitlab_utils.get_repo_group_names(
             arguments.project[0], arguments.group, arguments.clean)
@@ -376,6 +459,10 @@ def main():
                       title=arguments.title)
             elif arguments.command == 'clonegroup':
                 clonegroup(group_name=group_name)
+            elif arguments.command == 'search':
+                search(group_name, arguments.file[0])
+            elif arguments.command == 'grep':
+                grep(group_name, repo_name, project_id, arguments.term[0])
             else:
                 print(const.COMMAND_NOT_FOUND)
                 parser.print_help()

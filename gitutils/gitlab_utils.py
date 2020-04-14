@@ -63,6 +63,11 @@ def authenticate():
             # saves token into personal file
             save_token(access_token)
 
+def get_project(project_id):
+    return gl.projects.get(project_id)
+
+def get_project_tree(project_id, branch):
+    return get_project(project_id).repository_tree(recursive=True, all=True, branch=branch)
 
 def parse_access_token():
     if os.path.isfile(os.path.expanduser('~') + const.GIT_TOKEN_FILE):
@@ -248,6 +253,90 @@ def create_group(group_name, description):
         raise gitutils_exception.GitutilsError(ex)
     return exitCode
 
+def print_search_output(group_indication, file_name, results):
+    if results:
+        # For each result
+        for idx,i in enumerate(results):
+            # states the file name
+            print(const.bcolors.BOLD,str(idx+1),") ",const.bcolors.OKGREEN, file_name, const.bcolors.ENDC, ":\n")
+            # group
+            print("\t\t Group: "+group_indication)
+            # project (project id)
+            print("\t\t Project: "+i.get('project_name')+" (id "+ str(i.get('project_id'))+")")
+            # branch
+            print("\t\t Branch: "+i.get('branch'))
+            # path
+            print("\t\t Path: "+i.get('path'))
+            # direct weblink
+            print("\n\t\t Weblink: "+const.bcolors.UNDERLINE+i.get('webpath')+const.bcolors.ENDC)
+            print("\n")
+    else:
+        # Empty search
+        print(const.SEARCHFILE_EMPTY % (const.bcolors.FAIL, file_name, const.bcolors.ENDC))
+
+
+def print_grep_output(project_name, project_id, search_term, results):
+    if results:
+        # For each grep match
+        for idx,i in enumerate(results):
+            # States the search_term
+            print(const.bcolors.BOLD,str(idx+1),") ",const.bcolors.OKGREEN, search_term, const.bcolors.ENDC, ":\n")
+            # direct weblink to such file
+            print("\t Weblink: "+const.bcolors.UNDERLINE+i.get('webpath')+const.bcolors.ENDC)
+            # removal of empty spaces at the beginning of lines
+            print("")
+            stopwords = ['']
+            resultwords  = [word for word in i.get('excerpt').splitlines() if word not in stopwords]
+            # for each line
+            for line in resultwords:                
+                # verifies if this is the line containing the search_term
+                if search_term in line:
+                    # color green
+                    b = line.split(search_term)
+                    print("\t\t"+b[0]+const.bcolors.OKGREEN+search_term+const.bcolors.ENDC+b[1])
+                else:
+                    # color regular
+                    print("\t\t"+line)
+            print("\n\n")
+    else:
+        # Coudln't find anything
+        print(const.GREP_EMPTY % (const.bcolors.FAIL, search_term, const.bcolors.ENDC))         
+
+def grep_file_in_project(search_term, project_id, project_name, group_name):
+    results =[]
+    # Gets the project and searches in its file for the search_term
+    project_search_results = get_project(project_id).search(const.BLOBS, search_term)
+    for match in project_search_results:
+        results.append({
+            # File name, including path
+            'filename':match.get('filename'),
+            # 3 lines surrounding the search_term
+            'excerpt':match.get('data'),
+            # Generation of the diret weblink to the file including the line
+            'webpath': const.ENDPOINT+"/"+group_name+"/"+project_name+"/blob/"+match.get('ref')+"/"+match.get('filename')+"#L"+str(match.get('startline'))
+        })
+    return results
+
+def find_file(file_name,group_indication):
+    results =[]
+    # gets all the projects in the group
+    projects = get_group_projects(group_indication)
+    # for every project found
+    for i in projects:
+        # For every project's branch
+        for b in i['branches']:
+            # gets the project tree for the branch
+            project_tree = get_project_tree(i.get('id'), b.name)
+            for j in project_tree:
+                if file_name == j.get('name'):
+                    results.append({
+                        'webpath':const.ENDPOINT+"/"+group_indication+"/"+i.get('name')+"/"+j.get('type')+"/"+b.name+"/"+j.get('path'),
+                        'branch':b.name,
+                        'path':j.get('path'),
+                        'project_name':i.get('name'),
+                        'project_id': i.get('id')
+                    })
+    return results
 
 def get_project_web_url(project_name):
     """
@@ -270,6 +359,27 @@ def check_key(dict_to_search, key):
     else:
         return False
 
+def get_project_group_simplified(project_name):
+    projects_list = gl.projects.list(search=project_name, all=True)
+    list_of_groups = []
+    for project in projects_list:
+        if project_name == project.attributes['name']:
+            project_path = project.attributes['path_with_namespace']
+            # verify if it's a personal project
+            groupFound = project_path.split('/')[0]
+            list_of_groups.append(groupFound)
+    if len(list_of_groups) == 1:
+        return groupFound
+    elif len(list_of_groups) >= 2:
+        # if there is a personal group
+        if get_username() in list_of_groups:
+            print("\nGitutils warning: "+const.GROUP_NOT_SPECIFIED_ASSUME_USER)
+            return get_username()
+        else:
+            raise gitutils_exception.GitutilsError(
+                const.MULTIPLE_PROJECTS % (list_of_groups))
+    print("teste", list_of_groups)
+    raise gitutils_exception.GitutilsError(const.PROJECT_NAME_NOT_FOUND)
 
 def get_project_group(project_name, clean, merge, project_indication):
     """
@@ -306,7 +416,7 @@ def get_project_group(project_name, clean, merge, project_indication):
     elif len(list_of_groups) >= 2:
         # if there is a personal group
         if get_username() in list_of_groups:
-            print(const.GROUP_NOT_SPECIFIED_ASSUME_USER)
+            print("Gitutils warning: "+const.GROUP_NOT_SPECIFIED_ASSUME_USER)
             return get_username()
         else:
             raise gitutils_exception.GitutilsError(
@@ -369,24 +479,6 @@ def get_branch(project_id):
         raise gitutils_exception.GitutilsError(
             const.GIT_UNABLE_TO_FIND_MASTER_BRANCH %
             project['name'])
-
-
-# def get_project_url(group_id, project_name):
-#     """
-#     Function to get the project http url attribute of a project based on
-#     its group id and name.
-#     :param project_name: Name of the project
-#     :type project_name: str
-#     :param group_id: Id of the group
-#     :type group_id: int
-#     :return: Returns the http url to the project.
-#     :rtype: str
-#     """
-#     projects_list = gl.projects.list(search=project_name, all=True)
-#     for project in projects_list:
-#         if project.attributes['name'] == project_name and group_id == project.namespace['id']:
-#             return project.attributes['http_url_to_repo']
-#     return ''
 
 
 def get_project_id(group_name, project_name):
@@ -652,6 +744,7 @@ def get_dict_from_own_projects(own_projects):
             'path': project.attributes['path_with_namespace'],
             'url': project.attributes['ssh_url_to_repo'],
             'username': project.attributes['namespace']['name'],
+            'branches': get_project(project.attributes['id']).branches.list(),
             'id': project.attributes['id'],
         })
 

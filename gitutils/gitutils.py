@@ -10,7 +10,7 @@ import time
 from gitutils import gitlab_utils
 from gitutils import gitutils_exception
 from gitutils import const
-from spinner import Spinner
+from gitutils.spinner import Spinner
 
 
 def grep(group_name, project_name, project_id, search_term):

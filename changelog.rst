@@ -4,6 +4,12 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
+[1.0.17] - 2020-05-20
+Changed
+~~~~~~~
+- bugfix when fetching an empty project.
+
+
 [1.0.15] - 2020-04-09
 Added
 ~~~~~

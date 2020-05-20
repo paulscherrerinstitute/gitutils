@@ -737,22 +737,29 @@ def create_merge_request(source_tuple,
 
 
 def get_dict_from_own_projects(own_projects):
-    projects = []
+    dict_projects = []
     for project in own_projects:
-        projects.append({
+        branches = ""
+        # workaround to avoid 404 on projects without any branch
+        try:
+            branches = get_project(project.attributes['id']).branches.list()
+        except Exception as ex:
+            pass
+
+        dict_projects.append({
             'name': project.attributes['name'],
             'path': project.attributes['path_with_namespace'],
             'url': project.attributes['ssh_url_to_repo'],
             'username': project.attributes['namespace']['name'],
-            'branches': get_project(project.attributes['id']).branches.list(),
+            'branches': branches,
             'id': project.attributes['id'],
         })
-
+        
         # if it's a fork add the source project
         if 'forked_from_project' in project.attributes:
-            projects[-1]['forked_from_project'] = \
+            dict_projects[-1]['forked_from_project'] = \
                 project.attributes['forked_from_project']
-    return projects
+    return dict_projects
 
 def get_owned_projects():
     """

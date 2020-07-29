@@ -20,8 +20,13 @@ The package has to be installed as root on ``gfalcd.psi.ch``::
 
 As this will change the global Python distribution, make sure that only the gitutils package gets updated.
 
-Building the conda package
---------------------------
+Building the conda package automatically
+----------------------------------------
+After every new release, github actions will automatically build the new package and upload to the anaconda channel being ready to install, as explained above.
+
+
+Building the conda package manually
+-----------------------------------
 First, login into ```gfa-lc6-64```, source the right anaconda environment by executing the command::
 
     $ source /opt/gfa/python
@@ -54,6 +59,3 @@ Develop new feature(s) on your personal fork, and submit a merge request::
 
 If the merge request is approved, it will be integrated and the conda package will be updated.
 
-Coding guidelines
------------------
-.. todo:: Introduce gitutils coding guidelines.

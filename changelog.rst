@@ -4,6 +4,16 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
+[1.0.18] - 2020-07-29
+Added
+~~~~~
+- Publish conda package automatically directly using github actions after a new release.
+- Python lint verification (flake8) using github actions.
+Changed
+~~~~~~~
+- Improved readme with badges and minor improvements in python format files.
+
+
 [1.0.17] - 2020-05-20
 Changed
 ~~~~~~~

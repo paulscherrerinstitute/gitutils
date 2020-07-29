@@ -9,13 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: publish-to-conda
-      uses: paulscherrerinstitute/conda-publish-action@master
-      with:
-        subdir: 'conda-recipe'
-        anacondatoken: ${{ secrets.ANACONDA_TOKEN }}
     - name: Lint with flake8
       run: |
         pip install flake8
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+    - name: publish-to-conda
+      uses: paulscherrerinstitute/conda-publish-action@master
+      with:
+        subdir: 'conda-recipe'
+        anacondatoken: ${{ secrets.ANACONDA_TOKEN }}
+

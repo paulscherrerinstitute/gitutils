@@ -288,7 +288,7 @@ def print_grep_output(project_name, project_id, search_term, results):
             stopwords = ['']
             resultwords  = [word for word in i.get('excerpt').splitlines() if word not in stopwords]
             # for each line
-            for line in resultwords:                
+            for line in resultwords:
                 # verifies if this is the line containing the search_term
                 if search_term in line:
                     # color green

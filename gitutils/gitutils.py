@@ -121,9 +121,9 @@ def fork(
 
 def clonegroup(group_name=''):
     """
-    Based on the group name, it clones all existing 
+    Based on the group name, it clones all existing
     projects from the specified group.
-    : param group_name : Name of group to be cloned 
+    : param group_name : Name of group to be cloned
     : type group_name : str
     """
     # check if group exists
@@ -135,7 +135,7 @@ def clonegroup(group_name=''):
         # clones into repo
         os.system('git clone %s' % i['url'])
         # 2 sec sleep time in between:
-        # Gitlab API refuses if there's no sleep in between 
+        # Gitlab API refuses if there's no sleep in between
         # error: ssh_exchange_identification: read: Connection reset by peer
         time.sleep(2)
     # Finishing up, message to user
@@ -309,7 +309,7 @@ def main():
     if arguments.command is None:
         parser.print_help()
         sys.exit(-1)
-    
+
     # sets the endpoins
     gitlab_utils.set_endpoint(arguments.endpoint)
 

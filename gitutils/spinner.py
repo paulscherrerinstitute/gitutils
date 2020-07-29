@@ -6,14 +6,14 @@ class Spinner:
     busy = False
     delay = 0.08
 
-    @staticmethod
-    def spinning_cursor():
-        while 1: 
-            for cursor in '|/-\\': yield cursor
-
     def __init__(self, delay=None):
         self.spinner_generator = self.spinning_cursor()
         if delay and float(delay): self.delay = delay
+
+    @staticmethod
+    def spinning_cursor():
+        while 1:
+            for cursor in '|/-\\': yield cursor
 
     def spinner_task(self):
         while self.busy:
@@ -23,7 +23,7 @@ class Spinner:
             sys.stdout.write('\b')
             sys.stdout.flush()
     
-    def setBusy(value):
+    def setBusy(self, value):
         self.busy = value
 
     def __enter__(self):

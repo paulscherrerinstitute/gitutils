@@ -114,6 +114,7 @@ class TestGitlabUtils(unittest.TestCase):
         self.assertEqual(repo_name, 'app_config')
         self.assertEqual(group_name, 'controls_highlevel_applications')
         self.assertEqual(project_id, 941)
+        self.assertEqual(valid, True)
 
     def test_get_repo_group_names_2(self):
         """
@@ -165,17 +166,17 @@ class TestGitlabUtils(unittest.TestCase):
 
     def test_get_all_projects(self):
         """
-        Test the retrieval of all projects following a name, overwriting the 
+        Test the retrieval of all projects following a name, overwriting the
         default of 20 projects per list.
         """
         # PROVISORY: A known project with 20+ forks
         project_name = 'sf_daq_sources'
         projects_list = gl.projects.list(search=project_name, all=True)
         self.assertGreater(len(projects_list), 20)
-        
+
     def test_get_all_groups(self):
         """
-        Test the retrieval of all projects, overwriting the 
+        Test the retrieval of all projects, overwriting the
         default of 20 projects per list.
         """
         # PROVISORY: a known group with 20+ projects

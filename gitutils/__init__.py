@@ -1,1 +1,1 @@
-__all__ = ["gitutils_excpetion", "gitlab_utils", "const"]
+__all__ = ["gitutils", "gitutils_exception", "gitlab_utils", "const"]

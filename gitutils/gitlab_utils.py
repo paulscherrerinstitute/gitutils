@@ -288,7 +288,7 @@ def print_grep_output(project_name, project_id, search_term, results):
             stopwords = ['']
             resultwords  = [word for word in i.get('excerpt').splitlines() if word not in stopwords]
             # for each line
-            for line in resultwords:                
+            for line in resultwords:
                 # verifies if this is the line containing the search_term
                 if search_term in line:
                     # color green
@@ -744,6 +744,7 @@ def get_dict_from_own_projects(own_projects):
         try:
             branches = get_project(project.attributes['id']).branches.list()
         except Exception as ex:
+            raise gitutils_exception.GitutilsWarning("Gitutils warning: No branch on this repository. (id "+str(project.attributes['id'])+")")
             pass
 
         dict_projects.append({

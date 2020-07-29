@@ -88,7 +88,6 @@ def fork(
         try:
             # Forks the repo
             new_project = gitlab_utils.fork_project(git_repository_id, fork_group_indication)
-            http_url_to_repo = new_project.attributes['http_url_to_repo']
             ssh_url_to_repo = new_project.attributes['ssh_url_to_repo']
             http_url_to_original_repo = new_project.attributes[
                 'forked_from_project']['http_url_to_repo']
@@ -121,9 +120,9 @@ def fork(
 
 def clonegroup(group_name=''):
     """
-    Based on the group name, it clones all existing 
+    Based on the group name, it clones all existing
     projects from the specified group.
-    : param group_name : Name of group to be cloned 
+    : param group_name : Name of group to be cloned
     : type group_name : str
     """
     # check if group exists
@@ -135,7 +134,7 @@ def clonegroup(group_name=''):
         # clones into repo
         os.system('git clone %s' % i['url'])
         # 2 sec sleep time in between:
-        # Gitlab API refuses if there's no sleep in between 
+        # Gitlab API refuses if there's no sleep in between
         # error: ssh_exchange_identification: read: Connection reset by peer
         time.sleep(2)
     # Finishing up, message to user
@@ -300,16 +299,16 @@ def main():
     # LOGIN CMD #
     #############
 
-    parser_login = subparsers.add_parser('login',
-                                      help=const.LOGIN_HELP_MSG,
-                                      formatter_class=argparse.RawTextHelpFormatter)
+    subparsers.add_parser('login',
+                        help=const.LOGIN_HELP_MSG,
+                        formatter_class=argparse.RawTextHelpFormatter)
 
     arguments = parser.parse_args()
     # verifies if there are any arguments
     if arguments.command is None:
         parser.print_help()
         sys.exit(-1)
-    
+
     # sets the endpoins
     gitlab_utils.set_endpoint(arguments.endpoint)
 
@@ -415,7 +414,7 @@ def main():
         if '/' in repo_name:
             group_name = repo_name.split('/')[0]
             repo_name = repo_name.split('/')[1]
-        else:    
+        else:
             group_name = gitlab_utils.get_project_group_simplified(repo_name)
         project_id = gitlab_utils.get_project_id(group_name, repo_name)
     elif arguments.project and arguments.command == 'fork':

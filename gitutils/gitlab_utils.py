@@ -744,6 +744,7 @@ def get_dict_from_own_projects(own_projects):
         try:
             branches = get_project(project.attributes['id']).branches.list()
         except Exception as ex:
+            raise gitutils_exception.GitutilsWarning("Gitutils warning: No branch on this repository. (id "+str(project.attributes['id'])+")")
             pass
 
         dict_projects.append({

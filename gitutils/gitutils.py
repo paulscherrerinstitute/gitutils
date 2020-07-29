@@ -88,7 +88,6 @@ def fork(
         try:
             # Forks the repo
             new_project = gitlab_utils.fork_project(git_repository_id, fork_group_indication)
-            http_url_to_repo = new_project.attributes['http_url_to_repo']
             ssh_url_to_repo = new_project.attributes['ssh_url_to_repo']
             http_url_to_original_repo = new_project.attributes[
                 'forked_from_project']['http_url_to_repo']
@@ -300,9 +299,9 @@ def main():
     # LOGIN CMD #
     #############
 
-    parser_login = subparsers.add_parser('login',
-                                      help=const.LOGIN_HELP_MSG,
-                                      formatter_class=argparse.RawTextHelpFormatter)
+    subparsers.add_parser('login',
+                        help=const.LOGIN_HELP_MSG,
+                        formatter_class=argparse.RawTextHelpFormatter)
 
     arguments = parser.parse_args()
     # verifies if there are any arguments
@@ -415,7 +414,7 @@ def main():
         if '/' in repo_name:
             group_name = repo_name.split('/')[0]
             repo_name = repo_name.split('/')[1]
-        else:    
+        else:
             group_name = gitlab_utils.get_project_group_simplified(repo_name)
         project_id = gitlab_utils.get_project_id(group_name, repo_name)
     elif arguments.project and arguments.command == 'fork':

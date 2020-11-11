@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 from gitutils import const
 from gitutils import gitutils_exception
+
+
 import requests
 import os
 import logging
@@ -316,6 +318,47 @@ def grep_file_in_project(search_term, project_id, project_name, group_name):
             'webpath': const.ENDPOINT+"/"+group_name+"/"+project_name+"/blob/"+match.get('ref')+"/"+match.get('filename')+"#L"+str(match.get('startline'))
         })
     return results
+
+
+def find_file_by_id(file_name,group_dict):
+    results_file =[]
+    results_blob =[]
+    # gets all the projects in the group
+    if group_dict['name']!='sandbox':
+        projects = get_group_projects_by_group_id(group_dict['id'])
+        # for every project found
+        for i in projects:
+            # For every project's branch
+            branches = i.get('branches', 0)
+            if branches != 0:
+                for b in i['branches']:
+                    # gets the project tree for the branch
+                    project_tree = get_project_tree(i.get('id'), b.name)
+                    for j in project_tree:
+                        if file_name == j.get('name'):
+                            results_file.append({
+                                'webpath':const.ENDPOINT+"/"+group_dict['name']+"/"+i.get('name')+"/"+j.get('type')+"/"+b.name+"/"+j.get('path'),
+                                'branch':b.name,
+                                'path':j.get('path'),
+                                'project_name':i.get('name'),
+                                'project_id': i.get('id')
+                            })
+            if len(results_file) > 0 :
+                print_search_output(group_dict['name'], file_name, results_file)
+            # Gets the project and searches in its file for the search_term
+            project_search_results = get_project(i.get('id')).search(const.BLOBS, file_name)
+            for match in project_search_results:
+                results_blob.append({
+                    # File name, including path
+                    'filename':match.get('filename'),
+                    # 3 lines surrounding the search_term
+                    'excerpt':match.get('data'),
+                    # Generation of the diret weblink to the file including the line
+                    'webpath': const.ENDPOINT+"/"+group_dict['name']+"/"+i.get('name')+"/blob/"+match.get('ref')+"/"+match.get('filename')+"#L"+str(match.get('startline'))
+                })
+            if len(results_blob) > 0 :
+                print_grep_output(i.get('name'), i.get('id'), file_name, results_blob)
+    return 
 
 def find_file(file_name,group_indication):
     results =[]
@@ -643,6 +686,23 @@ def get_group_id(group_name):
     return group_id
 
 
+def get_group_projects_by_group_id(group_id):
+    """
+    Retrieves all the projects of a group, which is given as parameter.
+    :param group_name: ID (int) of the group of interest.
+    :type group_id: int
+    :return: List of the projects (for the specified group id) containing name,
+     id, path and url (in a dictionary-type).
+    :rtype: list
+    """
+    try:
+        group = gl.groups.get(group_id)
+        group_projects = group.projects.list(all=True)
+    except Exception as ex:
+        raise gitutils_exception.GitutilsError(ex)
+    return get_dict_from_own_projects(group_projects)
+
+
 def get_group_projects(group_name):
     """
     Retrieves all the projects of a group, which is given as parameter.
@@ -740,21 +800,17 @@ def get_dict_from_own_projects(own_projects):
     dict_projects = []
     for project in own_projects:
         branches = ""
-        # workaround to avoid 404 on projects without any branch
-        try:
-            branches = get_project(project.attributes['id']).branches.list()
-        except Exception as ex:
-            raise gitutils_exception.GitutilsWarning("Gitutils warning: No branch on this repository. (id "+str(project.attributes['id'])+")")
-            pass
 
         dict_projects.append({
             'name': project.attributes['name'],
             'path': project.attributes['path_with_namespace'],
             'url': project.attributes['ssh_url_to_repo'],
             'username': project.attributes['namespace']['name'],
-            'branches': branches,
             'id': project.attributes['id'],
         })
+        if len(get_project(project.attributes['id']).branches.list()) > 0:
+            branches = get_project(project.attributes['id']).branches.list()
+            dict_projects[-1]['branches'] = branches
         
         # if it's a fork add the source project
         if 'forked_from_project' in project.attributes:

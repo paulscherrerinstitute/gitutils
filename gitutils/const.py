@@ -148,6 +148,8 @@ GREP_EMPTY = "The term %s %s %s was not found in such project."
 SEARCHFILE_EMPTY = "The file %s %s %s was not found in such group."
 STORE_TRUE = "store_true"
 BLOBS = 'blobs'
+GREPFILE_INIT_MSG = '\nGitutils searching for term \"%s %s %s\"...'
+FIND_HELP_MSG = "Find a term inside the repositories."
 ############
 # COMMANDS #
 ############

@@ -12,6 +12,22 @@ from gitutils import gitutils_exception
 from gitutils import const
 from gitutils.spinner import Spinner
 
+def find(search_term):
+    """
+    Find command searches in all projects/repositories.
+    :param search_term: Term to search in the content of files and filenames.
+    :type search_term: str
+    :return:
+    """
+    print(const.GREPFILE_INIT_MSG % (const.bcolors.BOLD, search_term, const.bcolors.ENDC))
+    # get groups
+    groups = gitlab_utils.get_groups()
+    results_group = []
+    # search for files in groups
+    for group in groups:
+        if groups[group]['name'] != 'sandbox':
+            gitlab_utils.find_file_by_id(search_term,groups[group])
+        
 
 def grep(group_name, project_name, project_id, search_term):
     """
@@ -284,6 +300,15 @@ def main():
     parser_grep.add_argument('term', nargs=1, metavar='term',
                              help=textwrap.dedent(const.GREP_TERM_MSG))
 
+    ########
+    # FIND #
+    ########
+    parser_find = subparsers.add_parser('find',
+                                    help=const.FIND_HELP_MSG,
+                                    formatter_class=argparse.RawTextHelpFormatter)
+    parser_find.add_argument('term', nargs=1, metavar='term',
+                             help=textwrap.dedent(const.GREP_TERM_MSG))
+
     ###################
     # CLONE GROUP CMD #
     ###################
@@ -404,6 +429,10 @@ def main():
         repo_name = 'all'
         group_name = arguments.group[0]
         project_id = 'all'
+    elif arguments.command == 'find':
+        repo_name = 'all'
+        group_name = 'all'
+        project_id = 'all'
     elif arguments.command == 'grep':
         if not arguments.project or not arguments.term:
             print(const.GREPFILE_PROBLEM)
@@ -441,23 +470,25 @@ def main():
 
     # Command, group and repo are ok
     if arguments.command and \
-       repo_name is not None and \
-       group_name is not None and \
-       project_id is not None:
+        repo_name is not None and \
+        group_name is not None and \
+        project_id is not None:
         try:
             if arguments.command == 'fork':
                 fork(fork_group_indication=arguments.group,
                     git_repository_id=project_id,
-                     git_repository=repo_name,
-                     no_clone=arguments.no_clone,
-                     clean=arguments.clean)
+                    git_repository=repo_name,
+                    no_clone=arguments.no_clone,
+                    clean=arguments.clean)
             elif arguments.command == 'merge':
                 merge(git_repository=repo_name,
-                      git_repository_id=project_id,
-                      description=arguments.description,
-                      title=arguments.title)
+                    git_repository_id=project_id,
+                    description=arguments.description,
+                    title=arguments.title)
             elif arguments.command == 'clonegroup':
                 clonegroup(group_name=group_name)
+            if arguments.command == 'find':
+                find(arguments.term[0])
             elif arguments.command == 'search':
                 search(group_name, arguments.file[0])
             elif arguments.command == 'grep':

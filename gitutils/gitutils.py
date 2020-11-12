@@ -48,7 +48,7 @@ def grep(group_name, project_name, project_id, search_term):
     with Spinner():
         results = gitlab_utils.grep_file_in_project(search_term, project_id,project_name,group_name)
     # Display the results
-    gitlab_utils.print_grep_output(project_name, project_id, search_term, results)
+    gitlab_utils.print_grep_output(group_name, project_name, project_id, search_term, results)
 
 def search(group_indication, file_name):
     """

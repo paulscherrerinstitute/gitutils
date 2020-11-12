@@ -277,12 +277,13 @@ def print_search_output(group_indication, file_name, results):
         print(const.SEARCHFILE_EMPTY % (const.bcolors.FAIL, file_name, const.bcolors.ENDC))
 
 
-def print_grep_output(project_name, project_id, search_term, results):
+def print_grep_output(group_name, project_name, project_id, search_term, results):
     if results:
         # For each grep match
         for idx,i in enumerate(results):
             # States the search_term
             print(const.bcolors.BOLD,str(idx+1),") ",const.bcolors.OKGREEN, search_term, const.bcolors.ENDC, ":\n")
+            print("\t Group: "+group_name)
             # direct weblink to such file
             print("\t Weblink: "+const.bcolors.UNDERLINE+i.get('webpath')+const.bcolors.ENDC)
             # removal of empty spaces at the beginning of lines
@@ -357,7 +358,7 @@ def find_file_by_id(file_name,group_dict):
                     'webpath': const.ENDPOINT+"/"+group_dict['name']+"/"+i.get('name')+"/blob/"+match.get('ref')+"/"+match.get('filename')+"#L"+str(match.get('startline'))
                 })
             if len(results_blob) > 0 :
-                print_grep_output(i.get('name'), i.get('id'), file_name, results_blob)
+                print_grep_output(group_dict['name'], i.get('name'), i.get('id'), file_name, results_blob)
     return 
 
 def find_file(file_name,group_indication):

@@ -107,30 +107,10 @@ optional arguments:
 > To see the clonegroup help message use: ```> gitutils clonegroup -h```
 
 ## search
-```bash
-usage: gitutils.py search [-h] group file
-
-positional arguments:
-  group       Group's name
-  file        File's name.
-
-optional arguments:
-  -h, --help  show this help message and exit
-```
-> To see the merge help message use: ```> gitutils search -h```
+Deprecated. Use the find command.
 
 ## grep
-```bash
-usage: gitutils.py grep [-h] project term
-
-positional arguments:
-  project     Project's name.
-  term        Term to search.
-
-optional arguments:
-  -h, --help  show this help message and exit
-```
-> To see the merge help message use: ```> gitutils grep -h```
+Deprecated. Use the find command.
 
 ## Examples
 
@@ -155,53 +135,37 @@ optional arguments:
         
     > This will clone each repo into its specific folder, depending on the amount of projects this command might take a while. Additionally, a 2 seconds sleep time had to be added in between clones in order not to be blocked by Gitlab API.
 
-### SEARCH
+### FIND
 
-1. The search command will search for a specific file within all projects of a specified group .
+1. The find command will do a general search for all projects and groups.
     - To search for the file ```file_name``` within group ```group_name```:
 
         ```bash
-        > gitutils search <group_name> <file_name>
+        > gitutils find <term>
         ```
         > Keep in mind that depending the number of projects inside that group, this task can take some seconds...
 
     - The output will be enumerated according to this example:
 
         ```bash
-        Gitutils searching inside group <group_name> for file <file_name> ...
-            X )   <file_name>  :
-                            Group: <group_name>
-                            Project: <project_name> (id XXXX)
-                            Branch: <branch_name>
-                            Path: <path/to/file_name>
+        Gitutils searching for term " S10CB04-CVME-DBAMT1 "...
+Group:  archiver_config 
+  1 )   S10CB04-CVME-DBAMT1  :
 
-                            Weblink: https://git.psi.ch/path/to/file_name
+         Weblink: https://git.psi.ch/archiver_config/sf_archapp/blob/master/S_DI_BAM_S10CB04-DBAMT1.config#L6
+
+                #  BAM vme ioc cpu/memory usage
+                #
+                S10CB04-CVME-DBAMT1:MEM_USED                    Monitor 1 60
+                S10CB04-CVME-DBAMT1:MEM_FREE                    Monitor 1 60
+                S10CB04-CVME-DBAMT1:IOC_CPU_LOAD                Monitor 1 60
+                S10CB04-CVME-DBAMT1:UPTIME                      Monitor 1 60
+                S10CB04-CVME-DBAMT1:STATUS                      Monitor 1 60
+                #
+                S10CB04-CVME-DBAMT2:MEM_USED                    Monitor 1 60
         ```
         > Where ```X``` is the counter of file_name found and ```XXXX``` is the project id.
 
-### GREP
-
-1. The grep command will search for a term within both filenames and contents of all files within a specified proejct. 
-    - To search for the term ```search_term``` within project ```project_name```:
-
-        ```bash
-        > gitutils grep <project_name> <search_term>
-        ```
-        > Keep in mind that depending the number of files (and their sizes), this task can take some seconds...
-
-    - The output will be enumerated according to this example:
-
-        ```bash
-        Gitutils searching inside project <project_name> for term <search_term>...
-        X )   <search_term>  :
-
-                Weblink: https://git.psi.ch/path/to/<file_name>#LXX
-
-                Lorem ipsum dolor sit amet, consectetur
-                do eiusmod tempor <search_term> ut labore 
-                ex ea commodo consequat.
-        ```
-        > Where ```X``` indicates the number of matches and ```LX``` indicates the line that it was found.
 
 ### FORK
 

@@ -422,30 +422,15 @@ def main():
         repo_name = 'all'
         group_name = arguments.group[0]
         project_id = 'all'
-    elif arguments.command == 'search':
-        if not arguments.group or not arguments.file:
-            print(const.SEARCHFILE_PROBLEM)
-            sys.exit(-1)
+    elif arguments.command == 'search' or arguments.command == 'grep':
+        print("Gitutils warning: "+const.DEPRECATED_GREP_SEARCH % (arguments.term[0]))
         repo_name = 'all'
-        group_name = arguments.group[0]
+        group_name = 'all'
         project_id = 'all'
     elif arguments.command == 'find':
         repo_name = 'all'
         group_name = 'all'
         project_id = 'all'
-    elif arguments.command == 'grep':
-        if not arguments.project or not arguments.term:
-            print(const.GREPFILE_PROBLEM)
-            sys.exit(-1)
-        # Initially we assume there's no group indication
-        repo_name = arguments.project[0]
-        # if there's group indication
-        if '/' in repo_name:
-            group_name = repo_name.split('/')[0]
-            repo_name = repo_name.split('/')[1]
-        else:
-            group_name = gitlab_utils.get_project_group_simplified(repo_name)
-        project_id = gitlab_utils.get_project_id(group_name, repo_name)
     elif arguments.project and arguments.command == 'fork':
         (repo_name, group_name, project_id, valid) = gitlab_utils.get_repo_group_names(
             arguments.project[0], arguments.group, arguments.clean)
@@ -489,10 +474,8 @@ def main():
                 clonegroup(group_name=group_name)
             if arguments.command == 'find':
                 find(arguments.term[0])
-            elif arguments.command == 'search':
-                search(group_name, arguments.file[0])
-            elif arguments.command == 'grep':
-                grep(group_name, repo_name, project_id, arguments.term[0])
+            elif arguments.command == 'search' or arguments.command == 'grep':
+                find(arguments.term[0])
             else:
                 print(const.COMMAND_NOT_FOUND)
                 parser.print_help()

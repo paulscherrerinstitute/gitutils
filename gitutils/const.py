@@ -91,6 +91,7 @@ GIT_UNABLE_TO_FIND_PROJECT_MSG = "Unable to find project - Aborting...\n"
 GIT_UNABLE_TO_FIND_MASTER_BRANCH = "Unable to find master branch in project to merge - Aborting...\n"
 GIT_PATHNAME_IS_TAKEN = 'has already been taken'
 MERGE_DEFAULT_TITLE = "Merge request submitted by %s."
+
 #####################
 # PARSE MSGS / HELP #
 #####################
@@ -135,7 +136,7 @@ MERGE_MESSAGE_TITLE = ''' The title of the merge request that is going to be cre
 MERGE_MESSAGE_DESCRIPTION = '''The description of the merge request that is going to be created.'''
 CLONEGROUP_HELP_MSG = "Clones all existing projects within a group."
 CLONEGROUP_GROUP_NAME = "Group name"
-SEARCHFILE_HELP_MSG = "Search for a file within a group."
+SEARCHFILE_HELP_MSG = "DEPRECATED. Use find instead."
 SEARCHFILE_FILE_MSG = "File's name."
 GREP_PROJECT_MSG = "Project's name."
 GREP_TERM_MSG = "Term to search."
@@ -143,13 +144,14 @@ SEARCHFILE_GROUP_MSG = "Group's name"
 SEARCHFILE_INIT_MSG = '\nGitutils searching inside group%s %s %sfor file%s %s %s...'
 GREPFILE_INIT_MSG = '\nGitutils searching inside project%s %s %sfor term \"%s %s %s\"...'
 GREPFILE_PROBLEM = "Not possible to search for a term if the project or the term itself are not provided. Use 'gitutils grep -h' for help."
-GREPFILE_HELP_MSG = "Search for a term inside the files of a project."
+GREPFILE_HELP_MSG = "DEPRECATED. Use find instead."
 GREP_EMPTY = "The term %s %s %s was not found in such project."
 SEARCHFILE_EMPTY = "The file %s %s %s was not found in such group."
 STORE_TRUE = "store_true"
 BLOBS = 'blobs'
 GREPFILE_INIT_MSG = '\nGitutils searching for term \"%s %s %s\"...'
 FIND_HELP_MSG = "Find a term inside the repositories."
+DEPRECATED_GREP_SEARCH = "Grep and search are deprecated. Gitutils will use find %s instead."
 ############
 # COMMANDS #
 ############

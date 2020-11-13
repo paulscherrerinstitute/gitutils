@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 import sys
 import os
 import logging
@@ -156,6 +157,74 @@ def clonegroup(group_name=''):
     # Finishing up, message to user
     print("All projects have been cloned. Exiting now...")
 
+def createprojects(group_name, project_names=[]):
+    """
+    It create groups based on the list provided.
+    : param group_name : List of name(s) of group to be created
+    : type group_name : list
+    """
+    total_proj_names = len(project_names)
+    group_id = 0
+    # checks if group exists and create if it doesnt exists yet
+    if not gitlab_utils.group_exists(group_name):
+        # if not, creates the new group
+        print(const.CREATEPROJECT_NOGROUP % (group_name, group_name))
+        print(const.CREATEGROUP_CREATING % (1, group_name), end="")
+        gitlab_utils.create_group(group_name, "-")
+        time.sleep(1)
+        group_id = gitlab_utils.get_group_id(group_name)
+        if group_id != -1:
+            print(const.CREATEGROUP_ID % group_id)
+    # if group existed before
+    if group_id == 0:
+        group_id = gitlab_utils.get_group_id(group_name)
+    # gets all projects from this group
+    group_projects = gitlab_utils.get_group_projects(group_name)
+    
+    # iterates over all entries of new projects
+    count = 1
+    print(const.CREATEPROJECT_START % (const.bcolors.BOLD, group_name, group_id, const.bcolors.ENDC))
+    for project in project_names:
+        skip_proj = False
+        for existing_project in group_projects:
+            if existing_project['name'] == project:
+                print(const.CREATEPROJECT_TAKEN % (count, group_name, project))
+                skip_proj = True
+        if not skip_proj:
+            print(const.CREATEPROJECT_CREATING % (count, project), end="")
+            new_proj = gitlab_utils.create_project(group_id, project)
+            project_id = gitlab_utils.get_project_id(group_name, project)
+            if project_id != -1:
+                print(const.CREATEGROUP_ID % project_id)
+            count += 1
+    print(const.CREATEPROJECT_END % (count-1, total_proj_names))
+
+
+def creategroups(group_names=[]):
+    """
+    It create groups based on the list provided.
+    : param group_name : List of name(s) of group to be created
+    : type group_name : list
+    """
+    total_group_names = len(group_names)
+    if total_group_names < 1:
+        gitutils_exception.GitutilsError(const.PROBLEM_CREATEGROUP_EMPTY)
+    count = 1
+    print(const.CREATEGROUP_START)
+    for group_name in group_names:
+        # check if group exists
+        if not gitlab_utils.group_exists(group_name):
+            print(const.CREATEGROUP_CREATING % (count, group_name), end="")
+            gitlab_utils.create_group(group_name, "-")
+            time.sleep(1)
+            group_id = gitlab_utils.get_group_id(group_name)
+            if group_id != -1:
+                print(const.CREATEGROUP_ID % group_id)
+            count += 1
+        else:
+            print(const.CREATEGROUP_TAKEN % group_name)
+    print(const.CREATEGROUP_END % (count-1, total_group_names))
+
 def merge(git_repository='',
           git_repository_id='',
           description='',
@@ -175,7 +244,7 @@ def merge(git_repository='',
 
     git_username = gitlab_utils.get_username()
     if git_username == -1:
-        raise gitutils_exception.GitutilsError(const.PROBLEM_USERNAME)
+        raise gitutils_exception.GitutilsError(const.PROBLEM_CREATEGROUP_EMPTY)
 
     # Check if there is already a fork
     forked_project = gitlab_utils.get_forked_project(git_repository,
@@ -309,9 +378,9 @@ def main():
     parser_find.add_argument('term', nargs=1, metavar='term',
                              help=textwrap.dedent(const.GREP_TERM_MSG))
 
-    ###################
-    # CLONE GROUP CMD #
-    ###################
+    ###############
+    # CLONE GROUP #
+    ###############
 
     parser_cg = subparsers.add_parser('clonegroup',
                                       help=const.CLONEGROUP_HELP_MSG,
@@ -319,6 +388,30 @@ def main():
 
     parser_cg.add_argument('group', nargs=1, metavar='group',
                              help=textwrap.dedent(const.CLONEGROUP_GROUP_NAME))
+
+    ################
+    # CREATE GROUP #
+    ################
+
+    parser_createg = subparsers.add_parser('creategroups',
+                                      help=const.CREATEGROUP_HELP_MSG,
+                                      formatter_class=argparse.RawTextHelpFormatter)
+
+    parser_createg.add_argument('name', nargs='+', metavar='name',
+                             help=textwrap.dedent(const.CREATEGROUP_GROUP_NAME))
+
+    ###################
+    # CREATE PROJECTS #
+    ###################
+
+    parser_createp = subparsers.add_parser('createprojects',
+                                      help=const.CREATEPROJECT_HELP_MSG,
+                                      formatter_class=argparse.RawTextHelpFormatter)
+
+    parser_createp.add_argument('group', nargs=1, metavar='group',
+                             help=textwrap.dedent(const.CLONEGROUP_GROUP_NAME))
+    parser_createp.add_argument('name', nargs='+', metavar='name',
+                             help=textwrap.dedent(const.CREATEGROUP_GROUP_NAME))
 
     #############
     # LOGIN CMD #
@@ -422,6 +515,20 @@ def main():
         repo_name = 'all'
         group_name = arguments.group[0]
         project_id = 'all'
+    elif arguments.command == 'creategroups':
+        if not arguments.name:
+            print(const.CREATEGROUP_PROBLEM)
+            sys.exit(-1)
+        repo_name = 'none'
+        group_name = arguments.name
+        project_id = 'none'
+    elif arguments.command == 'createprojects':
+        if not arguments.name:
+            print(const.CREATEGROUP_PROBLEM)
+            sys.exit(-1)
+        repo_name = arguments.name
+        group_name = arguments.group
+        project_id = 'none'
     elif arguments.command == 'search' or arguments.command == 'grep':
         print("Gitutils warning: "+const.DEPRECATED_GREP_SEARCH % (arguments.term[0]))
         repo_name = 'all'
@@ -472,7 +579,11 @@ def main():
                     title=arguments.title)
             elif arguments.command == 'clonegroup':
                 clonegroup(group_name=group_name)
-            if arguments.command == 'find':
+            elif arguments.command == 'creategroups':
+                creategroups(group_names=group_name)
+            elif arguments.command == 'createprojects':
+                createprojects(group_name=group_name[0], project_names=repo_name)
+            elif arguments.command == 'find':
                 find(arguments.term[0])
             elif arguments.command == 'search' or arguments.command == 'grep':
                 find(arguments.term[0])

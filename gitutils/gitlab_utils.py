@@ -83,14 +83,18 @@ def check_group_exists(group_name):
         raise gitutils_exception.GitutilsError(const.GROUP_PARAMETER_EMPTY)
     return 0
 
+def group_exists(name):
+    group = gl.groups.list(search=name, all=True)
+    return bool(group)
+
+def project_exists(proj_name):
+    project = gl.projects.list(search=project_name, all=True)
+    return bool(project)
+
+
 
 def check_existing_remote_git(clean, git_repository_id, group_name):
     proj = gl.projects.get(git_repository_id)
-
-    # verifies if the group_name exists
-    # TODO it seems that user names are not full projects
-    # check_group_exists(group_name)
-
     # verifies if such project already exists remotely under
     # any personal project
     projs = get_owned_projects()
@@ -234,6 +238,9 @@ def get_projects():
     projects_list = gl.projects.list(all=True)
     return get_dict_from_own_projects(projects_list)
 
+def create_project(group_id, project_name):
+    project = gl.projects.create({'name': project_name, 'namespace_id': group_id})
+    return project
 
 def create_group(group_name, description):
     """
@@ -422,7 +429,6 @@ def get_project_group_simplified(project_name):
         else:
             raise gitutils_exception.GitutilsError(
                 const.MULTIPLE_PROJECTS % (list_of_groups))
-    print("teste", list_of_groups)
     raise gitutils_exception.GitutilsError(const.PROJECT_NAME_NOT_FOUND)
 
 def get_project_group(project_name, clean, merge, project_indication):

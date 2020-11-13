@@ -20,7 +20,7 @@ add_function_parentheses = True
 project = u'Gitutils'
 copyright = u'2019, Leonardo hax Damiani'
 
-version = '1.4.3'
+version = '1.0.19'
 release = ''
 
 # -- Options for HTML output ---------------------------------------------------

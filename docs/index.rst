@@ -11,6 +11,9 @@ Gitutils allows you to:
 
       * **Fork** existing repositories into your own personal space. Doing a fork is strongly recommended to freely experiment your changes and/or development in a safe working space without affecting the original project.
       * **Merge** existing repositories from your personal space into the original repository. Merge has the purpose of joining different repositories to incorporate changes into repository.
+      * **Clonegroup**  allows to clone all existing projects within a group.
+      * **Find** allows to do a general search for a term inside all groups/projects.
+
 
 It is developed using `python`_ on an open-source project (`github repository`_), distributed using anaconda via the Paul Scherrer Institute channel (`anaconda channel`_) and documented here using readthedocs.
 Gitutils authenticates on the git server using the OAuth2 protocol. If the token is non-existant or not valid, gitutils will request username and password and store the token in a file located on the user's home directory called ``.gitutils_token``. The user will not be requested for username nor password until the saved token is not valid anymore.
@@ -30,6 +33,5 @@ Contents:
     usage
     development
     faq
-    sheet
     changelog
     contact

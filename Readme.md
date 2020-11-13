@@ -6,14 +6,15 @@ Gitutils is a python tool to facilitate the server-side operations when developi
 
 [Detailed readthedocs documentation](https://gitutils.readthedocs.io/en/latest/index.html)
 
-[Gitutils cheat sheet](cheatsheet.pdf)
+Please note that Gitutils depends on the Oauth2 authentication via the GITLAB EE API v4. Because of this, gitlab accounts with the two-factor authentication (2FA) activated are not allowed to use the Oauth2 authentication and,therefore, the gitutils token can't be generated.
+> for more information: https://docs.gitlab.com/ee/user/profile/account/two_factor_authentication.html and https://docs.gitlab.com/ee/api/oauth2.html#resource-owner-password-credentials-flow
 
 # Usage
 
 ## gitutils
 ```bash
-usage: gitutils.py [-h] [-e ENDPOINT]
-                   {fork,merge,search,grep,clonegroup,login} ...
+usage: gitutils [-h] [-e ENDPOINT]
+                {fork,merge,search,grep,find,clonegroup,login} ...
 
 GITUTILS is a tool to facilitate the server-side operations when developing software that uses git repositories.
 
@@ -25,12 +26,13 @@ optional arguments:
 command:
   valid commands
 
-  {fork,merge,search,grep,clonegroup,login}
+  {fork,merge,search,grep,find,clonegroup,login}
                         commands
     fork                Creates a fork from the repository.
     merge               Creates a request to merge the defined fork to the original repository.
-    search              Search for a file within a group.
-    grep                Search for a term inside the files of a project.
+    search              DEPRECATED. Use find instead.
+    grep                DEPRECATED. Use find instead.
+    find                Find a term inside the repositories.
     clonegroup          Clones all existing projects within a group.
     login               Fetches the token for the usage of gitutils and stores it on the user's home directory file (~/.gitutils_token).
 ```
@@ -112,6 +114,19 @@ Deprecated. Use the find command.
 ## grep
 Deprecated. Use the find command.
 
+## find
+```bash
+usage: gitutils find [-h] term
+
+positional arguments:
+  term        Term to search.
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+> To see the clonegroup help message use: ```> gitutils find -h```
+
 ## Examples
 
 ### LOGIN
@@ -138,33 +153,32 @@ Deprecated. Use the find command.
 ### FIND
 
 1. The find command will do a general search for all projects and groups.
-    - To search for the file ```file_name``` within group ```group_name```:
+    - To search for ```term```:
 
         ```bash
         > gitutils find <term>
         ```
-        > Keep in mind that depending the number of projects inside that group, this task can take some seconds...
+        > Keep in mind that depending the number of groups and projects, this task can take some minutes...
 
-    - The output will be enumerated according to this example:
+    - The output will display the group and the enumerated matching cases according to this example:
 
         ```bash
         Gitutils searching for term " S10CB04-CVME-DBAMT1 "...
-Group:  archiver_config 
-  1 )   S10CB04-CVME-DBAMT1  :
+        Group:  archiver_config 
+            1 )   S10CB04-CVME-DBAMT1  :
 
-         Weblink: https://git.psi.ch/archiver_config/sf_archapp/blob/master/S_DI_BAM_S10CB04-DBAMT1.config#L6
+            Weblink: https://git.psi.ch/archiver_config/sf_archapp/blob/master/S_DI_BAM_S10CB04-DBAMT1.config#L6
 
-                #  BAM vme ioc cpu/memory usage
-                #
-                S10CB04-CVME-DBAMT1:MEM_USED                    Monitor 1 60
-                S10CB04-CVME-DBAMT1:MEM_FREE                    Monitor 1 60
-                S10CB04-CVME-DBAMT1:IOC_CPU_LOAD                Monitor 1 60
-                S10CB04-CVME-DBAMT1:UPTIME                      Monitor 1 60
-                S10CB04-CVME-DBAMT1:STATUS                      Monitor 1 60
-                #
-                S10CB04-CVME-DBAMT2:MEM_USED                    Monitor 1 60
+                    #  BAM vme ioc cpu/memory usage
+                    #
+                    S10CB04-CVME-DBAMT1:MEM_USED                    Monitor 1 60
+                    S10CB04-CVME-DBAMT1:MEM_FREE                    Monitor 1 60
+                    S10CB04-CVME-DBAMT1:IOC_CPU_LOAD                Monitor 1 60
+                    S10CB04-CVME-DBAMT1:UPTIME                      Monitor 1 60
+                    S10CB04-CVME-DBAMT1:STATUS                      Monitor 1 60
+                    #
+                    S10CB04-CVME-DBAMT2:MEM_USED                    Monitor 1 60
         ```
-        > Where ```X``` is the counter of file_name found and ```XXXX``` is the project id.
 
 
 ### FORK

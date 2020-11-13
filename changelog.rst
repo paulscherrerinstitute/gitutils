@@ -4,7 +4,20 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
+[1.0.19] - 2020-11-13
+
+Added
+~~~~~
+- Find function allows to do a general search for terms within groups and projects.
+
+Changed
+~~~~~~~
+- Search and grep commands are now deprecated (the new find command replaces both).
+
+
 [1.0.18] - 2020-07-29
+---------------------
+
 Added
 ~~~~~
 - Publish conda package automatically directly using github actions after a new release.
@@ -15,12 +28,16 @@ Changed
 
 
 [1.0.17] - 2020-05-20
+---------------------
+
 Changed
 ~~~~~~~
 - bugfix when fetching an empty project.
 
 
 [1.0.15] - 2020-04-09
+---------------------
+
 Added
 ~~~~~
 
@@ -33,6 +50,8 @@ Changed
 
 
 [1.0.14] - 2020-04-03
+---------------------
+
 Added
 ~~~~~
 
@@ -44,6 +63,8 @@ Changed
 - Improved readme with new command and new help messages.
 
 [1.0.12] - 2020-01-06
+---------------------
+
 Added
 ~~~~~
 
@@ -55,12 +76,15 @@ Changed
 - Increased sleep time after deletion of project because the server wasn't processing it in time.
 
 [1.0.10] - 2019-12-20
+---------------------
 Changed
 ~~~~~~~
 
 -  Gitutils now uses SSH to perform git commands. HTTP has issues due to security/access.
 
 [1.0.2] - 2019-12-06
+--------------------
+
 Added
 ~~~~~
 

@@ -7,27 +7,28 @@ Gitutils
 
 .. code-block:: bash
 
-      usage: gitutils.py [-h] [-e ENDPOINT]
-                         {fork,merge,search,grep,clonegroup,login} ...
+usage: gitutils [-h] [-e ENDPOINT]
+                {fork,merge,search,grep,find,clonegroup,login} ...
 
-      GITUTILS is a tool to facilitate the server-side operations when developing software that uses git repositories.
+GITUTILS is a tool to facilitate the server-side operations when developing software that uses git repositories.
 
-      optional arguments:
-        -h, --help            show this help message and exit
-        -e ENDPOINT, --endpoint ENDPOINT
-                              Endpoint of the git server. Default: https://git.psi.ch
+optional arguments:
+  -h, --help            show this help message and exit
+  -e ENDPOINT, --endpoint ENDPOINT
+                        Endpoint of the git server. Default: https://git.psi.ch
 
-      command:
-        valid commands
+command:
+  valid commands
 
-        {fork,merge,search,grep,clonegroup,login}
-                              commands
-          fork                Creates a fork from the repository.
-          merge               Creates a request to merge the defined fork to the original repository.
-          search              Search for a file within a group.
-          grep                Search for a term inside the files of a project.
-          clonegroup          Clones all existing projects within a group.
-          login               Fetches the token for the usage of gitutils and stores it on the user's home directory file (~/.gitutils_token).
+  {fork,merge,search,grep,find,clonegroup,login}
+                        commands
+    fork                Creates a fork from the repository.
+    merge               Creates a request to merge the defined fork to the original repository.
+    search              DEPRECATED. Use find instead.
+    grep                DEPRECATED. Use find instead.
+    find                Find a term inside the repositories.
+    clonegroup          Clones all existing projects within a group.
+    login               Fetches the token for the usage of gitutils and stores it on the user's home directory file (~/.gitutils_token).
 
 .. note:: To see the gitutils usage help, you can use::
 
@@ -117,38 +118,23 @@ Clonegroup
       
       
       
-Search
-------
-
-.. code-block:: bash
-
-      usage: gitutils.py search [-h] group file
-
-      positional arguments:
-        group       Group's name
-        file        File's name.
-
-      optional arguments:
-        -h, --help  show this help message and exit
-
-.. note:: To see the search usage help, you can use::
-
-      $ gitutils search -h
+Search & Grep
+-------------
+Deprecated. Use command find instead
   
-Grep
-------
-
+Find
+----
 .. code-block:: bash
 
-      usage: gitutils.py grep [-h] project term
+      usage: gitutils find [-h] term
 
       positional arguments:
-        project     Project's name.
-        term        Term to search.
+      term        Term to search.
 
       optional arguments:
-        -h, --help  show this help message and exit
+      -h, --help  show this help message and exit
 
-.. note:: To see the grep usage help, you can use::
+.. note:: To see the find usage help, you can use::
 
-      $ gitutils grep -h
+      $ gitutils find -h
+      

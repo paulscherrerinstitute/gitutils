@@ -287,7 +287,7 @@ def print_grep_output(group_name, project_name, project_id, search_term, results
         # For each grep match
         for idx,i in enumerate(results):
             # States the search_term
-            print("Group: ",group_name, "\n",const.bcolors.BOLD,str(idx+1),") ",const.bcolors.OKGREEN, search_term, const.bcolors.ENDC, ":\n")
+            print("\nGroup: ",group_name, "\n",const.bcolors.BOLD,str(idx+1),") ",const.bcolors.OKGREEN, search_term, const.bcolors.ENDC, ":\n")
             
             # direct weblink to such file
             print("\t Weblink: "+const.bcolors.UNDERLINE+i.get('webpath')+const.bcolors.ENDC)

@@ -25,9 +25,9 @@ def find(search_term):
     groups = gitlab_utils.get_groups()
     results_group = []
     # search for files in groups
-    for group in groups:
-        if groups[group]['name'] != 'sandbox':
-            gitlab_utils.find_file_by_id(search_term,groups[group])
+    with Spinner():
+        for group in groups:
+                gitlab_utils.find_file_by_id(search_term,groups[group])
         
 
 def grep(group_name, project_name, project_id, search_term):

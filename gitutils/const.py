@@ -150,8 +150,26 @@ SEARCHFILE_EMPTY = "The file %s %s %s was not found in such group."
 STORE_TRUE = "store_true"
 BLOBS = 'blobs'
 GREPFILE_INIT_MSG = '\nGitutils searching for term \"%s %s %s\"...'
-FIND_HELP_MSG = "Find a term inside the repositories."
+FIND_HELP_MSG = "General search inside the ."
 DEPRECATED_GREP_SEARCH = "Grep and search are deprecated. Gitutils will use find %s instead."
+CREATEGROUP_HELP_MSG = "Create a new group (or multiple)."
+CREATEGROUP_GROUP_NAME = "Group name or multiple (if multiple groups should be created)."
+CREATEGROUP_PROBLEM = "Not possible to creategroup if the group name parameter is not provided. Use 'gitutils creategroup -h' for help."
+PROBLEM_CREATEGROUP_EMPTY = "Not possible to create groups if no name is provided. Use 'gitutils creategroup -h' for help."
+CREATEGROUP_CREATING = "\t %s) %s "
+CREATEGROUP_START = "\nGitutils creategroups...\n"
+CREATEGROUP_TAKEN = "Group %s already exists."
+CREATEGROUP_END = "\nGitutils creategroups summary: \n\tgroups created: %s/%s.\n"
+CREATEPROJECT_HELP_MSG = "Create a new project (or multiple) inside the specified group."
+PROBLEM_CREATEPROJECT_EMPTY = "Not possible to create projects if no name is provided. Use 'gitutils createprojects -h' for help."
+CREATEPROJECT_GROUP_NAME = "Group name"
+CREATEPROJECT_PROJECTS_NAME = "Create a new project (or multiple)."
+CREATEPROJECT_NOGROUP = "\nGroup %s doesn't exist. Creating group %s first..."
+CREATEPROJECT_TAKEN = "\t %s) Group %s already has a project named %s. This will be skipped."
+CREATEGROUP_ID = " (id: %s) ✓\n"
+CREATEPROJECT_CREATING = "\t %s) %s "
+CREATEPROJECT_START = "\nGitutils createprojects: creating project in group %s %s (id: %s) %s ...\n"
+CREATEPROJECT_END = "\nGitutils createprojects summary: \n\tprojects created: %s/%s.\n"
 ############
 # COMMANDS #
 ############

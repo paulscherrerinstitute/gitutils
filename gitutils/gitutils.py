@@ -28,45 +28,6 @@ def find(search_term):
     with Spinner():
         for group in groups:
                 gitlab_utils.find_file_by_id(search_term,groups[group])
-        
-
-def grep(group_name, project_name, project_id, search_term):
-    """
-    Grep command searches in filenames and content for a term in a specific project.
-    :param group_name: Name of the group.
-    :type group_name: str
-    :param project_name: Name of the project.
-    :type project_name: str
-    :param project_id: Id of the project.
-    :type project_id: int
-    :param search_term: Term to search in the content of files and filenames.
-    :type search_term: str
-    :return:
-    """
-    # Initial message
-    print(const.GREPFILE_INIT_MSG % (const.bcolors.BOLD, project_name, const.bcolors.ENDC, const.bcolors.BOLD, search_term, const.bcolors.ENDC))
-    # Gets all the projects from the specified group and gets the results
-    with Spinner():
-        results = gitlab_utils.grep_file_in_project(search_term, project_id,project_name,group_name)
-    # Display the results
-    gitlab_utils.print_grep_output(group_name, project_name, project_id, search_term, results)
-
-def search(group_indication, file_name):
-    """
-    Search command searches for filenames inside a specified group.
-    :param group_indication: Name of the group.
-    :type group_indication: str
-    :param file_name: Name of the file to be searched.
-    :type file_name: str
-    :return:
-    """
-    # Initial message
-    print(const.SEARCHFILE_INIT_MSG % (const.bcolors.BOLD, group_indication, const.bcolors.ENDC, const.bcolors.BOLD, file_name, const.bcolors.ENDC))
-    # # Gets all the projects from the specified group and gets the results
-    with Spinner():
-        results = gitlab_utils.find_file(file_name, group_indication)
-    # Display the results
-    gitlab_utils.print_search_output(group_indication, file_name, results)
 
 def fork(
         fork_group_indication='',
@@ -305,81 +266,6 @@ def main():
                                        dest='command',
                                        help='commands')
 
-    ############
-    # FORK CMD #
-    ############
-
-    parser_fork = subparsers.add_parser('fork',
-                                        help=const.FORK_HELP_MSG,
-                                        formatter_class=argparse.RawTextHelpFormatter)
-
-    parser_fork.add_argument('-n',
-                             '--no_clone',
-                             action=const.STORE_TRUE,
-                             help=const.FORK_NOCLONE_HELP)
-
-    parser_fork.add_argument('-c',
-                             '--clean',
-                             action=const.STORE_TRUE,
-                             help=const.FORK_CLEAN_MSG)
-
-    parser_fork.add_argument('-g',
-                             '--group',
-                             help=const.FORK_GROUP_MSG)
-
-    parser_fork.add_argument('project', nargs=1, metavar='project',
-                             help=textwrap.dedent(const.FORK_PROJECT_MESSAGE))
-
-    #############
-    # MERGE CMD #
-    #############
-
-    parser_mr = subparsers.add_parser('merge',
-                                      help=const.MERGE_HELP_MSG,
-                                      formatter_class=argparse.RawTextHelpFormatter)
-    parser_mr.add_argument('-t',
-                           '--title',
-                           help=const.MERGE_MESSAGE_TITLE)
-
-    parser_mr.add_argument('-p',
-                           '--project',
-                           help=const.MERGE_PROJECT_MESSAGE)
-
-    parser_mr.add_argument('-d',
-                           '--description',
-                           help=const.MERGE_MESSAGE_DESCRIPTION)
-
-    ###############
-    # SEARCH FILE #
-    ###############
-    parser_sf = subparsers.add_parser('search',
-                                    help=const.SEARCHFILE_HELP_MSG,
-                                    formatter_class=argparse.RawTextHelpFormatter)
-    parser_sf.add_argument('group', nargs=1, metavar='group',
-                             help=textwrap.dedent(const.SEARCHFILE_GROUP_MSG))
-    parser_sf.add_argument('file', nargs=1, metavar='file',
-                             help=textwrap.dedent(const.SEARCHFILE_FILE_MSG))
-
-    #############
-    # GREP TERM #
-    #############
-    parser_grep = subparsers.add_parser('grep',
-                                    help=const.GREPFILE_HELP_MSG,
-                                    formatter_class=argparse.RawTextHelpFormatter)
-    parser_grep.add_argument('project', nargs=1, metavar='project',
-                             help=textwrap.dedent(const.GREP_PROJECT_MSG))
-    parser_grep.add_argument('term', nargs=1, metavar='term',
-                             help=textwrap.dedent(const.GREP_TERM_MSG))
-
-    ########
-    # FIND #
-    ########
-    parser_find = subparsers.add_parser('find',
-                                    help=const.FIND_HELP_MSG,
-                                    formatter_class=argparse.RawTextHelpFormatter)
-    parser_find.add_argument('term', nargs=1, metavar='term',
-                             help=textwrap.dedent(const.GREP_TERM_MSG))
-
     ###############
     # CLONE GROUP #
     ###############
@@ -415,10 +301,40 @@ def main():
     parser_createp.add_argument('name', nargs='+', metavar='name',
                              help=textwrap.dedent(const.CREATEPROJECT_PROJECTS_NAME))
 
+    ########
+    # FIND #
+    ########
+    parser_find = subparsers.add_parser('find',
+                                    help=const.FIND_HELP_MSG,
+                                    formatter_class=argparse.RawTextHelpFormatter)
+    parser_find.add_argument('term', nargs=1, metavar='term',
+                             help=textwrap.dedent(const.GREP_TERM_MSG))
+
+    ############
+    # FORK CMD #
+    ############
+
+    parser_fork = subparsers.add_parser('fork',
+                                        help=const.FORK_HELP_MSG,
+                                        formatter_class=argparse.RawTextHelpFormatter)
+    parser_fork.add_argument('-n',
+                             '--no_clone',
+                             action=const.STORE_TRUE,
+                             help=const.FORK_NOCLONE_HELP)
+    parser_fork.add_argument('-c',
+                             '--clean',
+                             action=const.STORE_TRUE,
+                             help=const.FORK_CLEAN_MSG)
+    parser_fork.add_argument('-g',
+                             '--group',
+                             help=const.FORK_GROUP_MSG)
+    parser_fork.add_argument('project', nargs=1, metavar='project',
+                             help=textwrap.dedent(const.FORK_PROJECT_MESSAGE))
+
+
     #############
     # LOGIN CMD #
     #############
-
     subparsers.add_parser('login',
                         help=const.LOGIN_HELP_MSG,
                         formatter_class=argparse.RawTextHelpFormatter)
@@ -428,6 +344,26 @@ def main():
     if arguments.command is None:
         parser.print_help()
         sys.exit(-1)
+
+    #############
+    # MERGE CMD #
+    #############
+
+    parser_mr = subparsers.add_parser('merge',
+                                      help=const.MERGE_HELP_MSG,
+                                      formatter_class=argparse.RawTextHelpFormatter)
+    parser_mr.add_argument('-t',
+                           '--title',
+                           help=const.MERGE_MESSAGE_TITLE)
+
+    parser_mr.add_argument('-p',
+                           '--project',
+                           help=const.MERGE_PROJECT_MESSAGE)
+
+    parser_mr.add_argument('-d',
+                           '--description',
+                           help=const.MERGE_MESSAGE_DESCRIPTION)
+
 
     # sets the endpoins
     gitlab_utils.set_endpoint(arguments.endpoint)
@@ -441,7 +377,7 @@ def main():
     # retrieve repository and group names
     (repo_name, group_name, project_id) = (None, None, None)
     # list of commands
-    list_of_cmds = ['clonegroup', 'creategroups', 'createprojects', 'find', 'fork', 'grep', 'login', 'merge', 'search']
+    list_of_cmds = ['clonegroup', 'creategroups', 'createprojects', 'find', 'fork', 'login', 'merge']
     ##############
     # CLONEGROUP #
     ##############
@@ -499,14 +435,6 @@ def main():
             print(const.PROBLEM_FETCHING_NAME)
             parser.print_help()
             sys.exit(-1)
-    #################
-    # SEARCH & GREP #
-    #################
-    elif arguments.command == 'search' or arguments.command == 'grep':
-        print("Gitutils warning: "+const.DEPRECATED_GREP_SEARCH % (arguments.term[0]))
-        repo_name = 'all'
-        group_name = 'all'
-        project_id = 'all'
     #########
     # LOGIN #
     #########
@@ -600,7 +528,7 @@ def main():
                 creategroups(group_names=group_name)
             elif arguments.command == 'createprojects':
                 createprojects(group_name=group_name[0], project_names=repo_name)
-            elif arguments.command in ['find', 'search', 'grep']:
+            elif arguments.command == 'find':
                 find(arguments.term[0])
             elif arguments.command == 'fork':
                 fork(fork_group_indication=arguments.group,

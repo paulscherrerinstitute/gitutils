@@ -127,7 +127,7 @@ FORK_HELP_MSG = "Creates a fork from the repository."
 FORK_NOCLONE_HELP = '''Indicates that the forked project will not be cloned after forking. A fork
 will be created on the server-side and no clone nor upstream will be
 generated on the local git server.'''
-LOGIN_HELP_MSG = "Fetches the token for the usage of gitutils and stores it on the user's home directory file (~/.gitutils_token)."
+LOGIN_HELP_MSG = "Fetches the gitlab token (saved in ~/.gitutils_token)."
 LOGIN_TEST = "As a verification for the gitutils-gitlab token, gitutils will fetch the list of groups..."
 LOGIN_PROBLEM = "Problem with the token. Please, check your credentials."
 LOGIN_SUCCESS = "Credentials successfully stored and token is valid.."
@@ -150,7 +150,7 @@ SEARCHFILE_EMPTY = "The file %s %s %s was not found in such group."
 STORE_TRUE = "store_true"
 BLOBS = 'blobs'
 GREPFILE_INIT_MSG = '\nGitutils searching for term \"%s %s %s\"...'
-FIND_HELP_MSG = "General search inside the ."
+FIND_HELP_MSG = "General search inside all the groups/projects."
 DEPRECATED_GREP_SEARCH = "Grep and search are deprecated. Gitutils will use find %s instead."
 CREATEGROUP_HELP_MSG = "Create a new group (or multiple)."
 CREATEGROUP_GROUP_NAME = "Group name to be created (or multiple separated with spaces)."

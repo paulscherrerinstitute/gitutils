@@ -13,8 +13,9 @@ Please note that Gitutils depends on the Oauth2 authentication via the GITLAB EE
 
 ## gitutils
 ```bash
-usage: gitutils [-h] [-e ENDPOINT]
-                {fork,merge,search,grep,find,clonegroup,login} ...
+usage: gitutils.py [-h] [-e ENDPOINT]
+                   {clonegroup,creategroups,createprojects,find,fork,login}
+                   ...
 
 GITUTILS is a tool to facilitate the server-side operations when developing software that uses git repositories.
 
@@ -26,18 +27,68 @@ optional arguments:
 command:
   valid commands
 
-  {fork,merge,search,grep,find,clonegroup,login}
+  {clonegroup,creategroups,createprojects,find,fork,login}
                         commands
-    fork                Creates a fork from the repository.
-    merge               Creates a request to merge the defined fork to the original repository.
-    search              DEPRECATED. Use find instead.
-    grep                DEPRECATED. Use find instead.
-    find                Find a term inside the repositories.
     clonegroup          Clones all existing projects within a group.
-    login               Fetches the token for the usage of gitutils and stores it on the user's home directory file (~/.gitutils_token).
+    creategroups        Create a new group (or multiple).
+    createprojects      Create a new project (or multiple) inside the specified group.
+    find                General search inside all the groups/projects.
+    fork                Creates a fork from the repository.
+    login               Fetches the gitlab token (saved in ~/.gitutils_token).
 ```
 
 > To see the gitutils help message use: ```> gitutils -h```. If not specified otherwise the default endpoint is ```https://git.psi.ch```.
+
+## clonegroup
+```bash
+usage: gitutils.py clonegroup [-h] group
+
+positional arguments:
+  group       Group name
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+> To see the clonegroup help message use: ```> gitutils clonegroup -h```
+
+
+## creategroups
+
+```bash
+usage: gitutils.py creategroups [-h] name [name ...]
+
+positional arguments:
+  name        Group name or multiple (if multiple groups should be created).
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+## createprojects
+```bash
+usage: gitutils.py createprojects [-h] group name [name ...]
+
+positional arguments:
+  group       Group name
+  name        Name of the new project (or multiple separated with spaces).
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+## find
+```bash
+usage: gitutils find [-h] term
+
+positional arguments:
+  term        Term to search.
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+> To see the clonegroup help message use: ```> gitutils find -h```
 
 ## fork
 ```bash
@@ -94,38 +145,6 @@ optional arguments:
 ```
 
 > To see the merge help message use: ```> gitutils merge -h```
-
-## clonegroup
-```bash
-usage: gitutils.py clonegroup [-h] group
-
-positional arguments:
-  group       Group name
-
-optional arguments:
-  -h, --help  show this help message and exit
-```
-
-> To see the clonegroup help message use: ```> gitutils clonegroup -h```
-
-## search
-Deprecated. Use the find command.
-
-## grep
-Deprecated. Use the find command.
-
-## find
-```bash
-usage: gitutils find [-h] term
-
-positional arguments:
-  term        Term to search.
-
-optional arguments:
-  -h, --help  show this help message and exit
-```
-
-> To see the clonegroup help message use: ```> gitutils find -h```
 
 ## Examples
 

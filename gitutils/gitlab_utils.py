@@ -190,10 +190,8 @@ def verify_token():
     global gl
     if is_empty(gl.groups.list()):
         print(const.LOGIN_PROBLEM)
-        sys.exit(-1)
     else:
         print(const.LOGIN_SUCCESS)
-        sys.exit(-1)
 
 def oauth_authentication():
     """

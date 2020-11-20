@@ -4,6 +4,22 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
+[1.0.20] - 2020-11-13
+
+Changed
+~~~~~~~
+- Alphabetic order of the commands and the functions in the code.
+- Readme instructions
+
+Added
+~~~~~
+- creategroups and createprojects commands allowing to do bulk operations with groups and projects.
+
+Removed
+~~~~~~~
+- Search and grep commands.
+
+
 [1.0.19] - 2020-11-13
 
 Added

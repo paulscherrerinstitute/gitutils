@@ -160,8 +160,10 @@ def clonegroup(group_name=''):
 def createprojects(group_name, project_names=[]):
     """
     It create groups based on the list provided.
-    : param group_name : List of name(s) of group to be created
-    : type group_name : list
+    : param group_name : group name in which the projects will be created
+    : type group_name : str
+    : param project_names : List of name(s) of group to be created
+    : type project_names : list
     """
     total_proj_names = len(project_names)
     group_id = 0

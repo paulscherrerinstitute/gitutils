@@ -413,7 +413,7 @@ def main():
     parser_createp.add_argument('group', nargs=1, metavar='group',
                              help=textwrap.dedent(const.CLONEGROUP_GROUP_NAME))
     parser_createp.add_argument('name', nargs='+', metavar='name',
-                             help=textwrap.dedent(const.CREATEGROUP_GROUP_NAME))
+                             help=textwrap.dedent(const.CREATEPROJECT_PROJECTS_NAME))
 
     #############
     # LOGIN CMD #

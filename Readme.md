@@ -14,7 +14,7 @@ Please note that Gitutils depends on the Oauth2 authentication via the GITLAB EE
 ## gitutils
 ```bash
 usage: gitutils.py [-h] [-e ENDPOINT]
-                   {clonegroup,creategroups,createprojects,find,fork,login}
+                   {clonegroup,creategroups,createprojects,find,fork,login,merge}
                    ...
 
 GITUTILS is a tool to facilitate the server-side operations when developing software that uses git repositories.
@@ -27,7 +27,7 @@ optional arguments:
 command:
   valid commands
 
-  {clonegroup,creategroups,createprojects,find,fork,login}
+  {clonegroup,creategroups,createprojects,find,fork,login,merge}
                         commands
     clonegroup          Clones all existing projects within a group.
     creategroups        Create a new group (or multiple).
@@ -35,6 +35,7 @@ command:
     find                General search inside all the groups/projects.
     fork                Creates a fork from the repository.
     login               Fetches the gitlab token (saved in ~/.gitutils_token).
+    merge               Creates a request to merge the defined fork to the original repository.
 ```
 
 > To see the gitutils help message use: ```> gitutils -h```. If not specified otherwise the default endpoint is ```https://git.psi.ch```.

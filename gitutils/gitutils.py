@@ -339,12 +339,6 @@ def main():
                         help=const.LOGIN_HELP_MSG,
                         formatter_class=argparse.RawTextHelpFormatter)
 
-    arguments = parser.parse_args()
-    # verifies if there are any arguments
-    if arguments.command is None:
-        parser.print_help()
-        sys.exit(-1)
-
     #############
     # MERGE CMD #
     #############
@@ -364,7 +358,13 @@ def main():
                            '--description',
                            help=const.MERGE_MESSAGE_DESCRIPTION)
 
-
+    
+    arguments = parser.parse_args()
+    # verifies if there are any arguments
+    if arguments.command is None:
+        parser.print_help()
+        sys.exit(-1)
+    
     # sets the endpoins
     gitlab_utils.set_endpoint(arguments.endpoint)
 

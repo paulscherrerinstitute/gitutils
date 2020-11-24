@@ -13,6 +13,18 @@ from gitutils import gitutils_exception
 from gitutils import const
 from gitutils.spinner import Spinner
 
+def add_ldap(ldap_cn, git_group):
+    """
+    Assign ldap group sync to a git group
+    :param ldap_cn: LDAP USER CN (common name)
+    :type ldap_cn: str
+    :param git_group: Git group that the ldap will be added
+    :type git_group: str
+    :return:
+    """
+    print(const.ADDLDAP_INIT_MSG % (const.bcolors.BOLD, ldap_cn, const.bcolors.ENDC, const.bcolors.BOLD, git_group, const.bcolors.ENDC))
+    gitlab_utils.addldapgroup(ldap_cn, git_group)
+
 def find(search_term):
     """
     Find command searches in all projects/repositories.
@@ -248,7 +260,6 @@ def main():
     of the possible errors that might occur.
     """
 
-
     ############
     # GITUTILS #
     ############
@@ -265,15 +276,23 @@ def main():
                                        description='valid commands',
                                        dest='command',
                                        help='commands')
+    ############
+    # ADD LDAP #
+    ############
+    parser_addldap = subparsers.add_parser('addldap',
+                                      help=const.ADDLDAP_HELP_MSG,
+                                      formatter_class=argparse.RawTextHelpFormatter)
+    parser_addldap.add_argument('group', metavar='group',
+                             help=textwrap.dedent(const.ADDLDAP_GROUP_NAME))
+    parser_addldap.add_argument('ldapgroup', metavar='ldapgroup',
+                             help=textwrap.dedent(const.ADDLDAP_LDAP_GROUP_NAME))
 
     ###############
     # CLONE GROUP #
     ###############
-
     parser_cg = subparsers.add_parser('clonegroup',
                                       help=const.CLONEGROUP_HELP_MSG,
                                       formatter_class=argparse.RawTextHelpFormatter)
-
     parser_cg.add_argument('group', nargs=1, metavar='group',
                              help=textwrap.dedent(const.CLONEGROUP_GROUP_NAME))
 
@@ -377,11 +396,22 @@ def main():
     # retrieve repository and group names
     (repo_name, group_name, project_id) = (None, None, None)
     # list of commands
-    list_of_cmds = ['clonegroup', 'creategroups', 'createprojects', 'find', 'fork', 'login', 'merge']
+    list_of_cmds = ['addldap', 'clonegroup', 'creategroups', 'createprojects', 'find', 'fork', 'login', 'merge']
+
+    ###########
+    # ADDLDAP #
+    ###########
+    if arguments.command == 'addldap':
+        if not arguments.group or not arguments.ldapgroup:
+            print(const.ADDLDAP_PROBLEM)
+            sys.exit(-1)
+        repo_name = 'all'
+        group_name = arguments.group[0]
+        project_id = 'all'
     ##############
     # CLONEGROUP #
     ##############
-    if arguments.command == 'clonegroup':
+    elif arguments.command == 'clonegroup':
         if not arguments.group:
             print(const.CLONEGROUP_PROBLEM)
             sys.exit(-1)
@@ -522,6 +552,8 @@ def main():
         group_name is not None and \
         project_id is not None:
         try:
+            if arguments.command == 'addldap':
+                add_ldap(ldap_cn=arguments.ldapgroup, git_group=arguments.group)
             if arguments.command == 'clonegroup':
                 clonegroup(group_name=group_name)
             elif arguments.command == 'creategroups':

@@ -116,6 +116,31 @@ def check_existing_remote_git(clean, git_repository_id, group_name):
     # if check_exist is false -> good to go
     return 0
 
+def addldapgroup(ldap_group_name, git_goal_group):
+    group_id = -1
+    # gets group id
+    try:
+        group_id = get_group_id(git_goal_group)
+    except Exception as ex:
+        raise gitutils_exception.GitutilsError(ex)
+    # verifies ldap group
+    try:
+        ldap_groups = gl.ldapgroups.list(search=ldap_group_name)
+    except Exception as ex:
+        raise gitutils_exception.GitutilsError(ex)
+    if group_id != -1:
+        # ldap group must return only one entry
+        if len(ldap_groups) != 1: 
+            raise gitutils_exception.GitutilsWarning(const.ADDLDAP_LDAP_GROUP_PROBLEM)
+        else:
+            group = gl.groups.get(group_id)
+            try:
+                group.add_ldap_group_link(ldap_group_name, gitlab.DEVELOPER_ACCESS, 'ldapmain')
+            except Exception as ex:
+                raise gitutils_exception.GitutilsWarning(str(ex))
+            # if everything went fine, sync
+            print(const.ADDLDAP_SUCCESS_MSG % (const.bcolors.BOLD, ldap_group_name, const.bcolors.ENDC, const.bcolors.BOLD, git_goal_group, const.bcolors.ENDC))
+            group.ldap_sync()
 
 def check_existing_local_git(clean, git_repository):
     # verify if there is an previously existing local folder

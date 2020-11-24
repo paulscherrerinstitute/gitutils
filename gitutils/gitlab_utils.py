@@ -76,6 +76,17 @@ def parse_access_token():
         with open(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 'r') as tfile:
             return tfile.read().replace('\n', '')
 
+def check_role(role):
+    if role == 'guest':
+        return gitlab.GUEST_ACCESS
+    elif role == 'reporter':
+        return gitlab.REPORTER_ACCESS
+    elif role == 'dev':
+        return gitlab.DEVELOPER_ACCESS
+    elif role == 'maintainer':
+        return gitlab.MAINTAINER_ACCESS
+    elif role == 'owner':
+        return gitlab.OWNER_ACCESS
 
 def check_group_exists(group_name):
     groups = gl.groups.list(search=group_name, all=True)
@@ -116,31 +127,19 @@ def check_existing_remote_git(clean, git_repository_id, group_name):
     # if check_exist is false -> good to go
     return 0
 
-def addldapgroup(ldap_group_name, git_goal_group):
-    group_id = -1
-    # gets group id
+def addldapgroup(git_group_name, group_id, ldap_group_name, role):
+    # ldap group must return only one entry
+    group = gl.groups.get(group_id)
     try:
-        group_id = get_group_id(git_goal_group)
+        group.add_ldap_group_link(ldap_group_name, role, 'ldapmain')
     except Exception as ex:
-        raise gitutils_exception.GitutilsError(ex)
-    # verifies ldap group
-    try:
-        ldap_groups = gl.ldapgroups.list(search=ldap_group_name)
-    except Exception as ex:
-        raise gitutils_exception.GitutilsError(ex)
-    if group_id != -1:
-        # ldap group must return only one entry
-        if len(ldap_groups) != 1: 
-            raise gitutils_exception.GitutilsWarning(const.ADDLDAP_LDAP_GROUP_PROBLEM)
-        else:
-            group = gl.groups.get(group_id)
-            try:
-                group.add_ldap_group_link(ldap_group_name, gitlab.DEVELOPER_ACCESS, 'ldapmain')
-            except Exception as ex:
-                raise gitutils_exception.GitutilsWarning(str(ex))
-            # if everything went fine, sync
-            print(const.ADDLDAP_SUCCESS_MSG % (const.bcolors.BOLD, ldap_group_name, const.bcolors.ENDC, const.bcolors.BOLD, git_goal_group, const.bcolors.ENDC))
-            group.ldap_sync()
+        raise gitutils_exception.GitutilsWarning(str(ex))
+    # if everything went fine, sync
+    print(const.ADDLDAP_SUCCESS_MSG % (const.bcolors.BOLD, ldap_group_name, const.bcolors.ENDC, const.bcolors.BOLD, role, const.bcolors.ENDC, const.bcolors.BOLD, git_group_name, group_id, const.bcolors.ENDC))
+    group.ldap_sync()
+
+def get_ldap_groups():
+    return gl.ldapgroups.list()
 
 def check_existing_local_git(clean, git_repository):
     # verify if there is an previously existing local folder
@@ -307,33 +306,26 @@ def print_search_output(group_indication, file_name, results):
         print(const.SEARCHFILE_EMPTY % (const.bcolors.FAIL, file_name, const.bcolors.ENDC))
 
 
-def print_grep_output(group_name, project_name, project_id, search_term, results):
-    if results:
-        # For each grep match
-        for idx,i in enumerate(results):
-            # States the search_term
-            print("\nGroup: ",group_name, "\n",const.bcolors.BOLD,str(idx+1),") ",const.bcolors.OKGREEN, search_term, const.bcolors.ENDC, ":\n")
-            
-            # direct weblink to such file
-            print("\t Weblink: "+const.bcolors.UNDERLINE+i.get('webpath')+const.bcolors.ENDC)
-            # removal of empty spaces at the beginning of lines
-            print("")
-            stopwords = ['']
-            resultwords  = [word for word in i.get('excerpt').splitlines() if word not in stopwords]
-            # for each line
-            for line in resultwords:
-                # verifies if this is the line containing the search_term
-                if search_term in line:
-                    # color green
-                    b = line.split(search_term)
-                    print("\t\t"+b[0]+const.bcolors.OKGREEN+search_term+const.bcolors.ENDC+b[1])
-                else:
-                    # color regular
-                    print("\t\t"+line)
-            print("\n\n")
-    else:
-        # Coudln't find anything
-        print(const.GREP_EMPTY % (const.bcolors.FAIL, search_term, const.bcolors.ENDC))         
+def print_grep_output(group_name, project_name, project_id, search_term, result):
+    # States the search_term
+    print("\nGroup: ",group_name, "\n",const.bcolors.BOLD,const.bcolors.OKGREEN, search_term, const.bcolors.ENDC, ":\n")
+    # direct weblink to such file
+    print("\t Weblink: "+const.bcolors.UNDERLINE+result.get('webpath')+const.bcolors.ENDC)
+    # removal of empty spaces at the beginning of lines
+    print("")
+    stopwords = ['']
+    resultwords  = [word for word in result.get('excerpt').splitlines() if word not in stopwords]
+    # for each line
+    for line in resultwords:
+        # verifies if this is the line containing the search_term
+        if search_term in line:
+            # color green
+            b = line.split(search_term)
+            print("\t\t"+b[0]+const.bcolors.OKGREEN+search_term+const.bcolors.ENDC+b[1])
+        else:
+            # color regular
+            print("\t\t"+line)
+    print("\n\n")
 
 def grep_file_in_project(search_term, project_id, project_name, group_name):
     results =[]
@@ -351,44 +343,53 @@ def grep_file_in_project(search_term, project_id, project_name, group_name):
     return results
 
 
-def find_file_by_id(file_name,group_dict):
+def find_file_by_id(file_name,group_dict,files_only):
     results_file =[]
     results_blob =[]
     # gets all the projects in the group
     if group_dict['name']!='sandbox':
         projects = get_group_projects_by_group_id(group_dict['id'])
+        match_files = []
         # for every project found
         for i in projects:
             # For every project's branch
-            branches = i.get('branches', 0)
-            if branches != 0:
-                for b in i['branches']:
-                    # gets the project tree for the branch
-                    project_tree = get_project_tree(i.get('id'), b.name)
-                    for j in project_tree:
-                        if file_name == j.get('name'):
-                            results_file.append({
-                                'webpath':const.ENDPOINT+"/"+group_dict['name']+"/"+i.get('name')+"/"+j.get('type')+"/"+b.name+"/"+j.get('path'),
-                                'branch':b.name,
-                                'path':j.get('path'),
-                                'project_name':i.get('name'),
-                                'project_id': i.get('id')
-                            })
-            if len(results_file) > 0 :
-                print_search_output(group_dict['name'], file_name, results_file)
+            if not files_only:
+                branches = i.get('branches', 0)
+                if branches != 0:
+                    for b in i['branches']:
+                        # gets the project tree for the branch
+                        project_tree = get_project_tree(i.get('id'), b.name)
+                        for j in project_tree:
+                            if file_name == j.get('name'):
+                                results_file.append({
+                                    'webpath':const.ENDPOINT+"/"+group_dict['name']+"/"+i.get('name')+"/"+j.get('type')+"/"+b.name+"/"+j.get('path'),
+                                    'branch':b.name,
+                                    'path':j.get('path'),
+                                    'project_name':i.get('name'),
+                                    'project_id': i.get('id')
+                                })
+                if len(results_file) > 0 :
+                    print_search_output(group_dict['name'], file_name, results_file)
             # Gets the project and searches in its file for the search_term
             project_search_results = get_project(i.get('id')).search(const.BLOBS, file_name)
             for match in project_search_results:
-                results_blob.append({
-                    # File name, including path
-                    'filename':match.get('filename'),
-                    # 3 lines surrounding the search_term
-                    'excerpt':match.get('data'),
-                    # Generation of the diret weblink to the file including the line
-                    'webpath': const.ENDPOINT+"/"+group_dict['name']+"/"+i.get('name')+"/blob/"+match.get('ref')+"/"+match.get('filename')+"#L"+str(match.get('startline'))
-                })
-            if len(results_blob) > 0 :
-                print_grep_output(group_dict['name'], i.get('name'), i.get('id'), file_name, results_blob)
+                not_add = False
+                for entry in results_blob:
+                    if entry['filename'] == match.get('filename'):
+                        not_add = True
+                if not not_add:
+                    results_blob = {
+                        # File name, including path
+                        'filename':match.get('filename'),
+                        # 3 lines surrounding the search_term
+                        'excerpt':match.get('data'),
+                        # Generation of the diret weblink to the file including the line
+                        'webpath': const.ENDPOINT+"/"+group_dict['name']+"/"+i.get('name')+"/blob/"+match.get('ref')+"/"+match.get('filename')+"#L"+str(match.get('startline'))
+                    }
+            if len(results_blob) > 0:
+                if results_blob.get('webpath') not in match_files:
+                    match_files.append(results_blob.get('webpath'))
+                    print_grep_output(group_dict['name'], i['name'], i['id'], file_name, results_blob)
     return 
 
 def find_file(file_name,group_indication):
@@ -710,9 +711,9 @@ def get_group_id(group_name):
         try:
             group_id = gl.users.list(username=group_name, all=True)[0].attributes['id']
         except Exception as ex:
-            raise gitutils_exception.GitutilsError(ex)
-
-    logging.info('Group name: %s (id %s)' % (group_name, group_id))
+            raise gitutils_exception.GitutilsError("Group not found.")
+    if group_id != -1:
+        logging.info('Group name: %s (id %s)' % (group_name, group_id))
     return group_id
 
 

@@ -8,12 +8,37 @@ import argparse
 import textwrap
 import time
 
-from gitutils import gitlab_utils
-from gitutils import gitutils_exception
-from gitutils import const
-from gitutils.spinner import Spinner
+# from gitutils import gitlab_utils
+# from gitutils import gitutils_exception
+# from gitutils import const
+# from gitutils.spinner import Spinner
+# ts.LDAPGroup'> => {'cn': 'unx-3201'}
+# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'Schema'}
+# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'IEA_CAD'}
+# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'Chemaerosol'}
+# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'CHINADATA'}
+# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'quickfix_gruppenkonzept'}
+# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'BA9321'}
+# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'Nanokat'}
+# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'unx-mcnpx240'}
+# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'SP2'}
+# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'cat_comb'}
+# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'ENEXAS'}
+# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'unx-mcnpx270'}
+# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'Data_Dworkowski'}
+# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'Vsoft'}
+# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'Eulitha'}
+# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'CMS-Inventor'}
+# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'SLS-Redesign'}
+# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'mevisXchange'}
+# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'LAC_Alumni'}
+import gitlab_utils
+import gitutils_exception
+import const
+from spinner import Spinner
 
-def add_ldap(ldap_cn, git_group):
+
+def add_ldap(git_group, ldap_cn, role):
     """
     Assign ldap group sync to a git group
     :param ldap_cn: LDAP USER CN (common name)
@@ -22,10 +47,27 @@ def add_ldap(ldap_cn, git_group):
     :type git_group: str
     :return:
     """
-    print(const.ADDLDAP_INIT_MSG % (const.bcolors.BOLD, ldap_cn, const.bcolors.ENDC, const.bcolors.BOLD, git_group, const.bcolors.ENDC))
-    gitlab_utils.addldapgroup(ldap_cn, git_group)
+    print(const.ADDLDAP_INIT_MSG % (const.bcolors.BOLD, ldap_cn, role, const.bcolors.ENDC, const.bcolors.BOLD, git_group, const.bcolors.ENDC))
+    # verify if ldap_cn is a real ldap group
+    list_of_ldap_cns = gitlab_utils.get_ldap_groups()
+    found = False
+    # verifies if the ldap group is actually a ldap group
+    for i in list_of_ldap_cns:
+        if ldap_cn == i.attributes['cn']:
+            found = True
+    # gets group id
+    group_id = -1
+    try:
+        group_id = gitlab_utils.get_group_id(git_group)
+    except Exception as ex:
+        raise gitutils_exception.GitutilsError(ex)
+    if found is True and group_id != -1:
+        gitlab_utils.addldapgroup(git_group, group_id, ldap_cn, role)
+    else:
+        gitutils_exception.GitutilsError(const.ADDLDAP_LDAP_NAME_PROBLEM)
 
-def find(search_term):
+
+def find(search_term, files_only):
     """
     Find command searches in all projects/repositories.
     :param search_term: Term to search in the content of files and filenames.
@@ -35,11 +77,10 @@ def find(search_term):
     print(const.GREPFILE_INIT_MSG % (const.bcolors.BOLD, search_term, const.bcolors.ENDC))
     # get groups
     groups = gitlab_utils.get_groups()
-    results_group = []
     # search for files in groups
     with Spinner():
         for group in groups:
-                gitlab_utils.find_file_by_id(search_term,groups[group])
+            gitlab_utils.find_file_by_id(search_term,groups[group], files_only)
 
 def fork(
         fork_group_indication='',
@@ -286,7 +327,9 @@ def main():
                              help=textwrap.dedent(const.ADDLDAP_GROUP_NAME))
     parser_addldap.add_argument('ldapgroup', metavar='ldapgroup',
                              help=textwrap.dedent(const.ADDLDAP_LDAP_GROUP_NAME))
-
+    parser_addldap.add_argument('role', metavar='role',
+                             help=textwrap.dedent(const.ADDLDAP_ROLE))
+    
     ###############
     # CLONE GROUP #
     ###############
@@ -299,18 +342,15 @@ def main():
     ################
     # CREATE GROUP #
     ################
-
     parser_createg = subparsers.add_parser('creategroups',
                                       help=const.CREATEGROUP_HELP_MSG,
                                       formatter_class=argparse.RawTextHelpFormatter)
-
     parser_createg.add_argument('name', nargs='+', metavar='name',
                              help=textwrap.dedent(const.CREATEGROUP_GROUP_NAME))
 
     ###################
     # CREATE PROJECTS #
     ###################
-
     parser_createp = subparsers.add_parser('createprojects',
                                       help=const.CREATEPROJECT_HELP_MSG,
                                       formatter_class=argparse.RawTextHelpFormatter)
@@ -328,6 +368,10 @@ def main():
                                     formatter_class=argparse.RawTextHelpFormatter)
     parser_find.add_argument('term', nargs=1, metavar='term',
                              help=textwrap.dedent(const.GREP_TERM_MSG))
+    parser_find.add_argument('-f',
+                             '--file',
+                             action=const.STORE_TRUE,
+                             help=const.FIND_FILES_ONLY_MSG)
 
     ############
     # FORK CMD #
@@ -402,11 +446,17 @@ def main():
     # ADDLDAP #
     ###########
     if arguments.command == 'addldap':
+        role_access = None
         if not arguments.group or not arguments.ldapgroup:
             print(const.ADDLDAP_PROBLEM)
             sys.exit(-1)
+        if arguments.role not in ['guest', 'reporter', 'dev', 'maintainer', 'owner']:
+            print(const.ROLE_ADDLDAP_PROBLEM)
+            sys.exit(-1)
+        else:
+            role_access = gitlab_utils.check_role(arguments.role)
         repo_name = 'all'
-        group_name = arguments.group[0]
+        group_name = arguments.group
         project_id = 'all'
     ##############
     # CLONEGROUP #
@@ -506,11 +556,9 @@ def main():
                     for line in git_search:
                         line = line.strip()
                         if next_line is True and git_extracted_repo_name is None:
-
                             if not line.startswith("url ="):
                                 # go to next line
                                 continue
-
                             # Detect if ssh or http has been used to clone
                             if const.SSH_GIT_GIT in line:
                                 try:
@@ -553,15 +601,18 @@ def main():
         project_id is not None:
         try:
             if arguments.command == 'addldap':
-                add_ldap(ldap_cn=arguments.ldapgroup, git_group=arguments.group)
-            if arguments.command == 'clonegroup':
+                if role_access is not None:
+                    add_ldap(git_group=group_name, 
+                            ldap_cn=arguments.ldapgroup, 
+                            role=role_access)
+            elif arguments.command == 'clonegroup':
                 clonegroup(group_name=group_name)
             elif arguments.command == 'creategroups':
                 creategroups(group_names=group_name)
             elif arguments.command == 'createprojects':
                 createprojects(group_name=group_name[0], project_names=repo_name)
             elif arguments.command == 'find':
-                find(arguments.term[0])
+                find(arguments.term[0], arguments.file)
             elif arguments.command == 'fork':
                 fork(fork_group_indication=arguments.group,
                     git_repository_id=project_id,

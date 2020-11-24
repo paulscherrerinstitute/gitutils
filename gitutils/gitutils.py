@@ -8,34 +8,10 @@ import argparse
 import textwrap
 import time
 
-# from gitutils import gitlab_utils
-# from gitutils import gitutils_exception
-# from gitutils import const
-# from gitutils.spinner import Spinner
-# ts.LDAPGroup'> => {'cn': 'unx-3201'}
-# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'Schema'}
-# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'IEA_CAD'}
-# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'Chemaerosol'}
-# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'CHINADATA'}
-# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'quickfix_gruppenkonzept'}
-# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'BA9321'}
-# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'Nanokat'}
-# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'unx-mcnpx240'}
-# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'SP2'}
-# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'cat_comb'}
-# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'ENEXAS'}
-# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'unx-mcnpx270'}
-# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'Data_Dworkowski'}
-# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'Vsoft'}
-# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'Eulitha'}
-# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'CMS-Inventor'}
-# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'SLS-Redesign'}
-# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'mevisXchange'}
-# <class 'gitlab.v4.objects.LDAPGroup'> => {'cn': 'LAC_Alumni'}
-import gitlab_utils
-import gitutils_exception
-import const
-from spinner import Spinner
+from gitutils import gitlab_utils
+from gitutils import gitutils_exception
+from gitutils import const
+from gitutils.spinner import Spinner
 
 
 def add_ldap(git_group, ldap_cn, role):

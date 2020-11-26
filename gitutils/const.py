@@ -125,6 +125,7 @@ project under your personal projects.'''
 FORK_GROUP_MSG = ''' Indicates the group that the fork is going to be created. The default is the username.'''
 COMMAND_NOT_FOUND = "Command not found."
 FORK_HELP_MSG = "Creates a fork from the repository."
+SETROLE_PROJECT_FLAG_HELP = "If indicated, the setrole gives the access on a project level (and not on the default group level)."
 FORK_NOCLONE_HELP = '''Indicates that the forked project will not be cloned after forking. A fork
 will be created on the server-side and no clone nor upstream will be
 generated on the local git server.'''
@@ -133,6 +134,7 @@ LOGIN_TEST = "As a verification for the gitutils-gitlab token, gitutils will fet
 LOGIN_PROBLEM = "Problem with the token. Please, check your credentials."
 LOGIN_SUCCESS = "Credentials successfully stored and token is valid.."
 MERGE_HELP_MSG = "Creates a request to merge the defined fork to the original repository."
+SETROLE_HELP_MSG = "Sets the role for a specific user on a specific group or project (or several)"
 MERGE_MESSAGE_TITLE = ''' The title of the merge request that is going to be created.'''
 MERGE_MESSAGE_DESCRIPTION = '''The description of the merge request that is going to be created.'''
 CLONEGROUP_HELP_MSG = "Clones all existing projects within a group."
@@ -152,14 +154,20 @@ STORE_TRUE = "store_true"
 BLOBS = 'blobs'
 GREPFILE_INIT_MSG = '\nGitutils searching for term \"%s %s %s\"...'
 ADDLDAP_INIT_MSG = '\nGitutils adding ldap group %s %s (access level: %s) %s to group %s %s %s ... \n'
+SETROLE_INIT_MSG = '\nGitutils setting role %s %s %s to user %s %s (id: %s) %s to group %s %s (id: %s) %s ... \n'
+SETROLE_P_INIT_MSG = '\nGitutils setting user %s %s (access level: %s) %s to project %s %s %s ... \n'
 ADDLDAP_ROLE = "The role defines the permissions. Options: guest, reporter, dev, maintainer, owner"
 ROLE_ADDLDAP_PROBLEM = "Role not found. Role options: guest, reporter, dev, maintainer, owner"
+SETROLE_PROJECT_VALIDATION_FAILS = "\n Gitutils was not able to validate the setrole command. Something went wrong..."
 ADDLDAP_LDAP_GROUP_PROBLEM= "ldap_cn needs to be unique."
 ADDLDAP_PROBLEM = "Not possible to add ldap group to a group if both are not provided. Use 'gitutils addldap -h' for help."
+SETROLE_PROBLEM = "Not possible to set a role to a group if group is not provided. Use 'gitutils setrole -h' for help."
 ADDLDAP_HELP_MSG = "Add a ldap group user to a group."
 ADDLDAP_LDAP_GROUP_NAME = "LDAP group common name."
+SETROLE_USER_NAME = "Username that will be given the role."
 ADDLDAP_LDAP_NAME_PROBLEM = "LDAP group name not found."
 ADDLDAP_GROUP_NAME = "Group that the LDAP group will be added to."
+SETROLE_GROUP_NAME = "Group in which the user will be given such role."
 ADDLDAP_GROUP_PROBLEM = "The group id to be added wasn't found."
 ADDLDAP_SUCCESS_MSG = "The LDAP group %s %s %s was successfully added %s (access level: %s) %s to group %s %s (id: %s) %s. Syncing and exiting now...\n"
 FIND_HELP_MSG = "General search inside all the groups/projects."

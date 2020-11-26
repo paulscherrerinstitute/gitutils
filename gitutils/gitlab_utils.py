@@ -69,7 +69,8 @@ def get_project(project_id):
     return gl.projects.get(project_id)
 
 def get_project_tree(project_id, branch):
-    return get_project(project_id).repository_tree(recursive=True, all=True, branch=branch)
+    return get_project(project_id).repository_tree(recursive=True,
+            all=True, branch=branch)
 
 def parse_access_token():
     if os.path.isfile(os.path.expanduser('~') + const.GIT_TOKEN_FILE):
@@ -97,6 +98,22 @@ def check_group_exists(group_name):
 def group_exists(name):
     group = gl.groups.list(search=name, all=True)
     return bool(group)
+
+def get_group(group_id):
+    try:
+        group = gl.groups.get(group_id)
+    except Exception as e:
+        raise gitutils_exception.GitutilsError(const.GROUP_PARAMETER_EMPTY)
+    return group
+
+def get_user_id(username):
+    user_id = -1
+    users = gl.users.list(search=username, all=True)
+    for i in users:
+        if i.attributes['name'] == username:
+            user_id = i.attributes['id']
+    return user_id
+
 
 def project_exists(proj_name):
     project = gl.projects.list(search=project_name, all=True)
@@ -135,11 +152,22 @@ def addldapgroup(git_group_name, group_id, ldap_group_name, role):
     except Exception as ex:
         raise gitutils_exception.GitutilsWarning(str(ex))
     # if everything went fine, sync
-    print(const.ADDLDAP_SUCCESS_MSG % (const.bcolors.BOLD, ldap_group_name, const.bcolors.ENDC, const.bcolors.BOLD, role, const.bcolors.ENDC, const.bcolors.BOLD, git_group_name, group_id, const.bcolors.ENDC))
+    print( const.ADDLDAP_SUCCESS_MSG % (
+        const.bcolors.BOLD,
+        ldap_group_name,
+        const.bcolors.ENDC,
+        const.bcolors.BOLD,
+        role,
+        const.bcolors.ENDC,
+        const.bcolors.BOLD,
+        git_group_name,
+        group_id,
+        const.bcolors.ENDC,
+        ))
     group.ldap_sync()
 
-def get_ldap_groups():
-    return gl.ldapgroups.list()
+def get_ldap_groups(ldap_cn):
+    return gl.ldapgroups.list(all=True, search=ldap_cn)
 
 def check_existing_local_git(clean, git_repository):
     # verify if there is an previously existing local folder
@@ -235,7 +263,6 @@ def get_groups():
     :return: Dictionary containing details of the groups (name and id).
     :rtype: dict
     """
-
     groups = gl.groups.list(all=True)
     return create_group_dict(groups)
 

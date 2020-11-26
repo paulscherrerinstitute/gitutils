@@ -13,7 +13,6 @@ from gitutils import gitutils_exception
 from gitutils import const
 from gitutils.spinner import Spinner
 
-
 def add_ldap(git_group, ldap_cn, role):
     """
     Assign ldap group sync to a git group
@@ -21,11 +20,21 @@ def add_ldap(git_group, ldap_cn, role):
     :type ldap_cn: str
     :param git_group: Git group that the ldap will be added
     :type git_group: str
+    :param role: Role that will be given to the user
+    :type role: str
     :return:
     """
-    print(const.ADDLDAP_INIT_MSG % (const.bcolors.BOLD, ldap_cn, role, const.bcolors.ENDC, const.bcolors.BOLD, git_group, const.bcolors.ENDC))
+    print(const.ADDLDAP_INIT_MSG % (
+        const.bcolors.BOLD,
+        ldap_cn,
+        role,
+        const.bcolors.ENDC,
+        const.bcolors.BOLD,
+        git_group,
+        const.bcolors.ENDC,
+        ))
     # verify if ldap_cn is a real ldap group
-    list_of_ldap_cns = gitlab_utils.get_ldap_groups()
+    list_of_ldap_cns = gitlab_utils.get_ldap_groups(ldap_cn)
     found = False
     # verifies if the ldap group is actually a ldap group
     for i in list_of_ldap_cns:
@@ -175,7 +184,12 @@ def createprojects(group_name, project_names=[]):
     
     # iterates over all entries of new projects
     count = 1
-    print(const.CREATEPROJECT_START % (const.bcolors.BOLD, group_name, group_id, const.bcolors.ENDC))
+    print(const.CREATEPROJECT_START % (
+        const.bcolors.BOLD, 
+        group_name, 
+        group_id, 
+        const.bcolors.ENDC
+        ))
     for project in project_names:
         skip_proj = False
         for existing_project in group_projects:
@@ -267,6 +281,87 @@ def merge(git_repository='',
             print(const.GIT_MERGE_SUCCESS
                   % (merge_request.attributes['id'],
                      merge_request.attributes['created_at']))
+
+def setrole(role, username, git_group, project_flag):
+    """
+    Sets a role to a specified user in a specified group or project (or several)
+    :param role: Role that will be given to the user.
+    :type role: int
+    :param username: Username
+    :type username: str
+    :param git_group: Group or project names
+    :type git_group: list
+    :param project_flag: Flag to indicate project-level role.
+    :type project_flag: bool
+    :return:
+    """
+    # gets user_id
+    user_id = gitlab_utils.get_user_id(username)
+    #########
+    # GROUP #
+    #########
+    if not project_flag: 
+        group_id = gitlab_utils.get_group_id(git_group)
+        print(const.SETROLE_INIT_MSG % (
+            const.bcolors.BOLD,
+            role,
+            const.bcolors.ENDC,
+            const.bcolors.BOLD,
+            username,
+            user_id,
+            const.bcolors.ENDC,
+            const.bcolors.BOLD,
+            git_group,
+            group_id,
+            const.bcolors.ENDC,
+            ))
+        # gets group
+        group = gitlab_utils.get_group(git_group)
+        # adds member with the desired access level to the group
+        group.members.create({'user_id': user_id,
+                                'access_level': role})
+        # verification
+        members = group.members.all(all=True)
+        found = False
+        for member in members:
+            if member.attributes['username'] == username:
+                found = True
+        if not found:
+            raise gitutils_exception.GitutilsError(
+                    const.SETROLE_PROJECT_VALIDATION_FAILS)
+    else:
+        ###########
+        # PROJECT #
+        ###########
+        #git_group -> project_name
+        project_name = git_group
+        print(const.SETROLE_P_INIT_MSG % (
+            const.bcolors.BOLD,
+            username,
+            role,
+            const.bcolors.ENDC,
+            const.bcolors.BOLD,
+            project_name,
+            const.bcolors.ENDC,
+            ))
+        # gets group name
+        group_name = gitlab_utils.get_project_group_simplified(project_name)
+        # gets project id
+        project_id = gitlab_utils.get_project_id(group_name,project_name)   
+        # gets the project
+        project = gitlab_utils.get_project(project_id)
+        # adds member with the desired role to the project
+        project.members.create({'user_id': user_id, 
+                                'access_level': role})
+        # verification
+        members = project.members.all(all=True)
+        found = False
+        for member in members:
+            if member.attributes['username'] == username:
+                found = True
+        if not found:
+            raise gitutils_exception.GitutilsError(
+                    const.SETROLE_PROJECT_VALIDATION_FAILS)
 
 
 def main():
@@ -381,22 +476,35 @@ def main():
     #############
     # MERGE CMD #
     #############
-
     parser_mr = subparsers.add_parser('merge',
                                       help=const.MERGE_HELP_MSG,
                                       formatter_class=argparse.RawTextHelpFormatter)
     parser_mr.add_argument('-t',
                            '--title',
                            help=const.MERGE_MESSAGE_TITLE)
-
     parser_mr.add_argument('-p',
                            '--project',
                            help=const.MERGE_PROJECT_MESSAGE)
-
     parser_mr.add_argument('-d',
                            '--description',
                            help=const.MERGE_MESSAGE_DESCRIPTION)
 
+    ###########
+    # SETROLE #
+    ###########
+    parser_sr = subparsers.add_parser('setrole',
+                                      help=const.SETROLE_HELP_MSG,
+                                      formatter_class=argparse.RawTextHelpFormatter)
+    parser_sr.add_argument('-p',
+                            '--project',
+                             action=const.STORE_TRUE,
+                             help=const.SETROLE_PROJECT_FLAG_HELP)
+    parser_sr.add_argument('role', metavar='role',
+                             help=textwrap.dedent(const.ADDLDAP_ROLE))
+    parser_sr.add_argument('username', metavar='username',
+                             help=textwrap.dedent(const.SETROLE_USER_NAME))
+    parser_sr.add_argument('group', metavar='group',
+                             help=textwrap.dedent(const.SETROLE_GROUP_NAME))
     
     arguments = parser.parse_args()
     # verifies if there are any arguments
@@ -416,7 +524,15 @@ def main():
     # retrieve repository and group names
     (repo_name, group_name, project_id) = (None, None, None)
     # list of commands
-    list_of_cmds = ['addldap', 'clonegroup', 'creategroups', 'createprojects', 'find', 'fork', 'login', 'merge']
+    list_of_cmds = ['addldap', 
+                    'clonegroup', 
+                    'creategroups', 
+                    'createprojects', 
+                    'find', 
+                    'fork', 
+                    'login', 
+                    'merge',
+                    'setrole']
 
     ###########
     # ADDLDAP #
@@ -566,6 +682,22 @@ def main():
             group_name = gitlab_utils.get_project_group(
                 repo_name, False, True, project_indication)
         project_id = gitlab_utils.get_project_id(group_name, repo_name) 
+    ###########
+    # SETROLE #
+    ###########
+    elif arguments.command == 'setrole':
+        role_access = None
+        if not arguments.group:
+            print(const.SETROLE_PROBLEM)
+            sys.exit(-1)
+        if arguments.role not in ['guest', 'reporter', 'dev', 'maintainer', 'owner']:
+            print(const.ROLE_ADDLDAP_PROBLEM)
+            sys.exit(-1)
+        else:
+            role_access = gitlab_utils.check_role(arguments.role)
+        repo_name = 'all'
+        group_name = arguments.group
+        project_id = 'all'
     else:
         parser.print_help()
         sys.exit(-1)
@@ -600,6 +732,11 @@ def main():
                     git_repository_id=project_id,
                     description=arguments.description,
                     title=arguments.title)
+            elif arguments.command == 'setrole':
+                setrole(role=role_access,
+                        username=arguments.username,
+                        git_group=group_name,
+                        project_flag=arguments.project)
             elif arguments.command not in list_of_cmds:
                 print(const.COMMAND_NOT_FOUND)
                 parser.print_help()

@@ -332,8 +332,7 @@ def setrole(role, username, git_groups, project_flag):
                 print(' ⨯')
                 raise gitutils_exception.GitutilsError(
                         const.SETROLE_PROJECT_VALIDATION_FAILS)
-            else:
-                print(' ✓')
+            print(' ✓')
     else:
         ###################
         # PROJECT SETROLE #
@@ -368,8 +367,7 @@ def setrole(role, username, git_groups, project_flag):
                 print(' ⨯')
                 raise gitutils_exception.GitutilsError(
                         const.SETROLE_PROJECT_VALIDATION_FAILS)
-            else:
-                print(' ✓')
+            print(' ✓')
 
 
 def main():

@@ -133,14 +133,12 @@ def check_existing_remote_git(clean, git_repository_id, group_name):
             check_exist = True
             id_to_delete = own_p['id']
             break  # If we find something we can abort the loop
-
     # project exists not clean -> raise error
     if check_exist:
         if not clean:
             raise gitutils_exception.GitutilsError(const.FORK_PROBLEM_REMOTE)
-        else:
-            # project exists and clean -> clean
-            delete_project(id_to_delete)
+        # project exists and clean -> clean
+        delete_project(id_to_delete)
     # if check_exist is false -> good to go
     return 0
 
@@ -235,8 +233,7 @@ def get_username():
 def is_empty(any_structure):
     if any_structure:
         return False
-    else:
-        return True
+    return True
 
 def verify_token():
     global gl
@@ -417,7 +414,6 @@ def find_file_by_id(file_name,group_dict,files_only):
                 if results_blob.get('webpath') not in match_files:
                     match_files.append(results_blob.get('webpath'))
                     print_grep_output(group_dict['name'], i['name'], i['id'], file_name, results_blob)
-    return 
 
 def find_file(file_name,group_indication):
     results =[]
@@ -458,8 +454,7 @@ def get_project_web_url(project_name):
 def check_key(dict_to_search, key):
     if key in dict_to_search:
         return True
-    else:
-        return False
+    return False
 
 def get_project_group_simplified(project_name):
     projects_list = gl.projects.list(search=project_name, all=True)
@@ -477,9 +472,8 @@ def get_project_group_simplified(project_name):
         if get_username() in list_of_groups:
             print("\nGitutils warning: "+const.GROUP_NOT_SPECIFIED_ASSUME_USER)
             return get_username()
-        else:
-            raise gitutils_exception.GitutilsError(
-                const.MULTIPLE_PROJECTS % (list_of_groups))
+        raise gitutils_exception.GitutilsError(
+            const.MULTIPLE_PROJECTS % (list_of_groups))
     raise gitutils_exception.GitutilsError(const.PROJECT_NAME_NOT_FOUND)
 
 def get_project_group(project_name, clean, merge, project_indication):
@@ -519,9 +513,8 @@ def get_project_group(project_name, clean, merge, project_indication):
         if get_username() in list_of_groups:
             print("Gitutils warning: "+const.GROUP_NOT_SPECIFIED_ASSUME_USER)
             return get_username()
-        else:
-            raise gitutils_exception.GitutilsError(
-                const.MULTIPLE_PROJECTS % (list_of_groups))
+        raise gitutils_exception.GitutilsError(
+            const.MULTIPLE_PROJECTS % (list_of_groups))
     if not project_indication:
         raise gitutils_exception.GitutilsError(const.PROJECT_NAME_NOT_FOUND)
 
@@ -576,10 +569,9 @@ def get_branch(project_id):
         logging.info('Master branch found within project id %s. '
                      % project_id)
         return 'master'
-    else:
-        raise gitutils_exception.GitutilsError(
-            const.GIT_UNABLE_TO_FIND_MASTER_BRANCH %
-            project['name'])
+    raise gitutils_exception.GitutilsError(
+        const.GIT_UNABLE_TO_FIND_MASTER_BRANCH %
+        project['name'])
 
 
 def get_project_id(group_name, project_name):
@@ -799,11 +791,9 @@ def fork_project(project_id, group_indication):
         else:
             fork = project.forks.create({})
     except Exception as ex:
-        print(ex)
         if ex.error_message['path'][0] == const.GIT_PATHNAME_IS_TAKEN:
             raise gitutils_exception.GitutilsError(const.FORKED_EXISTS)
-        else:
-            raise gitutils_exception.GitutilsError(ex)
+        raise gitutils_exception.GitutilsError(ex)
 
     logging.info(
         'Adding 3 seconds of idle time after forking to let the server process the new fork.')

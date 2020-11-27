@@ -14,7 +14,7 @@ Please note that Gitutils depends on the Oauth2 authentication via the GITLAB EE
 ## gitutils
 ```bash
 usage: gitutils.py [-h] [-e ENDPOINT]
-                   {clonegroup,creategroups,createprojects,find,fork,login,merge}
+                   {addldap,clonegroup,creategroups,createprojects,find,fork,login,merge,setrole}
                    ...
 
 GITUTILS is a tool to facilitate the server-side operations when developing software that uses git repositories.
@@ -27,8 +27,9 @@ optional arguments:
 command:
   valid commands
 
-  {clonegroup,creategroups,createprojects,find,fork,login,merge}
+  {addldap,clonegroup,creategroups,createprojects,find,fork,login,merge,setrole}
                         commands
+    addldap             Add a ldap group user to a group.
     clonegroup          Clones all existing projects within a group.
     creategroups        Create a new group (or multiple).
     createprojects      Create a new project (or multiple) inside the specified group.
@@ -36,6 +37,7 @@ command:
     fork                Creates a fork from the repository.
     login               Fetches the gitlab token (saved in ~/.gitutils_token).
     merge               Creates a request to merge the defined fork to the original repository.
+    setrole             Sets the role for a specific user on a specific group or project (or multiple)
 ```
 
 > To see the gitutils help message use: ```> gitutils -h```. If not specified otherwise the default endpoint is ```https://git.psi.ch```.
@@ -146,6 +148,23 @@ optional arguments:
 ```
 
 > To see the merge help message use: ```> gitutils merge -h```
+
+## setrole
+
+```bash
+usage: gitutils.py setrole [-h] [-p] role username group [group ...]
+
+positional arguments:
+  role           The role defines the permissions. Options: guest, reporter, dev, maintainer, owner
+  username       Username that will be given the role.
+  group          Group in which the user will be given such role.
+
+optional arguments:
+  -h, --help     show this help message and exit
+  -p, --project  If indicated, the setrole gives the access on a project level (and not on the default group level).
+```
+
+> To see the merge help message use: ```> gitutils setrole -h```
 
 ## Examples
 

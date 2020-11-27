@@ -4,6 +4,22 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
+[1.0.21] - 2020-11-27
+
+Added
+~~~~~
+- addldap feature:  Add a ldap group user to a group (or multiple).
+- setrole feature: Sets the role for a specific user on a specific group or project (or multiple).
+
+Changed
+~~~~~~~
+- optional flag -p when using the find command to specify search on file names only (and not include the content of files on the search).
+
+Fixed
+~~~~~
+- Bugfix: verifying if projects were existing and not accessible.
+- Bugfix: search for groups/projects was not consistent because of pagination (returning different lists every time).
+
 [1.0.20] - 2020-11-13
 
 Changed

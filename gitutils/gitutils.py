@@ -250,7 +250,8 @@ def merge(git_repository='',
 
     git_username = gitlab_utils.get_username()
     if git_username == -1:
-        raise gitutils_exception.GitutilsError(const.PROBLEM_CREATEGROUP_EMPTY)
+        raise gitutils_exception.GitutilsError(
+                const.PROBLEM_CREATEGROUP_EMPTY)
 
     # Check if there is already a fork
     forked_project = gitlab_utils.get_forked_project(git_repository,
@@ -282,9 +283,9 @@ def merge(git_repository='',
                   % (merge_request.attributes['id'],
                      merge_request.attributes['created_at']))
 
-def setrole(role, username, git_group, project_flag):
+def setrole(role, username, git_groups, project_flag):
     """
-    Sets a role to a specified user in a specified group or project (or several)
+    Sets a role to a specified user in a specified group or project
     :param role: Role that will be given to the user.
     :type role: int
     :param username: Username
@@ -297,71 +298,78 @@ def setrole(role, username, git_group, project_flag):
     """
     # gets user_id
     user_id = gitlab_utils.get_user_id(username)
-    #########
-    # GROUP #
-    #########
+    #################
+    # GROUP SETROLE #
+    #################
     if not project_flag: 
-        group_id = gitlab_utils.get_group_id(git_group)
-        print(const.SETROLE_INIT_MSG % (
-            const.bcolors.BOLD,
-            role,
-            const.bcolors.ENDC,
-            const.bcolors.BOLD,
-            username,
-            user_id,
-            const.bcolors.ENDC,
-            const.bcolors.BOLD,
-            git_group,
-            group_id,
-            const.bcolors.ENDC,
-            ))
-        # gets group
-        group = gitlab_utils.get_group(git_group)
-        # adds member with the desired access level to the group
-        group.members.create({'user_id': user_id,
-                                'access_level': role})
-        # verification
-        members = group.members.all(all=True)
-        found = False
-        for member in members:
-            if member.attributes['username'] == username:
-                found = True
-        if not found:
-            raise gitutils_exception.GitutilsError(
-                    const.SETROLE_PROJECT_VALIDATION_FAILS)
+        for git_group in git_groups:
+            group_id = gitlab_utils.get_group_id(git_group)
+            print(const.SETROLE_INIT_MSG % (
+                const.bcolors.BOLD,
+                role,
+                const.bcolors.ENDC,
+                const.bcolors.BOLD,
+                username,
+                user_id,
+                const.bcolors.ENDC,
+                const.bcolors.BOLD,
+                git_group,
+                group_id,
+                const.bcolors.ENDC,
+                ), end="")
+            # gets group
+            group = gitlab_utils.get_group(git_group)
+            # adds member with the desired access level to the group
+            group.members.create({'user_id': user_id,
+                                    'access_level': role})
+            # verification
+            members = group.members.all(all=True)
+            found = False
+            for member in members:
+                if member.attributes['username'] == username:
+                    found = True
+            if not found:
+                print(' ⨯')
+                raise gitutils_exception.GitutilsError(
+                        const.SETROLE_PROJECT_VALIDATION_FAILS)
+            else:
+                print(' ✓')
     else:
-        ###########
-        # PROJECT #
-        ###########
-        #git_group -> project_name
-        project_name = git_group
-        print(const.SETROLE_P_INIT_MSG % (
-            const.bcolors.BOLD,
-            username,
-            role,
-            const.bcolors.ENDC,
-            const.bcolors.BOLD,
-            project_name,
-            const.bcolors.ENDC,
-            ))
-        # gets group name
-        group_name = gitlab_utils.get_project_group_simplified(project_name)
-        # gets project id
-        project_id = gitlab_utils.get_project_id(group_name,project_name)   
-        # gets the project
-        project = gitlab_utils.get_project(project_id)
-        # adds member with the desired role to the project
-        project.members.create({'user_id': user_id, 
-                                'access_level': role})
-        # verification
-        members = project.members.all(all=True)
-        found = False
-        for member in members:
-            if member.attributes['username'] == username:
-                found = True
-        if not found:
-            raise gitutils_exception.GitutilsError(
-                    const.SETROLE_PROJECT_VALIDATION_FAILS)
+        ###################
+        # PROJECT SETROLE #
+        ###################
+        #git_groups has projects
+        for project_name in git_groups:
+            print(const.SETROLE_P_INIT_MSG % (
+                const.bcolors.BOLD,
+                username,
+                role,
+                const.bcolors.ENDC,
+                const.bcolors.BOLD,
+                project_name,
+                const.bcolors.ENDC,
+                ), end="")
+            # gets group name
+            group_name = gitlab_utils.get_project_group_simplified(project_name)
+            # gets project id
+            project_id = gitlab_utils.get_project_id(group_name,project_name)   
+            # gets the project
+            project = gitlab_utils.get_project(project_id)
+            # adds member with the desired role to the project
+            project.members.create({'user_id': user_id, 
+                                    'access_level': role})
+            # verification
+            members = project.members.all(all=True)
+            found = False
+            for member in members:
+                if member.attributes['username'] == username:
+                    found = True
+            if not found:
+                print(' ⨯')
+                raise gitutils_exception.GitutilsError(
+                        const.SETROLE_PROJECT_VALIDATION_FAILS)
+            else:
+                print(' ✓')
 
 
 def main():
@@ -503,7 +511,7 @@ def main():
                              help=textwrap.dedent(const.ADDLDAP_ROLE))
     parser_sr.add_argument('username', metavar='username',
                              help=textwrap.dedent(const.SETROLE_USER_NAME))
-    parser_sr.add_argument('group', metavar='group',
+    parser_sr.add_argument('group', nargs='+', metavar='group',
                              help=textwrap.dedent(const.SETROLE_GROUP_NAME))
     
     arguments = parser.parse_args()
@@ -735,7 +743,7 @@ def main():
             elif arguments.command == 'setrole':
                 setrole(role=role_access,
                         username=arguments.username,
-                        git_group=group_name,
+                        git_groups=group_name,
                         project_flag=arguments.project)
             elif arguments.command not in list_of_cmds:
                 print(const.COMMAND_NOT_FOUND)

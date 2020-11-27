@@ -593,9 +593,7 @@ def get_project_id(group_name, project_name):
     :return: Returns the id of the project.
     :rtype: str
     """
-
     projects_list = gl.projects.list(search=project_name,all=True)
-
     for project in projects_list:
         if project.attributes['name'] == project_name and group_name == project.attributes['path_with_namespace'].split(
                 '/')[0]:

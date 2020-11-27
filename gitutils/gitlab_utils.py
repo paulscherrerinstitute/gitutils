@@ -114,12 +114,9 @@ def get_user_id(username):
             user_id = i.attributes['id']
     return user_id
 
-
 def project_exists(proj_name):
-    project = gl.projects.list(search=project_name, all=True)
+    project = gl.projects.list(search=proj_name, all=True)
     return bool(project)
-
-
 
 def check_existing_remote_git(clean, git_repository_id, group_name):
     proj = gl.projects.get(git_repository_id)

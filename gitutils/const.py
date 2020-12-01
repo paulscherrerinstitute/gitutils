@@ -86,6 +86,7 @@ GIT_UPLINK_PROBLEM = "Problem creating the upstream link. Please do it mannualy 
 PROBLEM_FETCHING_NAME = "Problem fetching the group and projects name. Please check if the group and projects are correct and if you have the correct permissions to access such repository."
 PROBLEM_FETCHING_NAME_PROJECT = "Please, provide a valid project's name for the fork command."
 CLEAN_PROBLEM = "Gitutils is not able to delete a repo that is not a fork."
+ROLE_SETROLE_PROBLEM_USERID = "User not found."
 GIT_MERGE_DESCRIPTION_MSG = 'The configuration was changed by %s.'
 SSH_GIT_GIT = 'git@git'
 MERGE_DUPLICATED = 'Another open merge request already exists for this source branch'

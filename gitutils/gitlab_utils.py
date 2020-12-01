@@ -72,6 +72,12 @@ def get_project_tree(project_id, branch):
     return get_project(project_id).repository_tree(recursive=True,
             all=True, branch=branch)
 
+def get_role(role):
+    if role not in ['guest', 'reporter', 'dev', 'maintainer', 'owner']:
+        print(const.ROLE_ADDLDAP_PROBLEM)
+        sys.exit(-1)
+    return check_role(role)
+
 def parse_access_token():
     if os.path.isfile(os.path.expanduser('~') + const.GIT_TOKEN_FILE):
         with open(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 'r') as tfile:
@@ -374,43 +380,43 @@ def find_file_by_id(file_name,group_dict,files_only):
         # for every project found
         for i in projects:
             # For every project's branch
+            branches = i.get('branches', 0)
+            if branches != 0:
+                for b in i['branches']:
+                    # gets the project tree for the branch
+                    project_tree = get_project_tree(i.get('id'), b.name)
+                    for j in project_tree:
+                        if file_name == j.get('name'):
+                            results_file.append({
+                                'webpath':const.ENDPOINT+"/"+group_dict['name']+"/"+i.get('name')+"/"+j.get('type')+"/"+b.name+"/"+j.get('path'),
+                                'branch':b.name,
+                                'path':j.get('path'),
+                                'project_name':i.get('name'),
+                                'project_id': i.get('id')
+                            })
+            if len(results_file) > 0 :
+                print_search_output(group_dict['name'], file_name, results_file)
+            # content
             if not files_only:
-                branches = i.get('branches', 0)
-                if branches != 0:
-                    for b in i['branches']:
-                        # gets the project tree for the branch
-                        project_tree = get_project_tree(i.get('id'), b.name)
-                        for j in project_tree:
-                            if file_name == j.get('name'):
-                                results_file.append({
-                                    'webpath':const.ENDPOINT+"/"+group_dict['name']+"/"+i.get('name')+"/"+j.get('type')+"/"+b.name+"/"+j.get('path'),
-                                    'branch':b.name,
-                                    'path':j.get('path'),
-                                    'project_name':i.get('name'),
-                                    'project_id': i.get('id')
-                                })
-                if len(results_file) > 0 :
-                    print_search_output(group_dict['name'], file_name, results_file)
-            # Gets the project and searches in its file for the search_term
-            project_search_results = get_project(i.get('id')).search(const.BLOBS, file_name)
-            for match in project_search_results:
-                not_add = False
-                for entry in results_blob:
-                    if entry['filename'] == match.get('filename'):
-                        not_add = True
-                if not not_add:
-                    results_blob = {
-                        # File name, including path
-                        'filename':match.get('filename'),
-                        # 3 lines surrounding the search_term
-                        'excerpt':match.get('data'),
-                        # Generation of the diret weblink to the file including the line
-                        'webpath': const.ENDPOINT+"/"+group_dict['name']+"/"+i.get('name')+"/blob/"+match.get('ref')+"/"+match.get('filename')+"#L"+str(match.get('startline'))
-                    }
-            if len(results_blob) > 0:
-                if results_blob.get('webpath') not in match_files:
-                    match_files.append(results_blob.get('webpath'))
-                    print_grep_output(group_dict['name'], i['name'], i['id'], file_name, results_blob)
+                project_search_results = get_project(i.get('id')).search(const.BLOBS, file_name)
+                for match in project_search_results:
+                    not_add = False
+                    for entry in results_blob:
+                        if entry['filename'] == match.get('filename'):
+                            not_add = True
+                    if not not_add:
+                        results_blob = {
+                            # File name, including path
+                            'filename':match.get('filename'),
+                            # 3 lines surrounding the search_term
+                            'excerpt':match.get('data'),
+                            # Generation of the diret weblink to the file including the line
+                            'webpath': const.ENDPOINT+"/"+group_dict['name']+"/"+i.get('name')+"/blob/"+match.get('ref')+"/"+match.get('filename')+"#L"+str(match.get('startline'))
+                        }
+                if len(results_blob) > 0:
+                    if results_blob.get('webpath') not in match_files:
+                        match_files.append(results_blob.get('webpath'))
+                        print_grep_output(group_dict['name'], i['name'], i['id'], file_name, results_blob)
 
 def find_file(file_name,group_indication):
     results =[]
@@ -447,6 +453,19 @@ def get_project_web_url(project_name):
             return project.attributes['web_url']
     raise gitutils_exception.GitutilsError(const.PROJECT_NAME_NOT_FOUND)
 
+def get_project_http_url(project_name):
+    """
+    Function to get the web_url attribute of a project based on its name.
+    :param project_name: Name of the project
+    :type project_name: str
+    :return: Returns the web url to the project.
+    :rtype: str
+    """
+    projects_list = gl.projects.list(search=project_name, all=True)
+    for project in projects_list:
+        if project_name == project.attributes['name']:
+            return project.attributes['http_url_to_repo']
+    raise gitutils_exception.GitutilsError(const.PROJECT_NAME_NOT_FOUND)
 
 def check_key(dict_to_search, key):
     if key in dict_to_search:

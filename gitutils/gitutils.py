@@ -453,7 +453,6 @@ def main():
     ############
     # FORK CMD #
     ############
-
     parser_fork = subparsers.add_parser('fork',
                                         help=const.FORK_HELP_MSG,
                                         formatter_class=argparse.RawTextHelpFormatter)
@@ -468,7 +467,7 @@ def main():
     parser_fork.add_argument('-g',
                              '--group',
                              help=const.FORK_GROUP_MSG)
-    parser_fork.add_argument('project', nargs=1, metavar='project',
+    parser_fork.add_argument('project', nargs='?', metavar='project', default=None,
                              help=textwrap.dedent(const.FORK_PROJECT_MESSAGE))
 
 
@@ -596,22 +595,27 @@ def main():
     ########
     # FORK #
     ########
-    elif arguments.project and arguments.command == 'fork':
-        (repo_name, group_name, project_id, valid) = gitlab_utils.get_repo_group_names(
-            arguments.project[0], arguments.group, arguments.clean)
-        # if project is personal, needs to be deleted
-        if group_name == gitlab_utils.get_username():
-            if arguments.clean:
-                gitlab_utils.delete_project(project_id)
-                (repo_name, group_name, project_id, valid) = gitlab_utils.get_repo_group_names(
-                    arguments.project, False)
-            else:
-                print(const.FORK_PROBLEM_PERSONAL)
-                parser.print_help()
+    elif arguments.command == 'fork':
+        if arguments.project is not None:
+            (repo_name, group_name, project_id, valid) = gitlab_utils.get_repo_group_names(
+                arguments.project, arguments.group, arguments.clean)
+            # if project is personal, needs to be deleted
+            if group_name == gitlab_utils.get_username():
+                if arguments.clean:
+                    gitlab_utils.delete_project(project_id)
+                    (repo_name, group_name, project_id, valid) = gitlab_utils.get_repo_group_names(
+                        arguments.project, False)
+                else:
+                    print(const.FORK_PROBLEM_PERSONAL)
+                    parser_fork.print_help()
+                    sys.exit(-1)
+            if not valid:
+                print(const.PROBLEM_FETCHING_NAME)
+                parser_fork.print_help()
                 sys.exit(-1)
-        if not valid:
-            print(const.PROBLEM_FETCHING_NAME)
-            parser.print_help()
+        else:
+            print(const.PROBLEM_FETCHING_NAME_PROJECT)
+            parser_fork.print_help()
             sys.exit(-1)
     #########
     # LOGIN #

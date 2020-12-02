@@ -42,6 +42,22 @@ command:
 
 > To see the gitutils help message use: ```> gitutils -h```. If not specified otherwise the default endpoint is ```https://git.psi.ch```.
 
+## addldap
+```bash
+usage: gitutils.py addldap [-h] group ldapgroup [role]
+
+positional arguments:
+  group       Group that the LDAP group will be added to.
+  ldapgroup   LDAP group common name.
+  role        The role defines the permissions. Options: guest, reporter, dev, maintainer, owner
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+> To see the addldap help message use: ```> gitutils addldap -h```
+
+
+
 ## clonegroup
 ```bash
 usage: gitutils.py clonegroup [-h] group
@@ -52,8 +68,6 @@ positional arguments:
 optional arguments:
   -h, --help  show this help message and exit
 ```
-
-> To see the clonegroup help message use: ```> gitutils clonegroup -h```
 
 
 ## creategroups

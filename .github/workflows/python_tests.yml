@@ -15,6 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run unit tests
-        run: python -m unittest gitutils.tests.gitutils_unittest 
+        run: python unittest gitutils/tests/gitutils_unittest.py
       - name: Run cmd behavior tests
-        run: python -m unittest gitutils.tests.gitutils_cmds
+        run: python unittest gitutils/tests/gitutils_cmds.py

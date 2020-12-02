@@ -13,6 +13,7 @@ from gitutils import gitutils_parser
 from gitutils import gitutils_exception
 from gitutils import const
 from gitutils.cmds.creategroups import create_groups
+from gitutils.cmds.clonegroup import clone_group
 from gitutils.cmds.createprojects import create_projects
 from gitutils.cmds.find import find
 from gitutils.cmds.fork import fork

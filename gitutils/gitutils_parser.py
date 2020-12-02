@@ -241,6 +241,7 @@ class Parser:
         # MERGE #
         #########
         elif arguments.command == 'merge':
+            group_name = None
             # Verify if project has been indicated
             project_indication = False
             repo_name = os.path.basename(os.getcwd())

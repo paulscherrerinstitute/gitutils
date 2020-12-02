@@ -83,6 +83,12 @@ def parse_access_token():
         with open(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 'r') as tfile:
             return tfile.read().replace('\n', '')
 
+def remove_project(project_id):
+    gl.projects.delete(project_id)
+
+def remove_group(group_id):
+    gl.groups.delete(group_id)
+
 def check_role(role):
     if role == 'guest':
         return gitlab.GUEST_ACCESS
@@ -237,6 +243,10 @@ def is_empty(any_structure):
     if any_structure:
         return False
     return True
+
+def verify_token_unittest():
+    global gl
+    return bool(len(gl.groups.list()))
 
 def verify_token():
     global gl
@@ -551,7 +561,6 @@ def get_forked_project(git_repository, git_repository_id):
         if project['username'] == get_username() \
                 and project['name'] == git_repository \
                 and 'forked_from_project' in project:
-
             # check if project is forked from the right project
             if project['forked_from_project']['name'] == git_repository:
                 forked_project = project
@@ -559,9 +568,9 @@ def get_forked_project(git_repository, git_repository_id):
             else:
                 raise gitutils_exception.GitutilsError(
                     const.PROJECT_FORK_NAME_ERROR)
-        else:
-            raise gitutils_exception.GitutilsError(
-                const.PROJECT_FOUND_NOT_FORK)
+        # else:
+        #     raise gitutils_exception.GitutilsError(
+        #         const.PROJECT_FOUND_NOT_FORK)
     return forked_project
 
 

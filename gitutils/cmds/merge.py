@@ -18,7 +18,6 @@ def merge(git_repository='',
     :type title: str
     :return:
     """
-
     git_username = gitlab_utils.get_username()
     if git_username == -1:
         raise gitutils_exception.GitutilsError(

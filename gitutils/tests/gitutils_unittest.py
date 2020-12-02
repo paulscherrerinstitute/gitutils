@@ -39,13 +39,24 @@ class TestGitutilsUnit(unittest.TestCase):
         list_of_groups = gitlab_utils.get_groups()
         self.assertTrue(len(list_of_groups) > 0)
 
-    # def test_get_projects(self):
-    #     """
-    #     Test get_projects
-    #     """
+    def test_roles(self):
+        """
+        Test roles
+        """
+        role_guest = gitlab_utils.check_role('guest')
+        self.assertEqual(role_guest, 10)
+        role_reporter = gitlab_utils.check_role('reporter')
+        self.assertEqual(role_reporter, 20)
+        role_dev = gitlab_utils.check_role('dev')
+        self.assertEqual(role_dev, 30)
+        role_maintainer = gitlab_utils.check_role('maintainer')
+        self.assertEqual(role_maintainer, 40)
+        role_owner = gitlab_utils.check_role('owner')
+        self.assertEqual(role_owner, 50)
+        
 
-    #     list_of_projects = gitlab_utils.get_projects()
-    #     self.assertTrue(len(list_of_projects) > 0)
+
+        
 
     def test_get_project_web_url(self):
         """

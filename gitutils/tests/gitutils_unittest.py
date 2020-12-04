@@ -9,7 +9,6 @@ from gitutils import const
 class TestGitutilsUnit(unittest.TestCase):
 
     global gl
-
     def test_authenticate(self):
         """
         Test the authentication.
@@ -29,7 +28,11 @@ class TestGitutilsUnit(unittest.TestCase):
         """
         Test the username
         """
-        self.assertEqual(gl.user.name, gitlab_utils.get_username())
+        docker = os.environ.get('DOCKER_CONTAINER', False)
+        if docker:
+            self.assertEqual(gl.user.name, 'root')
+        else:
+            self.assertEqual(gl.user.name, gitlab_utils.get_username())
 
     def test_get_groups(self):
         """

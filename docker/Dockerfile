@@ -2,6 +2,7 @@ FROM conda/miniconda3-centos7
 
 ENV RUN_DIR /runners
 ENV TERM=xterm
+ENV LANG C.UTF-8
 ENV DOCKER_CONTAINER Yes
 
 # Create directory structure.

@@ -876,6 +876,7 @@ def get_dict_from_own_projects(own_projects):
             'name': project.attributes['name'],
             'path': project.attributes['path_with_namespace'],
             'url': project.attributes['ssh_url_to_repo'],
+            'http_url': project.attributes['http_url_to_repo'],
             'username': project.attributes['namespace']['name'],
             'id': project.attributes['id'],
         })

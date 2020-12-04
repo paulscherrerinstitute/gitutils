@@ -18,7 +18,7 @@ def clone_group(group_name=''):
     # clones all the projects from group
     for i in projects:
         # clones into repo
-        os.system('git clone %s' % i['url'])
+        os.system('git clone %s' % i['http_url'])
         # 2 sec sleep time in between:
         # Gitlab API refuses if there's no sleep in between
         # error: ssh_exchange_identification: read: Connection reset by peer

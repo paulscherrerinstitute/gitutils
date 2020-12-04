@@ -2,7 +2,7 @@
 LC_CTYPE=en_US.utf8
 # decript the token file
 echo "Please, type the password to decrypt the token file: "
-openssl aes-256-cbc -d -a -in /root/token.enc -out /root/.gitutils_token
+gpg --output /root/.gitutils_token --decrypt /root/token.enc 
 source activate
 conda env create -f environment_droplet.yml -n gitutils
 source activate gitutils

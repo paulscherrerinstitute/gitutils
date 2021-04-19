@@ -7,8 +7,9 @@ Gitutils
 
 .. code-block:: bash
 
-usage: gitutils [-h] [-e ENDPOINT]
-                {fork,merge,search,grep,find,clonegroup,login} ...
+usage: gitutils.py [-h] [-e ENDPOINT]
+                   {addldap,clonegroup,creategroups,createprojects,find,fork,login,merge,setrole}
+                   ...
 
 GITUTILS is a tool to facilitate the server-side operations when developing software that uses git repositories.
 
@@ -20,48 +21,141 @@ optional arguments:
 command:
   valid commands
 
-  {fork,merge,search,grep,find,clonegroup,login}
+  {addldap,clonegroup,creategroups,createprojects,find,fork,login,merge,setrole}
                         commands
-    fork                Creates a fork from the repository.
-    merge               Creates a request to merge the defined fork to the original repository.
-    search              DEPRECATED. Use find instead.
-    grep                DEPRECATED. Use find instead.
-    find                Find a term inside the repositories.
+    addldap             Add a ldap group user to a group.
     clonegroup          Clones all existing projects within a group.
-    login               Fetches the token for the usage of gitutils and stores it on the user's home directory file (~/.gitutils_token).
+    creategroups        Create a new group (or multiple).
+    createprojects      Create a new project (or multiple) inside the specified group.
+    find                General search inside all the groups/projects.
+    fork                Creates a fork from the repository.
+    login               Fetches the gitlab token (saved in ~/.gitutils_token).
+    merge               Creates a request to merge the defined fork to the original repository.
+    setrole             Sets the role for a specific user on a specific group or project (or multiple)
 
 .. note:: To see the gitutils usage help, you can use::
 
       $ gitutils -h
+
+Addldap
+-------
+
+.. code-block:: bash
+
+      usage: gitutils.py addldap [-h] group ldapgroup [role]
+
+      positional arguments:
+      group       Group that the LDAP group will be added to.
+      ldapgroup   LDAP group common name.
+      role        The role defines the permissions. Options: guest, reporter, dev, maintainer, owner
+
+optional arguments:
+  -h, --help  show this help message and exit
+
+
+.. note:: To see the addldap usage help, you can use::
+
+      $ gitutils addldap -h
+
+Clonegroup
+----------
+
+.. code-block:: bash
+
+      usage: gitutils.py clonegroup [-h] group
+
+      positional arguments:
+      group       Group name
+
+      optional arguments:
+      -h, --help  show this help message and exit
+
+.. note:: To see the clonegroup usage help, you can use::
+
+      $ gitutils clonegroup -h
+
+Creategroups
+------------
+
+.. code-block:: bash
+
+      usage: gitutils.py creategroups [-h] name [name ...]
+
+      positional arguments:
+      name        Group name or multiple (if multiple groups should be created).
+
+      optional arguments:
+      -h, --help  show this help message and exit
+
+.. note:: To see the creategroups usage help, you can use::
+
+      $ gitutils creategroups -h
+
+Createprojects
+--------------
+
+.. code-block:: bash
+
+      usage: gitutils.py createprojects [-h] group name [name ...]
+
+      positional arguments:
+      group       Group name
+      name        Name of the new project (or multiple separated with spaces).
+
+      optional arguments:
+      -h, --help  show this help message and exit
+
+.. note:: To see the createprojects usage help, you can use::
+
+      $ gitutils createprojects -h
+
+
+Find
+----
+.. code-block:: bash
+
+      usage: gitutils find [-h] term
+
+      positional arguments:
+      term        Term to search.
+
+      optional arguments:
+      -h, --help  show this help message and exit
+
+.. note:: To see the find usage help, you can use::
+
+      $ gitutils find -h
+
 
 Fork
 ----
 
 .. code-block:: bash
 
-      usage: gitutils fork [-h] [-n] [-c] [-g GROUP] project
+usage: gitutils fork [-h] [-n] [-c] [-g GROUP] project
 
-      positional arguments:
-        project               (REQUIRED) Indicates the project to be forked. It can be of three different formats:
-                              - https://git.psi.ch/<group_name>/<project_name> : The user provides
-                                 the direct http to the git repository.
-                              - <group_name>/<project_name> : The user provides a combination of
-                                 group_name and project_name divided by "/".
-                              - <project_name> : The user provides the name of the project name.
-                                 Gitutils will fetch the name of the group (keep in mind, that this may
-                                 cause ambiguity problems).
+positional arguments:
+  project               (REQUIRED) Indicates the project to be forked. It can be of three different formats:
+                        - https://git.psi.ch/<group_name>/<project_name> : The user provides
+                           the direct http to the git repository.
+                        - <group_name>/<project_name> : The user provides a combination of
+                           group_name and project_name divided by "/".
+                        - <project_name> : The user provides the name of the project name.
+                           Gitutils will fetch the name of the group (keep in mind, that this may
+                           cause ambiguity problems).
 
-      optional arguments:
-        -h, --help            show this help message and exit
-        -n, --no_clone        Indicates that the forked project will not be cloned after forking. A fork
-                              will be created on the server-side and no clone nor upstream will be
-                              generated on the local git server.
-        -c, --clean           Indicates to delete any existing fork project under your personal group.
-                              This might be necessary to fork and clone into a clean copy of the original
-                              repository. The desired forked project must not be a pre-existing forked
-                              project under your personal projects.
-        -g GROUP, --group GROUP
-                               Indicates the group that the fork is going to be created. The default is the username.
+optional arguments:
+  -h, --help            show this help message and exit
+  -n, --no_clone        Indicates that the forked project will not be cloned after forking. A fork
+                        will be created on the server-side and no clone nor upstream will be
+                        generated on the local git server.
+  -c, --clean           Indicates to delete any existing fork project under your personal group.
+                        This might be necessary to fork and clone into a clean copy of the original
+                        repository. The desired forked project must not be a pre-existing forked
+                        project under your personal projects.
+  -g GROUP, --group GROUP
+                         Indicates the group that the fork is going to be created. The default is the username.
+
 
 .. note:: To see the fork usage help, you can use::
 
@@ -97,44 +191,23 @@ Merge
 .. note:: To see the merge usage help, you can use::
 
       $ gitutils merge -h
-       
-     
-Clonegroup
-----------
+             
+setrole
+-------
 
 .. code-block:: bash
 
-      usage: gitutils.py clonegroup [-h] group
+      usage: gitutils.py setrole [-h] [-p] role username group [group ...]
 
       positional arguments:
-        group       Group name
+      role           The role defines the permissions. Options: guest, reporter, dev, maintainer, owner
+      username       Username that will be given the role.
+      group          Group in which the user will be given such role.
 
       optional arguments:
-        -h, --help  show this help message and exit
+      -h, --help     show this help message and exit
+      -p, --project  If indicated, the setrole gives the access on a project level (and not on the default group level).
 
-.. note:: To see the clonegroup usage help, you can use::
+.. note:: To see the setrole usage help, you can use::
 
-      $ gitutils clonegroup -h
-      
-      
-      
-Search & Grep
--------------
-Deprecated. Use command find instead
-  
-Find
-----
-.. code-block:: bash
-
-      usage: gitutils find [-h] term
-
-      positional arguments:
-      term        Term to search.
-
-      optional arguments:
-      -h, --help  show this help message and exit
-
-.. note:: To see the find usage help, you can use::
-
-      $ gitutils find -h
-      
+      $ gitutils setrole -h

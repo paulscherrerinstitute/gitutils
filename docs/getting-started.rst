@@ -69,10 +69,10 @@ Find
 
 1. The find command will do a general search for all projects and groups.
 
-    - To search for term:
+    - To search for term::
 
         $ gitutils find <term>
-    
+
     .. note:: This task can take some minutes depending the number of groups and projects. 
 
     - The output will display the group and the enumerated matching cases according to this example:
@@ -99,7 +99,7 @@ Clonegroup
 ----------
 
 1. The clonegroup command clones all the existing projects from a specified group.
-    - To clone all projects of group_name:
+    - To clone all projects of group_name::
 
         $ gitutils clonegroup <group_name>
 
@@ -108,38 +108,41 @@ Clonegroup
 Fork & Merge walk-through
 -------------------------
 
-1. Fork and clone a repository:
+1. Fork and clone a repository::
 
     $ gitutils fork <group_name>/<repository_name>
 
-2. Change the current working directory to your local project cd <repository_name>. Do the changes and/or development necessary.
 
-3. Stage your changes to commit by adding them:
+2. Change the current working directory to your local project ```cd <repository_name>```. 
+
+3. Do the changes and/or development necessary. 
+
+4. Stage your changes to commit by adding them::
 
     $ git add .
 
-4. Commit your changes with a descriptive commit_message:
-
+5. Commit your changes with a descriptive commit_message::
     $ git commit -m <commit_message>
 
-5. Push changes to the forked repository:
+6. Push changes to the forked repository::
 
     $ git push
 
-6. Once you're ready to create the merge request, fetch and merge changes from original repository:
+7. Once you're ready to create the merge request, fetch and merge changes from original repository::
 
     $ git fetch upstream
 
-7. Fetch the branches and their respective commits from the upstream repository.
+    .. note:: Fetch the branches and their respective commits from the upstream repository::
 
-    $ git merge upstream/master
+        $ git merge upstream/master
 
     .. note:: This brings your fork's 'master' branch into sync with the upstream repository without losing your changes. You might have to deal with existing conflicts between your changes and the original repo changes. Decide if you want to keep only your branch's changes, keep only the other branch's changes, or make a brand new change, which may incorporate changes from both branches. If this is the case, go back to step 4 after solving the merge conflicts (add, commit and push the resolved merge conflicts files).
 
-8. Finally, create a merge request:
+8. Finally, create a merge request::
 
     $ gitutils merge -p <group_name>/<repository_name> -t <title> -d <description>
 
-    .. note:: if you are located on the repository folder, simply:
+    .. note:: if you are located on the repository folder, simply::
 
         $ gitutils merge  -t <title> -d <description>
+

@@ -80,16 +80,13 @@ class TestGitutils(TestCase):
         del sys.argv[2:]
         # ARG PROJECT
         # not clone
-        sys.argv.append('-n') 
-        sys.argv.append(self.__class__.project_2) 
+        sys.argv.append('-n')
+        sys.argv.append(self.__class__.project_2)
         # calls main to fork
         gitutils.main()
         # verifies if forked project exists under personal account
         own_projects = gitlab_utils.get_owned_projects()
-        found = False
-        for proj in own_projects:
-            if proj['name'] == self.__class__.project_2:
-                found = True
+        found = any(proj['name'] == self.__class__.project_2 for proj in own_projects)
         self.assertTrue(found)
         time.sleep(2)
         # creates a change
@@ -125,15 +122,15 @@ class TestGitutils(TestCase):
         sys.argv.append('-g')
         sys.argv.append(self.__class__.group_name)
         # ARG PROJECT
-        sys.argv.append(self.__class__.project_fork) 
+        sys.argv.append(self.__class__.project_fork)
         # calls main to fork
         gitutils.main()
         # verifies if forked project exists under group projects
         own_projects = gitlab_utils.get_group_projects(self.__class__.group_name)
-        found = False
-        for proj in own_projects:
-            if proj['name'] == self.__class__.project_fork:
-                found = True
+        found = any(
+            proj['name'] == self.__class__.project_fork for proj in own_projects
+        )
+
         self.assertTrue(found)
         time.sleep(2)
 
@@ -184,9 +181,12 @@ class TestGitutils(TestCase):
         self.assertTrue(os.path.exists('./'+self.__class__.project_2))
         self.assertTrue(os.path.exists('./'+self.__class__.project_fork))
         # cleanup 
-        shutil.rmtree('./'+self.__class__.project_1)
-        shutil.rmtree('./'+self.__class__.project_2)
-        shutil.rmtree('./'+self.__class__.project_fork)
+        try:
+            shutil.rmtree('./'+self.__class__.project_1)
+            shutil.rmtree('./'+self.__class__.project_2)
+            shutil.rmtree('./'+self.__class__.project_fork)
+        except:
+            print("Problem deleting the cloned project's folders.")
         time.sleep(2)
 
     #########

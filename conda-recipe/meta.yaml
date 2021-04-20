@@ -10,6 +10,7 @@ requirements:
     run:
         - python
         - python-gitlab
+        - click
 
 build:
   noarch: python

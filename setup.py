@@ -11,5 +11,5 @@ setup(name='gitutils',
       long_description=README,
       author='Paul Scherrer Institute (PSI)',
       url='https://github.com/paulscherrerinstitute/gitutils',
-      packages=['gitutils'],
+      packages=['gitutils', 'gitutils.cmds'],
       )

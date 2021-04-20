@@ -45,10 +45,7 @@ def set_role(role, username, git_groups, project_flag):
                                     'access_level': role})
             # verification
             members = group.members.all(all=True)
-            found = False
-            for member in members:
-                if member.attributes['username'] == username:
-                    found = True
+            found = any(member.attributes['username'] == username for member in members)
             if not found:
                 print(' ⨯')
                 raise gitutils_exception.GitutilsError(
@@ -72,7 +69,7 @@ def set_role(role, username, git_groups, project_flag):
             # gets group name
             group_name = gitlab_utils.get_project_group_simplified(project_name)
             # gets project id
-            project_id = gitlab_utils.get_project_id(group_name,project_name)   
+            project_id = gitlab_utils.get_project_id(group_name,project_name)
             # gets the project
             project = gitlab_utils.get_project(project_id)
             # adds member with the desired role to the project
@@ -80,10 +77,7 @@ def set_role(role, username, git_groups, project_flag):
                                     'access_level': role})
             # verification
             members = project.members.all(all=True)
-            found = False
-            for member in members:
-                if member.attributes['username'] == username:
-                    found = True
+            found = any(member.attributes['username'] == username for member in members)
             if not found:
                 print(' ⨯')
                 raise gitutils_exception.GitutilsError(

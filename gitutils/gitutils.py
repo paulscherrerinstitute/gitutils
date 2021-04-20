@@ -12,14 +12,14 @@ from gitutils import gitlab_utils
 from gitutils import gitutils_parser
 from gitutils import gitutils_exception
 from gitutils import const
-from gitutils.cmds.creategroups import create_groups
+from gitutils.cmds.addldap import add_ldap
+from gitutils.cmds.merge import merge
+from gitutils.cmds.setrole import set_role
 from gitutils.cmds.clonegroup import clone_group
+from gitutils.cmds.creategroups import create_groups
 from gitutils.cmds.createprojects import create_projects
 from gitutils.cmds.find import find
 from gitutils.cmds.fork import fork
-from gitutils.cmds.merge import merge
-from gitutils.cmds.setrole import set_role
-from gitutils.cmds.addldap import add_ldap
 
 def main():
     """
@@ -48,22 +48,22 @@ def main():
     (repo_name, group_name, project_id) = (None, None, None)
     # initialization routine
     (repo_name, group_name, project_id) = parser.initialization(arguments)
-    # list of commands
-    list_of_cmds = ['addldap', 
-                    'clonegroup', 
-                    'creategroups', 
-                    'createprojects', 
-                    'find', 
-                    'fork', 
-                    'login', 
-                    'merge',
-                    'setrole']
-
     # Command, group and repo are ok
     if arguments.command and \
         repo_name is not None and \
         group_name is not None and \
         project_id is not None:
+        # list of commands
+        list_of_cmds = ['addldap', 
+                        'clonegroup', 
+                        'creategroups', 
+                        'createprojects', 
+                        'find', 
+                        'fork', 
+                        'login', 
+                        'merge',
+                        'setrole']
+
         try:
             if arguments.command == 'addldap':
                 role_access = gitlab_utils.get_role(arguments.role)

@@ -1,4 +1,5 @@
 import os
+import subprocess
 import time
 from gitutils import const
 from gitutils import gitlab_utils
@@ -16,12 +17,13 @@ def clone_group(group_name=''):
     # Gets all the projects from the group
     projects = gitlab_utils.get_group_projects(group_name)
     # clones all the projects from group
+    print(const.CLONEGROUP_WARNING)
     for i in projects:
         # clones into repo
-        os.system('git clone %s' % i['http_url'])
+        subprocess.call(['git', 'clone', i['http_url']])
         # 2 sec sleep time in between:
-        # Gitlab API refuses if there's no sleep in between
+        # Gitlab API refuses if there's no sleep in between (too many requests)
         # error: ssh_exchange_identification: read: Connection reset by peer
         time.sleep(2)
     # Finishing up, message to user
-    print("All projects have been cloned. Exiting now...")
+    print(const.CLONEGROUP_FINISH)

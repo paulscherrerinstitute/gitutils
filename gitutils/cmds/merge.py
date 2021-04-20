@@ -32,23 +32,22 @@ def merge(git_repository='',
 
     if forked_project is None:
         raise gitutils_exception.GitutilsError(const.GIT_MERGE_PROBLEM_2)
-    else:
-        print(const.GIT_CREATE_MERGE_MSG)
-        final_description = const.GIT_MERGE_DESCRIPTION_MSG \
-            % git_username
-        if description is not None:
-            final_description += ' User description: ' + description
+    print(const.GIT_CREATE_MERGE_MSG)
+    final_description = const.GIT_MERGE_DESCRIPTION_MSG \
+        % git_username
+    if description is not None:
+        final_description += ' User description: ' + description
 
-        # Merge will be from source and target masters branches
-        source_branch = 'master'
-        target_branch = 'master'
+    # Merge will be from source and target masters branches
+    source_branch = 'master'
+    target_branch = 'master'
 
-        merge_request = gitlab_utils.create_merge_request(
-            (git_repository_id, source_branch),
-            (forked_project['forked_from_project']['id'], target_branch),
-            (title, final_description))
+    merge_request = gitlab_utils.create_merge_request(
+        (git_repository_id, source_branch),
+        (forked_project['forked_from_project']['id'], target_branch),
+        (title, final_description))
 
-        if merge_request.attributes['id']:
-            print(const.GIT_MERGE_SUCCESS
-                  % (merge_request.attributes['id'],
-                     merge_request.attributes['created_at']))
+    if merge_request.attributes['id']:
+        print(const.GIT_MERGE_SUCCESS
+              % (merge_request.attributes['id'],
+                 merge_request.attributes['created_at']))

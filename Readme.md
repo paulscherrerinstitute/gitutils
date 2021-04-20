@@ -376,11 +376,28 @@ Checkout the project:
 ```
 
 ## Tests
+Unit and functional tests are available on the folder `tests`
 
-(Preliminary) Unit tests are available on the folder `tests`. To run the unit tests, use the command:
+### Unit tests
+
+To run the unit tests:
 
 ```bash
 > python -m unittest gitutils/tests/gitutils_test.py
+```
+
+### Functional tests
+To run the functional tests:
+
+```bash
+> python -m unittest gitutils/tests/gitutils_cmds.py
+```
+
+### New features/changes
+To practically test changes and new implementations:
+
+```bash
+> python -m gitutils.gitutils <new_command>
 ```
 
 ## Building the conda package

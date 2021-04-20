@@ -5,9 +5,19 @@ Development
 Tests
 -----
 
-(Preliminary) Unit tests are available on the folder `tests`. To run the unit tests, use the command::
+To run the unit tests::
 
     $ python -m unittest gitutils/tests/gitutils_test.py
+
+
+To run the functional tests::
+
+    $ python -m unittest gitutils/tests/gitutils_cmds.py
+
+To test new functionalities:
+
+    $ python -m gitutils.gitutils <new_cmd>
+
 
 Installation for distribution
 -----------------------------

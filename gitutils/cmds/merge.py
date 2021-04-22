@@ -24,8 +24,7 @@ def merge(git_repository='',
                 const.PROBLEM_CREATEGROUP_EMPTY)
 
     # Check if there is already a fork
-    forked_project = gitlab_utils.get_forked_project(git_repository,
-                                                     git_repository_id)
+    forked_project = gitlab_utils.get_forked_project(git_repository)
     # If no title submitted by the user, default title
     if title is None:
         title = const.MERGE_DEFAULT_TITLE % gitlab_utils.get_username()

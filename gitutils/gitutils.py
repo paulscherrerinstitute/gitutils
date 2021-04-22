@@ -53,6 +53,7 @@ def main():
         repo_name is not None and \
         group_name is not None and \
         project_id is not None:
+        
         # list of commands
         list_of_cmds = ['addldap', 
                         'clonegroup', 
@@ -83,10 +84,10 @@ def main():
                 find(arguments.term[0], arguments.file)
             elif arguments.command == 'fork':
                 fork(fork_group_indication=arguments.group,
+                    group_name=group_name,
                     git_repository_id=project_id,
                     git_repository=repo_name,
-                    no_clone=arguments.no_clone,
-                    clean=arguments.clean)
+                    no_clone=arguments.no_clone)
             elif arguments.command == 'merge':
                 merge(git_repository=repo_name,
                     git_repository_id=project_id,

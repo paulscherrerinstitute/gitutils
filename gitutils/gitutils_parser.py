@@ -110,6 +110,7 @@ class Parser:
                                 help=const.FORK_CLEAN_MSG)
         self.parser_fork.add_argument('-g',
                                 '--group',
+                                action=const.STORE_TRUE,
                                 help=const.FORK_GROUP_MSG)
         self.parser_fork.add_argument('project', nargs='?', metavar='project', default=None,
                                 help=textwrap.dedent(const.FORK_PROJECT_MESSAGE))
@@ -204,29 +205,25 @@ class Parser:
         # FORK #
         ########
         elif arguments.command == 'fork':
-            if not arguments.group:
-                arguments.group = gitlab_utils.get_username()
-            if arguments.project is not None:
-                (repo_name, group_name, project_id, valid) = gitlab_utils.get_repo_group_names(
-                    arguments.project, arguments.group, arguments.clean)
-                # if project is personal, needs to be deleted
-                if group_name == gitlab_utils.get_username():
-                    if arguments.clean:
-                        gitlab_utils.delete_project(project_id)
-                        (repo_name, group_name, project_id, valid) = gitlab_utils.get_repo_group_names(
-                            arguments.project, False)
-                    else:
-                        print(const.FORK_PROBLEM_PERSONAL)
-                        self.parser_fork.print_help()
-                        sys.exit(-1)
-                if not valid:
-                    print(const.PROBLEM_FETCHING_NAME)
-                    self.parser_fork.print_help()
-                    sys.exit(-1)
-            else:
+            if arguments.project is None:
                 print(const.PROBLEM_FETCHING_NAME_PROJECT)
                 self.parser_fork.print_help()
                 sys.exit(-1)
+            if arguments.project.count('/') != 1:
+                print(const.GROUP_PROJECT_BAD_FORMAT)
+                self.parser_fork.print_help()
+                sys.exit(-1)
+            group_name = arguments.project.split('/')[0]
+            repo_name = arguments.project.split('/')[1]
+            if arguments.clean:
+                forked_project = gitlab_utils.get_forked_project(repo_name)
+                project_id = forked_project['forked_from_project']['id']
+                gitlab_utils.delete_project(forked_project['id'])
+            else:
+                if not arguments.group:
+                    project_id = gitlab_utils.get_project_id(group_name,repo_name)
+                else:
+                    project_id = gitlab_utils.get_project_id_without_group(repo_name)
         #########
         # LOGIN #
         #########

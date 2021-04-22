@@ -4,6 +4,18 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
+[1.1.0] - 2021-04-22
+
+Added
+~~~~~
+- Functional tests Check gitutils/tests/gitutils_cmds.py for details.
+
+Changed
+~~~~~~~
+- Complete gitutils restructure. Each command is now divided into its own python file for easy maintenance and implementation of new functionalities.
+- Fork command requires the parameter in the format group_name/project name. Previously used: ``https://git.psi.ch/<group_name>/<project_name>`` and ``<project_name>`` are deprecated.
+- Fork command only forks into personal space and the removal using the clause -c is not treated on gitutils but directly with git message if not possible.
+
 [1.0.21] - 2020-11-27
 
 Added

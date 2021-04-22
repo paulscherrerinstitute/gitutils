@@ -47,12 +47,12 @@ LOGIN_REQUEST = "Username:"
 PASSWORD_REQUEST = "Password:"
 NO_GITLAB_TOKEN = "Before executing this script make sure that you have set GITLAB_PRIVATE_TOKEN"
 PROBLEM_USERNAME = "Problem getting the correct username. Please try again."
-FORKED_EXISTS = "A forked repository with the same name already exists. Use -c to clean existing fork."
+FORKED_EXISTS = "A forked repository with the same name already exists. Use -c to clean existing personal fork."
 FORK_PROJECT = "Forking project %s (id: %s)..."
 PROJECT_ID_NOT_FOUND = "Project id not found. Please, indicate group name and project name or check if you have permission to access such group/project."
 PROJECT_NAME_NOT_FOUND = "Project name not found. Please, indicate group name and project name or check if you have permission to access such group/project."
 GIT_INCONSISTENCY_NAME = "The name of the project extracted from the .git/config and the folder are not equal."
-PROJECT_FOUND_NOT_FORK = "The requested project is not a fork. Gitutils is not able to continue..."
+PROJECT_FOUND_NOT_FORK = "The requested project was not found under your personal forks. Gitutils is not able to continue..."
 PROJECT_FORK_NAME_ERROR = "The requested project has been forked from a different repository. Gitutils is not able to continue..."
 FIND_FILES_ONLY_MSG = "If used, the find command will search only in file names and not on file contents."
 GROUP_NOT_SPECIFIED_ASSUME_USER = "The group was not specified. Default is to use your personal project."
@@ -73,6 +73,9 @@ FULL_GROUP_PROJECT_BAD_FORMAT = "Please use the following format: https://git.ps
 GIT_CREATE_MERGE_MSG = "Creating merge request..."
 DELETING_EXISTING_FORK = "Deleting existing fork..."
 NO_PERSONAL_FORK = "Impossible to delete. The desired project is not under your personal projects."
+FORK_NO_CLONE = "Project was successfully forked remotely but not cloned locally.\n"
+DELETE_LOCAL_CONFIRMATION = "Do you want to continue? (all local changes will be lost)"
+NO_PERMISSION_TO_DELETE_LOCAL_FOLDER = "Aborting..."
 NO_PERSONAL_FORK_PERMISSIONS = "The desired project is not under your personal projects, this action depends on your permissions."
 DELETE_SUCCESS = "Project successfully deleted. Waiting 4 seconds of idle time after deleting a project to let the server process it."
 GROUP_PARAMETER_EMPTY = "The group provided as parameter was not found. Please check for typo or if the group really exists."
@@ -101,36 +104,22 @@ MERGE_DEFAULT_TITLE = "Merge request submitted by %s."
 GITUTILS_TITLE_DESCRIPTION = 'GITUTILS is a tool to facilitate the server-side operations when developing software that uses git repositories.'
 BASEDIR_HELP_MSG = "Base directory to clone configurations to."
 ENDPOINT_HELP_MSG = "Endpoint of the git server. Default: https://git.psi.ch"
-FORK_PROJECT_MESSAGE = '''(REQUIRED) Indicates the project to be forked. It can be of three different formats:
-- https://git.psi.ch/<group_name>/<project_name> : The user provides
-   the direct http to the git repository.
-- <group_name>/<project_name> : The user provides a combination of
-   group_name and project_name divided by \"/\".
-- <project_name> : The user provides the name of the project name.
-   Gitutils will fetch the name of the group (keep in mind, that this may
-   cause ambiguity problems).'''
+FORK_PROJECT_MESSAGE = '''(REQUIRED) Indicates the project to be forked. It must be indicated as follow:
+- <group_name>/<project_name>.'''
 MERGE_PROJECT_MESSAGE = '''Indicates the project to be forked. It can be of four different formats:
 - \"\" : (DEFAULT) The user doesn't provide this argument, the project's group and name
       will be fetched from the /.git/config folder within the path where the
       gitutils is being called.
-- https://git.psi.ch/<group_name>/<project_name> : The user provides the direct
-      http to the git repository.
 - <group_name>/<project_name> : The user provides a combination of group_name and
-      project_name divided by "/".
-- <project_name> : The user provides the name of the project name. Gitutils will
-      fetch the name of the group (keep in mind, that this may cause ambiguity
-      problems).'''
-FORK_CLEAN_MSG = '''Indicates to delete any existing fork project under your personal group.
-This might be necessary to fork and clone into a clean copy of the original
-repository. The desired forked project must not be a pre-existing forked
-project under your personal projects.'''
-FORK_GROUP_MSG = ''' Indicates the group that the fork is going to be created. The default is the username.'''
+      project_name divided by "/".'''
+FORK_CLEAN_MSG = '''Flag to delete personal fork of the project.'''
+FORK_GROUP_MSG = '''Indicates if the fork should not be a personal project.'''
 COMMAND_NOT_FOUND = "Command not found."
 FORK_HELP_MSG = "Creates a fork from the repository."
 SETROLE_PROJECT_FLAG_HELP = "If indicated, the setrole gives the access on a project level (and not on the default group level)."
 FORK_NOCLONE_HELP = '''Indicates that the forked project will not be cloned after forking. A fork
 will be created on the server-side and no clone nor upstream will be
-generated on the local git server.'''
+generated on the local git repository.'''
 LOGIN_HELP_MSG = "Fetches the gitlab token (saved in ~/.gitutils_token)."
 LOGIN_TEST = "As a verification for the gitutils-gitlab token, gitutils will fetch the list of groups..."
 LOGIN_PROBLEM = "Problem with the token. Please, check your credentials."

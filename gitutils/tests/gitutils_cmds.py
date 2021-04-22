@@ -81,7 +81,7 @@ class TestGitutils(TestCase):
         # ARG PROJECT
         # not clone
         sys.argv.append('-n')
-        sys.argv.append(self.__class__.project_2)
+        sys.argv.append(self.__class__.group_name+'/'+self.__class__.project_2)
         # calls main to fork
         gitutils.main()
         # verifies if forked project exists under personal account
@@ -110,6 +110,47 @@ class TestGitutils(TestCase):
         }
         project.commits.create(data)
         time.sleep(2)
+    
+    def step31(self):
+        # CMD
+        sys.argv[1] = 'fork'
+        # deletes previous args
+        del sys.argv[2:]
+        # ARG PROJECT
+        # not clone
+        sys.argv.append('-n')
+        # removes previous fork and creates a new one
+        sys.argv.append('-c')
+        sys.argv.append(self.__class__.group_name+'/'+self.__class__.project_2)
+        # calls main to fork
+        gitutils.main()
+        # verifies if forked project exists under personal account
+        time.sleep(2)
+        own_projects = gitlab_utils.get_owned_projects()
+        found = any(proj['name'] == self.__class__.project_2 for proj in own_projects)
+        self.assertTrue(found)
+        time.sleep(2)
+        # creates a change
+        own_projects = gitlab_utils.get_owned_projects()
+        project = None
+        for proj in own_projects:
+            if proj['name'] ==self.__class__.project_2:
+                project = gitlab_utils.get_project(proj['id'])
+        self.assertIsNotNone(project)
+        # creates the commit
+        data = {
+            'branch': 'master',
+            'commit_message': 'unit test commit',
+            'actions': [
+                {
+                    'action': 'create',
+                    'file_path': 'README_new.rst',
+                    'content': "UNIT TEST GITUTILS",
+                }
+            ]
+        }
+        project.commits.create(data)
+        time.sleep(2)
 
     def step4(self):
         # CMD
@@ -120,9 +161,8 @@ class TestGitutils(TestCase):
         sys.argv.append('-n')
         # ARG GROUP
         sys.argv.append('-g')
-        sys.argv.append(self.__class__.group_name)
         # ARG PROJECT
-        sys.argv.append(self.__class__.project_fork)
+        sys.argv.append(self.__class__.group_name+'/'+self.__class__.project_fork)
         # calls main to fork
         gitutils.main()
         # verifies if forked project exists under group projects

@@ -176,14 +176,12 @@ def addldapgroup(git_group_name, group_id, ldap_group_name, role):
 def get_ldap_groups(ldap_cn):
     return gl.ldapgroups.list(all=True, search=ldap_cn)
 
-def check_existing_local_git(clean, git_repository):
+def check_existing_local_git(git_repository):
     # verify if there is an previously existing local folder
     if os.path.exists('./' + git_repository):
-        if not clean:
-            raise gitutils_exception.GitutilsError(const.FORK_PROBLEM_FOLDER)
-        # Try to remove tree directory; if failed show an error using
-        # try...except on screen
         print(const.DELETING_LOCAL_STORAGE)
+        if not click.confirm(const.DELETE_LOCAL_CONFIRMATION, default=True):
+            raise gitutils_exception.GitutilsError(const.NO_PERMISSION_TO_DELETE_LOCAL_FOLDER)
         try:
             shutil.rmtree(git_repository)
         except OSError as e:
@@ -543,15 +541,13 @@ def get_project_group(project_name, clean, merge, project_indication):
             const.MULTIPLE_PROJECTS % (list_of_groups))
     if not project_indication:
         raise gitutils_exception.GitutilsError(const.PROJECT_NAME_NOT_FOUND)
+    
 
-
-def get_forked_project(git_repository, git_repository_id):
+def get_forked_project(git_repository):
     """
     Function to get the forked project based on the git repository name and id.
     :param git_repository: Name of the project
     :type git_repository: str
-    :param git_repository_id: Id of the project
-    :type git_repository_id: int
     :return: Returns the web url to the project.
     :rtype: str
     """
@@ -597,6 +593,24 @@ def get_branch(project_id):
     raise gitutils_exception.GitutilsError(
         const.GIT_UNABLE_TO_FIND_MASTER_BRANCH %
         project['name'])
+
+def get_project_id_without_group(project_name):
+    """
+    Function to get the id attribute of a project without providing the group.
+    project name.
+    :param project_name: Name of the project
+    :type project_name: str
+    :return: Returns the id of the project.
+    :rtype: str
+    """
+    projects_list = gl.projects.list(search=project_name,all=True)
+    for project in projects_list:
+        if project.attributes['name'] == project_name:
+            logging.info('Found the project id ( %s - %s ) : %s' % (
+                project.attributes['path_with_namespace'].split('/')[0], project_name,
+                project.attributes['id']))
+            return project.attributes['id']
+    raise gitutils_exception.GitutilsError(const.PROJECT_ID_NOT_FOUND)
 
 
 def get_project_id(group_name, project_name):
@@ -803,7 +817,7 @@ def get_group_projects(group_name):
     return get_dict_from_own_projects(group_projects)
 
 
-def fork_project(project_id, group_indication):
+def fork_project(project_id, fork_group_indication, group_name):
     """
     Creates a fork of the project given as parameter.
     :param project_id: ID of the project that wants to be forked.
@@ -811,15 +825,14 @@ def fork_project(project_id, group_indication):
     """
     project = gl.projects.get(project_id)
     try:
-        if group_indication != get_username():
-            fork = project.forks.create({'namespace': group_indication})
+        if fork_group_indication:
+            fork = project.forks.create({'namespace': group_name})
         else:
             fork = project.forks.create({})
     except Exception as ex:
         if ex.error_message['path'][0] == const.GIT_PATHNAME_IS_TAKEN:
             raise gitutils_exception.GitutilsError(const.FORKED_EXISTS)
         raise gitutils_exception.GitutilsError(ex)
-
     logging.info(
         'Adding 3 seconds of idle time after forking to let the server process the new fork.')
     time.sleep(4)
@@ -925,5 +938,5 @@ def delete_project(project_id):
     except Exception as ex:
         raise gitutils_exception.GitutilsError(ex)
     print(const.DELETE_SUCCESS)
-    time.sleep(4)
+    time.sleep(2)
     return 0

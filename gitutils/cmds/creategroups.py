@@ -2,6 +2,7 @@ from gitutils import const
 from gitutils import gitlab_utils
 import time
 
+
 def create_groups(group_names=[]):
     """
     It create groups based on the list provided.

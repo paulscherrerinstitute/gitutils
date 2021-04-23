@@ -9,6 +9,7 @@ from gitutils import const
 class TestGitutilsUnit(unittest.TestCase):
 
     global gl
+
     def test_authenticate(self):
         """
         Test the authentication.
@@ -55,10 +56,6 @@ class TestGitutilsUnit(unittest.TestCase):
         self.assertEqual(role_maintainer, 40)
         role_owner = gitlab_utils.check_role('owner')
         self.assertEqual(role_owner, 50)
-        
-
-
-        
 
     def test_get_project_web_url(self):
         """
@@ -86,7 +83,8 @@ class TestGitutilsUnit(unittest.TestCase):
         Test get_project_group
         """
 
-        group = gitlab_utils.get_project_group('app_config', False, False, True)
+        group = gitlab_utils.get_project_group(
+            'app_config', False, False, True)
         self.assertEqual(group, 'controls_highlevel_applications')
 
     def test_get_group_id(self):
@@ -161,7 +159,8 @@ class TestGitutilsUnit(unittest.TestCase):
             gitlab_utils.get_group_projects(group_name)
         if len(projects) >= 1:
             project_name = projects[0]['name']
-            group_name = gitlab_utils.get_project_group(project_name, False, False, True)
+            group_name = gitlab_utils.get_project_group(
+                project_name, False, False, True)
             self.assertEqual(group_name,
                              'controls_highlevel_applications')
 
@@ -197,6 +196,7 @@ class TestGitutilsUnit(unittest.TestCase):
         group = gl.groups.list(all=True, search=group_name)[0]
         proj_list = group.projects.list(all=True)
         self.assertGreater(len(proj_list), 20)
+
 
 if __name__ == '__main__':
     unittest.main()

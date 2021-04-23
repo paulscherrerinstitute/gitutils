@@ -1,14 +1,15 @@
 from gitutils import const
 from gitutils import gitlab_utils
 import time
-import os 
+import os
+
 
 def fork(verbosity,
-        fork_group_indication='',
-        group_name='',
-        git_repository_id=None,
-        git_repository='',
-        no_clone=False):
+         fork_group_indication='',
+         group_name='',
+         git_repository_id=None,
+         git_repository='',
+         no_clone=False):
     """
     Creates a fork repository of the repository given as parameter.
     :param git_repository_id: Id of the repository to be pulled.
@@ -23,7 +24,8 @@ def fork(verbosity,
     print(const.FORK_PROJECT % (git_repository, git_repository_id))
     # fork
     try:
-        new_project = gitlab_utils.fork_project(git_repository_id, fork_group_indication, group_name)
+        new_project = gitlab_utils.fork_project(
+            git_repository_id, fork_group_indication, group_name)
         time.sleep(2)
         info_msg = 'New project forked: [%s] (id: %s) - %s' % (
             new_project.attributes['path_with_namespace'],
@@ -35,8 +37,9 @@ def fork(verbosity,
     if not no_clone:
         ssh_url_to_repo = new_project.attributes['ssh_url_to_repo']
         http_url_to_original_repo = new_project.attributes[
-                'forked_from_project']['http_url_to_repo']
-        time.sleep(2) # waiting another 2 seconds before cloning - AFS gitserver issue
+            'forked_from_project']['http_url_to_repo']
+        # waiting another 2 seconds before cloning - AFS gitserver issue
+        time.sleep(2)
         # verify if there's a local folder and delete it
         gitlab_utils.check_existing_local_git(git_repository)
 

@@ -1,6 +1,7 @@
 from gitutils import const
 from gitutils import gitlab_utils
 
+
 def add_ldap(git_group, ldap_cn, role):
     """
     Assign ldap group sync to a git group
@@ -20,7 +21,7 @@ def add_ldap(git_group, ldap_cn, role):
         const.bcolors.BOLD,
         git_group,
         const.bcolors.ENDC,
-        ))
+    ))
     # verify if ldap_cn is a real ldap group
     list_of_ldap_cns = gitlab_utils.get_ldap_groups(ldap_cn)
     found = False

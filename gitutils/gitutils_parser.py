@@ -6,6 +6,7 @@ import os
 from gitutils import const
 from gitutils import gitlab_utils
 
+
 class Parser:
     def __init__(self):
         self.parser = argparse.ArgumentParser(
@@ -19,144 +20,143 @@ class Parser:
         self.parser_createg = None
         self.parser_cg = None
         self.init_parser()
-    
+
     def get_parser(self):
         return self.parser
-    
+
     def get_arguments(self):
         return self.parser.parse_args()
-    
+
     def init_parser(self):
         ############
         # GITUTILS #
         ############
         self.parser.add_argument('-e', '--endpoint',
-                            help=const.ENDPOINT_HELP_MSG,
-                            default=const.ENDPOINT)
+                                 help=const.ENDPOINT_HELP_MSG,
+                                 default=const.ENDPOINT)
 
         self.parser.add_argument('-v', dest='verbosity', action='store_true')
 
         subparsers = self.parser.add_subparsers(title='command',
-                                        description='valid commands',
-                                        dest='command',
-                                        help='commands')
+                                                description='valid commands',
+                                                dest='command',
+                                                help='commands')
         ############
         # ADD LDAP #
         ############
         self.parser_addldap = subparsers.add_parser('addldap',
-                                        help=const.ADDLDAP_HELP_MSG,
-                                        formatter_class=argparse.RawTextHelpFormatter)
+                                                    help=const.ADDLDAP_HELP_MSG,
+                                                    formatter_class=argparse.RawTextHelpFormatter)
         self.parser_addldap.add_argument('group', metavar='group',
-                                help=textwrap.dedent(const.ADDLDAP_GROUP_NAME))
+                                         help=textwrap.dedent(const.ADDLDAP_GROUP_NAME))
         self.parser_addldap.add_argument('ldapgroup', metavar='ldapgroup',
-                                help=textwrap.dedent(const.ADDLDAP_LDAP_GROUP_NAME))
-        self.parser_addldap.add_argument('role', metavar='role',nargs='?', default=None,
-                                help=textwrap.dedent(const.ADDLDAP_ROLE))
-        
+                                         help=textwrap.dedent(const.ADDLDAP_LDAP_GROUP_NAME))
+        self.parser_addldap.add_argument('role', metavar='role', nargs='?', default=None,
+                                         help=textwrap.dedent(const.ADDLDAP_ROLE))
+
         ###############
         # CLONE GROUP #
         ###############
         self.parser_cg = subparsers.add_parser('clonegroup',
-                                        help=const.CLONEGROUP_HELP_MSG,
-                                        formatter_class=argparse.RawTextHelpFormatter)
+                                               help=const.CLONEGROUP_HELP_MSG,
+                                               formatter_class=argparse.RawTextHelpFormatter)
         self.parser_cg.add_argument('group', nargs=1, metavar='group',
-                                help=textwrap.dedent(const.CLONEGROUP_GROUP_NAME))
+                                    help=textwrap.dedent(const.CLONEGROUP_GROUP_NAME))
 
         ################
         # CREATE GROUP #
         ################
         self.parser_createg = subparsers.add_parser('creategroups',
-                                        help=const.CREATEGROUP_HELP_MSG,
-                                        formatter_class=argparse.RawTextHelpFormatter)
+                                                    help=const.CREATEGROUP_HELP_MSG,
+                                                    formatter_class=argparse.RawTextHelpFormatter)
         self.parser_createg.add_argument('name', nargs='+', metavar='name',
-                                help=textwrap.dedent(const.CREATEGROUP_GROUP_NAME))
+                                         help=textwrap.dedent(const.CREATEGROUP_GROUP_NAME))
 
         ###################
         # CREATE PROJECTS #
         ###################
         self.parser_createp = subparsers.add_parser('createprojects',
-                                        help=const.CREATEPROJECT_HELP_MSG,
-                                        formatter_class=argparse.RawTextHelpFormatter)
+                                                    help=const.CREATEPROJECT_HELP_MSG,
+                                                    formatter_class=argparse.RawTextHelpFormatter)
 
         self.parser_createp.add_argument('group', nargs=1, metavar='group',
-                                help=textwrap.dedent(const.CLONEGROUP_GROUP_NAME))
+                                         help=textwrap.dedent(const.CLONEGROUP_GROUP_NAME))
         self.parser_createp.add_argument('name', nargs='+', metavar='name',
-                                help=textwrap.dedent(const.CREATEPROJECT_PROJECTS_NAME))
+                                         help=textwrap.dedent(const.CREATEPROJECT_PROJECTS_NAME))
 
         ########
         # FIND #
         ########
         self.parser_find = subparsers.add_parser('find',
-                                        help=const.FIND_HELP_MSG,
-                                        formatter_class=argparse.RawTextHelpFormatter)
+                                                 help=const.FIND_HELP_MSG,
+                                                 formatter_class=argparse.RawTextHelpFormatter)
         self.parser_find.add_argument('term', nargs=1, metavar='term',
-                                help=textwrap.dedent(const.GREP_TERM_MSG))
+                                      help=textwrap.dedent(const.GREP_TERM_MSG))
         self.parser_find.add_argument('-f',
-                                '--file',
-                                action=const.STORE_TRUE,
-                                help=const.FIND_FILES_ONLY_MSG)
+                                      '--file',
+                                      action=const.STORE_TRUE,
+                                      help=const.FIND_FILES_ONLY_MSG)
 
         ############
         # FORK CMD #
         ############
         self.parser_fork = subparsers.add_parser('fork',
-                                            help=const.FORK_HELP_MSG,
-                                            formatter_class=argparse.RawTextHelpFormatter)
+                                                 help=const.FORK_HELP_MSG,
+                                                 formatter_class=argparse.RawTextHelpFormatter)
         self.parser_fork.add_argument('-n',
-                                '--no_clone',
-                                action=const.STORE_TRUE,
-                                help=const.FORK_NOCLONE_HELP)
+                                      '--no_clone',
+                                      action=const.STORE_TRUE,
+                                      help=const.FORK_NOCLONE_HELP)
         self.parser_fork.add_argument('-c',
-                                '--clean',
-                                action=const.STORE_TRUE,
-                                help=const.FORK_CLEAN_MSG)
+                                      '--clean',
+                                      action=const.STORE_TRUE,
+                                      help=const.FORK_CLEAN_MSG)
         self.parser_fork.add_argument('-g',
-                                '--group',
-                                action=const.STORE_TRUE,
-                                help=const.FORK_GROUP_MSG)
+                                      '--group',
+                                      action=const.STORE_TRUE,
+                                      help=const.FORK_GROUP_MSG)
         self.parser_fork.add_argument('project', nargs='?', metavar='project', default=None,
-                                help=textwrap.dedent(const.FORK_PROJECT_MESSAGE))
-
+                                      help=textwrap.dedent(const.FORK_PROJECT_MESSAGE))
 
         #############
         # LOGIN CMD #
         #############
         subparsers.add_parser('login',
-                            help=const.LOGIN_HELP_MSG,
-                            formatter_class=argparse.RawTextHelpFormatter)
+                              help=const.LOGIN_HELP_MSG,
+                              formatter_class=argparse.RawTextHelpFormatter)
 
         #############
         # MERGE CMD #
         #############
         self.parser_mr = subparsers.add_parser('merge',
-                                        help=const.MERGE_HELP_MSG,
-                                        formatter_class=argparse.RawTextHelpFormatter)
+                                               help=const.MERGE_HELP_MSG,
+                                               formatter_class=argparse.RawTextHelpFormatter)
         self.parser_mr.add_argument('-t',
-                            '--title',
-                            help=const.MERGE_MESSAGE_TITLE)
+                                    '--title',
+                                    help=const.MERGE_MESSAGE_TITLE)
         self.parser_mr.add_argument('-p',
-                            '--project',
-                            help=const.MERGE_PROJECT_MESSAGE)
+                                    '--project',
+                                    help=const.MERGE_PROJECT_MESSAGE)
         self.parser_mr.add_argument('-d',
-                            '--description',
-                            help=const.MERGE_MESSAGE_DESCRIPTION)
+                                    '--description',
+                                    help=const.MERGE_MESSAGE_DESCRIPTION)
 
         ###########
         # SETROLE #
         ###########
         self.parser_sr = subparsers.add_parser('setrole',
-                                        help=const.SETROLE_HELP_MSG,
-                                        formatter_class=argparse.RawTextHelpFormatter)
+                                               help=const.SETROLE_HELP_MSG,
+                                               formatter_class=argparse.RawTextHelpFormatter)
         self.parser_sr.add_argument('-p',
-                                '--project',
-                                action=const.STORE_TRUE,
-                                help=const.SETROLE_PROJECT_FLAG_HELP)
-        self.parser_sr.add_argument('role', metavar='role',nargs='?', default=None,
-                                help=textwrap.dedent(const.ADDLDAP_ROLE))
+                                    '--project',
+                                    action=const.STORE_TRUE,
+                                    help=const.SETROLE_PROJECT_FLAG_HELP)
+        self.parser_sr.add_argument('role', metavar='role', nargs='?', default=None,
+                                    help=textwrap.dedent(const.ADDLDAP_ROLE))
         self.parser_sr.add_argument('username', metavar='username',
-                                help=textwrap.dedent(const.SETROLE_USER_NAME))
+                                    help=textwrap.dedent(const.SETROLE_USER_NAME))
         self.parser_sr.add_argument('group', nargs='+', metavar='group',
-                                help=textwrap.dedent(const.SETROLE_GROUP_NAME))
+                                    help=textwrap.dedent(const.SETROLE_GROUP_NAME))
 
     def initialization(self, arguments):
         ###########
@@ -218,20 +218,23 @@ class Parser:
             group_name = arguments.project.split('/')[0]
             repo_name = arguments.project.split('/')[1]
             if arguments.clean:
-                forked_project = gitlab_utils.get_forked_project(repo_name, 
-                                                arguments.clean,
-                                                arguments.verbosity)
+                forked_project = gitlab_utils.get_forked_project(repo_name,
+                                                                 arguments.clean,
+                                                                 arguments.verbosity)
                 if forked_project is not None:
                     project_id = forked_project['forked_from_project']['id']
                     gitlab_utils.delete_project(forked_project['id'])
                 else:
                     print(const.IGNORE_CLEAN % (group_name, repo_name))
-                    project_id = gitlab_utils.get_project_id(group_name, repo_name)
+                    project_id = gitlab_utils.get_project_id(
+                        group_name, repo_name)
             else:
                 if not arguments.group:
-                    project_id = gitlab_utils.get_project_id(group_name,repo_name)
+                    project_id = gitlab_utils.get_project_id(
+                        group_name, repo_name)
                 else:
-                    project_id = gitlab_utils.get_project_id_without_group(repo_name)
+                    project_id = gitlab_utils.get_project_id_without_group(
+                        repo_name)
         #########
         # LOGIN #
         #########
@@ -291,7 +294,8 @@ class Parser:
                                     try:
                                         git_extracted_repo_name = line.split(
                                             '=')[-1].split('/')[-1].split('.')[0]
-                                        group_name = line.split('=')[-1].split('/')[-2]
+                                        group_name = line.split(
+                                            '=')[-1].split('/')[-2]
                                     except Exception:
                                         raise gitutils_exception.GitutilsError(
                                             const.GIT_MERGE_PROBLEM_0)
@@ -307,7 +311,7 @@ class Parser:
             if group_name is None:
                 group_name = gitlab_utils.get_project_group(
                     repo_name, False, True, project_indication)
-            project_id = gitlab_utils.get_project_id(group_name, repo_name) 
+            project_id = gitlab_utils.get_project_id(group_name, repo_name)
         ###########
         # SETROLE #
         ###########
@@ -327,4 +331,4 @@ class Parser:
         else:
             parser.print_help()
             sys.exit(-1)
-        return (repo_name, group_name ,project_id)
+        return (repo_name, group_name, project_id)

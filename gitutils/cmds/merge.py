@@ -2,6 +2,7 @@ from gitutils import const
 from gitutils import gitlab_utils
 import time
 
+
 def merge(verbosity,
           git_repository='',
           git_repository_id='',
@@ -22,10 +23,11 @@ def merge(verbosity,
     git_username = gitlab_utils.get_username()
     if git_username == -1:
         raise gitutils_exception.GitutilsError(
-                const.PROBLEM_CREATEGROUP_EMPTY)
+            const.PROBLEM_CREATEGROUP_EMPTY)
 
     # Check if there is already a fork
-    forked_project = gitlab_utils.get_forked_project(git_repository, False, verbosity)
+    forked_project = gitlab_utils.get_forked_project(
+        git_repository, False, verbosity)
     # If no title submitted by the user, default title
     if title is None:
         title = const.MERGE_DEFAULT_TITLE % gitlab_utils.get_username()

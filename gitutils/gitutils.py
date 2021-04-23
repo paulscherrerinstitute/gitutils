@@ -21,6 +21,7 @@ from gitutils.cmds.createprojects import create_projects
 from gitutils.cmds.find import find
 from gitutils.cmds.fork import fork
 
+
 def main():
     """
     Main function for gitutils that parses the arguments and
@@ -55,21 +56,21 @@ def main():
     (repo_name, group_name, project_id) = (None, None, None)
     # initialization routine
     (repo_name, group_name, project_id) = parser.initialization(arguments)
-    
+
     # Command, group and repo are ok
     if arguments.command and \
-        repo_name is not None and \
-        group_name is not None and \
-        project_id is not None:
-        
+            repo_name is not None and \
+            group_name is not None and \
+            project_id is not None:
+
         # list of commands
-        list_of_cmds = ['addldap', 
-                        'clonegroup', 
-                        'creategroups', 
-                        'createprojects', 
-                        'find', 
-                        'fork', 
-                        'login', 
+        list_of_cmds = ['addldap',
+                        'clonegroup',
+                        'creategroups',
+                        'createprojects',
+                        'find',
+                        'fork',
+                        'login',
                         'merge',
                         'setrole']
 
@@ -80,36 +81,37 @@ def main():
                 if not arguments.ldapgroup:
                     print(const.ADDLDAP_PROBLEM)
                     sys.exit(-1)
-                add_ldap(git_group=group_name, 
-                        ldap_cn=arguments.ldapgroup, 
-                        role=role_access)
+                add_ldap(git_group=group_name,
+                         ldap_cn=arguments.ldapgroup,
+                         role=role_access)
             elif arguments.command == 'clonegroup':
                 clone_group(group_name=group_name)
             elif arguments.command == 'creategroups':
                 create_groups(group_names=group_name)
             elif arguments.command == 'createprojects':
-                create_projects(group_name=group_name[0], project_names=repo_name)
+                create_projects(
+                    group_name=group_name[0], project_names=repo_name)
             elif arguments.command == 'find':
                 find(arguments.term[0], arguments.file)
             elif arguments.command == 'fork':
                 fork(fork_group_indication=arguments.group,
-                    group_name=group_name,
-                    git_repository_id=project_id,
-                    git_repository=repo_name,
-                    no_clone=arguments.no_clone,
-                    verbosity=arguments.verbosity)
+                     group_name=group_name,
+                     git_repository_id=project_id,
+                     git_repository=repo_name,
+                     no_clone=arguments.no_clone,
+                     verbosity=arguments.verbosity)
             elif arguments.command == 'merge':
                 merge(git_repository=repo_name,
-                    git_repository_id=project_id,
-                    description=arguments.description,
-                    title=arguments.title,
-                    verbosity=arguments.verbosity)
+                      git_repository_id=project_id,
+                      description=arguments.description,
+                      title=arguments.title,
+                      verbosity=arguments.verbosity)
             elif arguments.command == 'setrole':
                 role_access = gitlab_utils.get_role(arguments.role)
                 set_role(role=role_access,
-                        username=arguments.username,
-                        git_groups=group_name,
-                        project_flag=arguments.project)
+                         username=arguments.username,
+                         git_groups=group_name,
+                         project_flag=arguments.project)
             elif arguments.command not in list_of_cmds:
                 print(const.COMMAND_NOT_FOUND)
                 parser.print_help()

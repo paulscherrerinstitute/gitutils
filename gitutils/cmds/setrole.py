@@ -2,6 +2,7 @@ from gitutils import const
 from gitutils import gitlab_utils
 from gitutils import gitutils_exception
 
+
 def set_role(role, username, git_groups, project_flag):
     """
     Sets a role to a specified user in a specified group or project
@@ -18,11 +19,12 @@ def set_role(role, username, git_groups, project_flag):
     # gets user_id
     user_id = gitlab_utils.get_user_id(username)
     if user_id == -1:
-        raise gitutils_exception.GitutilsError(const.ROLE_SETROLE_PROBLEM_USERID)
+        raise gitutils_exception.GitutilsError(
+            const.ROLE_SETROLE_PROBLEM_USERID)
     #################
     # GROUP SETROLE #
     #################
-    if not project_flag: 
+    if not project_flag:
         for git_group in git_groups:
             group_id = gitlab_utils.get_group_id(git_group)
             print(const.SETROLE_INIT_MSG % (
@@ -37,25 +39,26 @@ def set_role(role, username, git_groups, project_flag):
                 git_group,
                 group_id,
                 const.bcolors.ENDC,
-                ), end="")
+            ), end="")
             # gets group
             group = gitlab_utils.get_group(git_group)
             # adds member with the desired access level to the group
             group.members.create({'user_id': user_id,
-                                    'access_level': role})
+                                  'access_level': role})
             # verification
             members = group.members.all(all=True)
-            found = any(member.attributes['username'] == username for member in members)
+            found = any(member.attributes['username']
+                        == username for member in members)
             if not found:
                 print(' ⨯')
                 raise gitutils_exception.GitutilsError(
-                        const.SETROLE_PROJECT_VALIDATION_FAILS)
+                    const.SETROLE_PROJECT_VALIDATION_FAILS)
             print(' ✓')
     else:
         ###################
         # PROJECT SETROLE #
         ###################
-        #git_groups has projects
+        # git_groups has projects
         for project_name in git_groups:
             print(const.SETROLE_P_INIT_MSG % (
                 const.bcolors.BOLD,
@@ -65,21 +68,23 @@ def set_role(role, username, git_groups, project_flag):
                 const.bcolors.BOLD,
                 project_name,
                 const.bcolors.ENDC,
-                ), end="")
+            ), end="")
             # gets group name
-            group_name = gitlab_utils.get_project_group_simplified(project_name)
+            group_name = gitlab_utils.get_project_group_simplified(
+                project_name)
             # gets project id
-            project_id = gitlab_utils.get_project_id(group_name,project_name)
+            project_id = gitlab_utils.get_project_id(group_name, project_name)
             # gets the project
             project = gitlab_utils.get_project(project_id)
             # adds member with the desired role to the project
-            project.members.create({'user_id': user_id, 
+            project.members.create({'user_id': user_id,
                                     'access_level': role})
             # verification
             members = project.members.all(all=True)
-            found = any(member.attributes['username'] == username for member in members)
+            found = any(member.attributes['username']
+                        == username for member in members)
             if not found:
                 print(' ⨯')
                 raise gitutils_exception.GitutilsError(
-                        const.SETROLE_PROJECT_VALIDATION_FAILS)
+                    const.SETROLE_PROJECT_VALIDATION_FAILS)
             print(' ✓')

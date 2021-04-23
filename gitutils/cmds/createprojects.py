@@ -2,6 +2,7 @@ from gitutils import const
 from gitutils import gitlab_utils
 import time
 
+
 def create_projects(group_name, project_names=[]):
     """
     It create groups based on the list provided.
@@ -27,15 +28,15 @@ def create_projects(group_name, project_names=[]):
         group_id = gitlab_utils.get_group_id(group_name)
     # gets all projects from this group
     group_projects = gitlab_utils.get_group_projects(group_name)
-    
+
     # iterates over all entries of new projects
     count = 1
     print(const.CREATEPROJECT_START % (
-        const.bcolors.BOLD, 
-        group_name, 
-        group_id, 
+        const.bcolors.BOLD,
+        group_name,
+        group_id,
         const.bcolors.ENDC
-        ))
+    ))
     for project in project_names:
         skip_proj = False
         for existing_project in group_projects:

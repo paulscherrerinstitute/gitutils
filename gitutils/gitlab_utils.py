@@ -65,12 +65,15 @@ def authenticate():
             # saves token into personal file
             save_token(access_token)
 
+
 def get_project(project_id):
     return gl.projects.get(project_id)
 
+
 def get_project_tree(project_id, branch):
     return get_project(project_id).repository_tree(recursive=True,
-            all=True, branch=branch)
+                                                   all=True, branch=branch)
+
 
 def get_role(role):
     if role not in ['guest', 'reporter', 'dev', 'maintainer', 'owner']:
@@ -78,16 +81,20 @@ def get_role(role):
         sys.exit(-1)
     return check_role(role)
 
+
 def parse_access_token():
     if os.path.isfile(os.path.expanduser('~') + const.GIT_TOKEN_FILE):
         with open(os.path.expanduser('~') + const.GIT_TOKEN_FILE, 'r') as tfile:
             return tfile.read().replace('\n', '')
 
+
 def remove_project(project_id):
     gl.projects.delete(project_id)
 
+
 def remove_group(group_id):
     gl.groups.delete(group_id)
+
 
 def check_role(role):
     if role == 'guest':
@@ -101,15 +108,18 @@ def check_role(role):
     elif role == 'owner':
         return gitlab.OWNER_ACCESS
 
+
 def check_group_exists(group_name):
     groups = gl.groups.list(search=group_name, all=True)
     if not groups:
         raise gitutils_exception.GitutilsError(const.GROUP_PARAMETER_EMPTY)
     return 0
 
+
 def group_exists(name):
     group = gl.groups.list(search=name, all=True)
     return bool(group)
+
 
 def get_group(group_id):
     try:
@@ -117,6 +127,7 @@ def get_group(group_id):
     except Exception as e:
         raise gitutils_exception.GitutilsError(const.GROUP_PARAMETER_EMPTY)
     return group
+
 
 def get_user_id(username):
     user_id = -1
@@ -126,9 +137,11 @@ def get_user_id(username):
             user_id = i.attributes['id']
     return user_id
 
+
 def project_exists(proj_name):
     project = gl.projects.list(search=proj_name, all=True)
     return bool(project)
+
 
 def check_existing_remote_git(clean, git_repository_id, group_name):
     proj = gl.projects.get(git_repository_id)
@@ -151,6 +164,7 @@ def check_existing_remote_git(clean, git_repository_id, group_name):
     # if check_exist is false -> good to go
     return 0
 
+
 def addldapgroup(git_group_name, group_id, ldap_group_name, role):
     # ldap group must return only one entry
     group = gl.groups.get(group_id)
@@ -159,7 +173,7 @@ def addldapgroup(git_group_name, group_id, ldap_group_name, role):
     except Exception as ex:
         raise gitutils_exception.GitutilsWarning(str(ex))
     # if everything went fine, sync
-    print( const.ADDLDAP_SUCCESS_MSG % (
+    print(const.ADDLDAP_SUCCESS_MSG % (
         const.bcolors.BOLD,
         ldap_group_name,
         const.bcolors.ENDC,
@@ -170,18 +184,21 @@ def addldapgroup(git_group_name, group_id, ldap_group_name, role):
         git_group_name,
         group_id,
         const.bcolors.ENDC,
-        ))
+    ))
     group.ldap_sync()
+
 
 def get_ldap_groups(ldap_cn):
     return gl.ldapgroups.list(all=True, search=ldap_cn)
+
 
 def check_existing_local_git(git_repository):
     # verify if there is an previously existing local folder
     if os.path.exists('./' + git_repository):
         print(const.DELETING_LOCAL_STORAGE)
         if not click.confirm(const.DELETE_LOCAL_CONFIRMATION, default=True):
-            raise gitutils_exception.GitutilsError(const.NO_PERMISSION_TO_DELETE_LOCAL_FOLDER)
+            raise gitutils_exception.GitutilsError(
+                const.NO_PERMISSION_TO_DELETE_LOCAL_FOLDER)
         try:
             shutil.rmtree(git_repository)
         except OSError as e:
@@ -237,12 +254,15 @@ def get_username():
     global login
     return login
 
+
 def is_empty(any_structure):
     return not any_structure
+
 
 def verify_token_unittest():
     global gl
     return bool(len(gl.groups.list()))
+
 
 def verify_token():
     global gl
@@ -250,6 +270,7 @@ def verify_token():
         print(const.LOGIN_PROBLEM)
     else:
         print(const.LOGIN_SUCCESS)
+
 
 def oauth_authentication():
     """
@@ -275,7 +296,7 @@ def get_groups():
 
 def create_group_dict(groups):
     return {group.attributes['name']: {'name': group.attributes['name'],
-             'id': group.attributes['id']} for group in groups}
+                                       'id': group.attributes['id']} for group in groups}
 
 
 def get_projects():
@@ -289,8 +310,10 @@ def get_projects():
     projects_list = gl.projects.list(all=True)
     return get_dict_from_own_projects(projects_list)
 
+
 def create_project(group_id, project_name):
     return gl.projects.create({'name': project_name, 'namespace_id': group_id})
+
 
 def create_group(group_name, description):
     """
@@ -311,52 +334,63 @@ def create_group(group_name, description):
         raise gitutils_exception.GitutilsError(ex)
     return 0
 
+
 def print_search_output(group_indication, file_name, results):
     if results:
         # For each result
-        for idx,i in enumerate(results):
+        for idx, i in enumerate(results):
             # states the file name
-            print(const.bcolors.BOLD,str(idx+1),") ",const.bcolors.OKGREEN, file_name, const.bcolors.ENDC, ":\n")
+            print(const.bcolors.BOLD, str(idx+1), ") ",
+                  const.bcolors.OKGREEN, file_name, const.bcolors.ENDC, ":\n")
             # group
             print("\t\t Group: "+group_indication)
             # project (project id)
-            print("\t\t Project: "+i.get('project_name')+" (id "+ str(i.get('project_id'))+")")
+            print("\t\t Project: "+i.get('project_name') +
+                  " (id " + str(i.get('project_id'))+")")
             # branch
             print("\t\t Branch: "+i.get('branch'))
             # path
             print("\t\t Path: "+i.get('path'))
             # direct weblink
-            print("\n\t\t Weblink: "+const.bcolors.UNDERLINE+i.get('webpath')+const.bcolors.ENDC)
+            print("\n\t\t Weblink: "+const.bcolors.UNDERLINE +
+                  i.get('webpath')+const.bcolors.ENDC)
             print("\n")
     else:
         # Empty search
-        print(const.SEARCHFILE_EMPTY % (const.bcolors.FAIL, file_name, const.bcolors.ENDC))
+        print(const.SEARCHFILE_EMPTY %
+              (const.bcolors.FAIL, file_name, const.bcolors.ENDC))
 
 
 def print_grep_output(group_name, project_name, project_id, search_term, result):
     # States the search_term
-    print("\nGroup: ",group_name, "\n",const.bcolors.BOLD,const.bcolors.OKGREEN, search_term, const.bcolors.ENDC, ":\n")
+    print("\nGroup: ", group_name, "\n", const.bcolors.BOLD,
+          const.bcolors.OKGREEN, search_term, const.bcolors.ENDC, ":\n")
     # direct weblink to such file
-    print("\t Weblink: "+const.bcolors.UNDERLINE+result.get('webpath')+const.bcolors.ENDC)
+    print("\t Weblink: "+const.bcolors.UNDERLINE +
+          result.get('webpath')+const.bcolors.ENDC)
     # removal of empty spaces at the beginning of lines
     print("")
     stopwords = ['']
-    resultwords  = [word for word in result.get('excerpt').splitlines() if word not in stopwords]
+    resultwords = [word for word in result.get(
+        'excerpt').splitlines() if word not in stopwords]
     # for each line
     for line in resultwords:
         # verifies if this is the line containing the search_term
         if search_term in line:
             # color green
             b = line.split(search_term)
-            print("\t\t"+b[0]+const.bcolors.OKGREEN+search_term+const.bcolors.ENDC+b[1])
+            print("\t\t"+b[0]+const.bcolors.OKGREEN +
+                  search_term+const.bcolors.ENDC+b[1])
         else:
             # color regular
             print("\t\t"+line)
     print("\n\n")
 
+
 def grep_file_in_project(search_term, project_id, project_name, group_name):
     # Gets the project and searches in its file for the search_term
-    project_search_results = get_project(project_id).search(const.BLOBS, search_term)
+    project_search_results = get_project(
+        project_id).search(const.BLOBS, search_term)
     return [
         {
             # File name, including path
@@ -380,11 +414,11 @@ def grep_file_in_project(search_term, project_id, project_name, group_name):
     ]
 
 
-def find_file_by_id(file_name,group_dict,files_only):
-    results_file =[]
-    results_blob =[]
+def find_file_by_id(file_name, group_dict, files_only):
+    results_file = []
+    results_blob = []
     # gets all the projects in the group
-    if group_dict['name']!='sandbox':
+    if group_dict['name'] != 'sandbox':
         projects = get_group_projects_by_group_id(group_dict['id'])
         match_files = []
         # for every project found
@@ -398,17 +432,19 @@ def find_file_by_id(file_name,group_dict,files_only):
                     for j in project_tree:
                         if file_name == j.get('name'):
                             results_file.append({
-                                'webpath':const.ENDPOINT+"/"+group_dict['name']+"/"+i.get('name')+"/"+j.get('type')+"/"+b.name+"/"+j.get('path'),
-                                'branch':b.name,
-                                'path':j.get('path'),
-                                'project_name':i.get('name'),
+                                'webpath': const.ENDPOINT+"/"+group_dict['name']+"/"+i.get('name')+"/"+j.get('type')+"/"+b.name+"/"+j.get('path'),
+                                'branch': b.name,
+                                'path': j.get('path'),
+                                'project_name': i.get('name'),
                                 'project_id': i.get('id')
                             })
-            if len(results_file) > 0 :
-                print_search_output(group_dict['name'], file_name, results_file)
+            if len(results_file) > 0:
+                print_search_output(
+                    group_dict['name'], file_name, results_file)
             # content
             if not files_only:
-                project_search_results = get_project(i.get('id')).search(const.BLOBS, file_name)
+                project_search_results = get_project(
+                    i.get('id')).search(const.BLOBS, file_name)
                 for match in project_search_results:
                     not_add = False
                     for entry in results_blob:
@@ -417,19 +453,21 @@ def find_file_by_id(file_name,group_dict,files_only):
                     if not not_add:
                         results_blob = {
                             # File name, including path
-                            'filename':match.get('filename'),
+                            'filename': match.get('filename'),
                             # 3 lines surrounding the search_term
-                            'excerpt':match.get('data'),
+                            'excerpt': match.get('data'),
                             # Generation of the diret weblink to the file including the line
                             'webpath': const.ENDPOINT+"/"+group_dict['name']+"/"+i.get('name')+"/blob/"+match.get('ref')+"/"+match.get('filename')+"#L"+str(match.get('startline'))
                         }
                 if len(results_blob) > 0:
                     if results_blob.get('webpath') not in match_files:
                         match_files.append(results_blob.get('webpath'))
-                        print_grep_output(group_dict['name'], i['name'], i['id'], file_name, results_blob)
+                        print_grep_output(
+                            group_dict['name'], i['name'], i['id'], file_name, results_blob)
 
-def find_file(file_name,group_indication):
-    results =[]
+
+def find_file(file_name, group_indication):
+    results = []
     # gets all the projects in the group
     projects = get_group_projects(group_indication)
     # for every project found
@@ -441,13 +479,14 @@ def find_file(file_name,group_indication):
             for j in project_tree:
                 if file_name == j.get('name'):
                     results.append({
-                        'webpath':const.ENDPOINT+"/"+group_indication+"/"+i.get('name')+"/"+j.get('type')+"/"+b.name+"/"+j.get('path'),
-                        'branch':b.name,
-                        'path':j.get('path'),
-                        'project_name':i.get('name'),
+                        'webpath': const.ENDPOINT+"/"+group_indication+"/"+i.get('name')+"/"+j.get('type')+"/"+b.name+"/"+j.get('path'),
+                        'branch': b.name,
+                        'path': j.get('path'),
+                        'project_name': i.get('name'),
                         'project_id': i.get('id')
                     })
     return results
+
 
 def get_project_web_url(project_name):
     """
@@ -463,6 +502,7 @@ def get_project_web_url(project_name):
             return project.attributes['web_url']
     raise gitutils_exception.GitutilsError(const.PROJECT_NAME_NOT_FOUND)
 
+
 def get_project_http_url(project_name):
     """
     Function to get the web_url attribute of a project based on its name.
@@ -477,8 +517,10 @@ def get_project_http_url(project_name):
             return project.attributes['http_url_to_repo']
     raise gitutils_exception.GitutilsError(const.PROJECT_NAME_NOT_FOUND)
 
+
 def check_key(dict_to_search, key):
     return key in dict_to_search
+
 
 def get_project_group_simplified(project_name):
     projects_list = gl.projects.list(search=project_name, all=True)
@@ -499,6 +541,7 @@ def get_project_group_simplified(project_name):
         raise gitutils_exception.GitutilsError(
             const.MULTIPLE_PROJECTS % (list_of_groups))
     raise gitutils_exception.GitutilsError(const.PROJECT_NAME_NOT_FOUND)
+
 
 def get_project_group(project_name, clean, merge, project_indication):
     """
@@ -541,7 +584,7 @@ def get_project_group(project_name, clean, merge, project_indication):
             const.MULTIPLE_PROJECTS % (list_of_groups))
     if not project_indication:
         raise gitutils_exception.GitutilsError(const.PROJECT_NAME_NOT_FOUND)
-    
+
 
 def get_forked_project(git_repository, clean, verbosity):
     """
@@ -561,7 +604,8 @@ def get_forked_project(git_repository, clean, verbosity):
             if git_repository != proj['name']:
                 print(fmt.format(i, proj['username'], proj['name']))
             else:
-                print(fmt.format(str(i)+' --->', proj['username'], proj['name']))
+                print(fmt.format(str(i)+' --->',
+                      proj['username'], proj['name']))
     for project in projects:
         if (
             project['username'] == get_username()
@@ -576,7 +620,7 @@ def get_forked_project(git_repository, clean, verbosity):
             break
     if forked_project is None and not clean:
         raise gitutils_exception.GitutilsError(
-                const.PROJECT_FOUND_NOT_FORK)
+            const.PROJECT_FOUND_NOT_FORK)
     return forked_project
 
 
@@ -604,6 +648,7 @@ def get_branch(project_id):
         const.GIT_UNABLE_TO_FIND_MASTER_BRANCH %
         project['name'])
 
+
 def get_project_id_without_group(project_name):
     """
     Function to get the id attribute of a project without providing the group.
@@ -613,11 +658,12 @@ def get_project_id_without_group(project_name):
     :return: Returns the id of the project.
     :rtype: str
     """
-    projects_list = gl.projects.list(search=project_name,all=True)
+    projects_list = gl.projects.list(search=project_name, all=True)
     for project in projects_list:
         if project.attributes['name'] == project_name:
             logging.info('Found the project id ( %s - %s ) : %s' % (
-                project.attributes['path_with_namespace'].split('/')[0], project_name,
+                project.attributes['path_with_namespace'].split(
+                    '/')[0], project_name,
                 project.attributes['id']))
             return project.attributes['id']
     raise gitutils_exception.GitutilsError(const.PROJECT_ID_NOT_FOUND)
@@ -634,7 +680,7 @@ def get_project_id(group_name, project_name):
     :return: Returns the id of the project.
     :rtype: str
     """
-    projects_list = gl.projects.list(search=project_name,all=True)
+    projects_list = gl.projects.list(search=project_name, all=True)
     for project in projects_list:
         if project.attributes['name'] == project_name and group_name == project.attributes['path_with_namespace'].split(
                 '/')[0]:
@@ -775,7 +821,8 @@ def get_group_id(group_name):
     except Exception as ex:
         # group not found, it should be a personal group
         try:
-            group_id = gl.users.list(username=group_name, all=True)[0].attributes['id']
+            group_id = gl.users.list(username=group_name, all=True)[
+                0].attributes['id']
         except Exception as ex:
             raise gitutils_exception.GitutilsError("Group not found.")
     if group_id != -1:
@@ -906,12 +953,13 @@ def get_dict_from_own_projects(own_projects):
         if len(get_project(project.attributes['id']).branches.list()) > 0:
             branches = get_project(project.attributes['id']).branches.list()
             dict_projects[-1]['branches'] = branches
-        
+
         # if it's a fork add the source project
         if 'forked_from_project' in project.attributes:
             dict_projects[-1]['forked_from_project'] = \
                 project.attributes['forked_from_project']
     return dict_projects
+
 
 def get_personal_projects():
     """
@@ -921,10 +969,12 @@ def get_personal_projects():
     :rtype: dict
     """
     try:
-        own_projects = gl.users.list(username=get_username())[0].projects.list(owned=True)
+        own_projects = gl.users.list(username=get_username())[
+            0].projects.list(owned=True)
     except Exception as ex:
         raise gitutils_exception.GitutilsError(ex)
     return get_dict_from_own_projects(own_projects)
+
 
 def get_owned_projects():
     """

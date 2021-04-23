@@ -12,8 +12,10 @@ class NoTraceBackWithLineNumber(Exception):
 class GitutilsError(NoTraceBackWithLineNumber):
     pass
 
+
 class GitutilsWarning(NoTraceBackWithLineNumber):
     pass
+
 
 class GitutilsDebug(NoTraceBackWithLineNumber):
     pass

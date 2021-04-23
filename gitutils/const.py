@@ -11,6 +11,7 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+
 ######################
 # NOTIFICATION LEVEL #
 ######################
@@ -34,8 +35,8 @@ OAUTH_ROUTE = urljoin(ENDPOINT, "/oauth/token")
 OATH_REQUEST = urljoin(OAUTH_ROUTE, "?grant_type=password&username=")
 PASSWORD_URL = "&password="
 
-SEARCH_ROUTE= urljoin(ENDPOINT, "/search?")
-CODE_URL ="&search_code=true"
+SEARCH_ROUTE = urljoin(ENDPOINT, "/search?")
+CODE_URL = "&search_code=true"
 ############
 # MESSAGES #
 ############
@@ -154,7 +155,7 @@ SETROLE_P_INIT_MSG = '\nGitutils setting user %s %s (access level: %s) %s to pro
 ADDLDAP_ROLE = "The role defines the permissions. Options: guest, reporter, dev, maintainer, owner"
 ROLE_ADDLDAP_PROBLEM = "Role not found. Role options: guest, reporter, dev, maintainer, owner"
 SETROLE_PROJECT_VALIDATION_FAILS = "\n Gitutils was not able to validate the setrole command. Something went wrong..."
-ADDLDAP_LDAP_GROUP_PROBLEM= "ldap_cn needs to be unique."
+ADDLDAP_LDAP_GROUP_PROBLEM = "ldap_cn needs to be unique."
 ADDLDAP_PROBLEM = "Not possible to add ldap group to a group if both are not provided. Use 'gitutils addldap -h' for help."
 SETROLE_PROBLEM = "Not possible to set a role to a group if group is not provided. Use 'gitutils setrole -h' for help."
 ADDLDAP_HELP_MSG = "Add a ldap group user to a group."

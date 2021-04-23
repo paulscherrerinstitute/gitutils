@@ -75,6 +75,7 @@ DELETING_EXISTING_FORK = "Deleting existing fork..."
 NO_PERSONAL_FORK = "Impossible to delete. The desired project is not under your personal projects."
 FORK_NO_CLONE = "Project was successfully forked remotely but not cloned locally.\n"
 DELETE_LOCAL_CONFIRMATION = "Do you want to continue? (all local changes will be lost)"
+IGNORE_CLEAN = "\n Gitutils warning: No personal fork from %s/%s found."
 NO_PERMISSION_TO_DELETE_LOCAL_FOLDER = "Aborting..."
 NO_PERSONAL_FORK_PERMISSIONS = "The desired project is not under your personal projects, this action depends on your permissions."
 DELETE_SUCCESS = "Project successfully deleted. Waiting 4 seconds of idle time after deleting a project to let the server process it."
@@ -104,6 +105,7 @@ MERGE_DEFAULT_TITLE = "Merge request submitted by %s."
 GITUTILS_TITLE_DESCRIPTION = 'GITUTILS is a tool to facilitate the server-side operations when developing software that uses git repositories.'
 BASEDIR_HELP_MSG = "Base directory to clone configurations to."
 ENDPOINT_HELP_MSG = "Endpoint of the git server. Default: https://git.psi.ch"
+VERBOSITY_HELP_MSG = "Increase verbosity for debugging."
 FORK_PROJECT_MESSAGE = '''(REQUIRED) Indicates the project to be forked. It must be indicated as follow:
 - <group_name>/<project_name>.'''
 MERGE_PROJECT_MESSAGE = '''Indicates the project to be forked. It can be of four different formats:

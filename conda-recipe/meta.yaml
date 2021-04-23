@@ -14,7 +14,7 @@ requirements:
 
 build:
   noarch: python
-  number: 1
+  number: 0
   entry_points:
     - gitutils = gitutils.gitutils:main
 

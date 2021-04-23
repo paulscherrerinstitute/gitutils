@@ -34,6 +34,8 @@ class Parser:
                             help=const.ENDPOINT_HELP_MSG,
                             default=const.ENDPOINT)
 
+        self.parser.add_argument('-v', dest='verbosity', action='store_true')
+
         subparsers = self.parser.add_subparsers(title='command',
                                         description='valid commands',
                                         dest='command',
@@ -216,9 +218,15 @@ class Parser:
             group_name = arguments.project.split('/')[0]
             repo_name = arguments.project.split('/')[1]
             if arguments.clean:
-                forked_project = gitlab_utils.get_forked_project(repo_name)
-                project_id = forked_project['forked_from_project']['id']
-                gitlab_utils.delete_project(forked_project['id'])
+                forked_project = gitlab_utils.get_forked_project(repo_name, 
+                                                arguments.clean,
+                                                arguments.verbosity)
+                if forked_project is not None:
+                    project_id = forked_project['forked_from_project']['id']
+                    gitlab_utils.delete_project(forked_project['id'])
+                else:
+                    print(const.IGNORE_CLEAN % (group_name, repo_name))
+                    project_id = gitlab_utils.get_project_id(group_name, repo_name)
             else:
                 if not arguments.group:
                     project_id = gitlab_utils.get_project_id(group_name,repo_name)

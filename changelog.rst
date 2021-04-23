@@ -4,6 +4,17 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
+[1.1.1] 2021-04-23
+
+Added
+~~~~~
+- Initial implementation of verbosity mode using -v to facilitate debug sessions.
+
+Changed
+~~~~~~~
+- Fork command ignores -c command if a personal fork project is not found (behavior of v1.0.X)
+
+
 [1.1.0] - 2021-04-22
 
 Added

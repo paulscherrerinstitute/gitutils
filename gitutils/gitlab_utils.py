@@ -543,7 +543,7 @@ def get_project_group(project_name, clean, merge, project_indication):
         raise gitutils_exception.GitutilsError(const.PROJECT_NAME_NOT_FOUND)
     
 
-def get_forked_project(git_repository):
+def get_forked_project(git_repository, clean, verbosity):
     """
     Function to get the forked project based on the git repository name and id.
     :param git_repository: Name of the project
@@ -552,7 +552,16 @@ def get_forked_project(git_repository):
     :rtype: str
     """
     forked_project = None
-    projects = get_owned_projects()
+    projects = get_personal_projects()
+    if verbosity:
+        print("\n\n List of projects: ")
+        fmt = '{:<20}{:<20}{}'
+        print(fmt.format('', 'Owner', 'Project name'), "\n")
+        for i, proj in enumerate(projects):
+            if git_repository != proj['name']:
+                print(fmt.format(i, proj['username'], proj['name']))
+            else:
+                print(fmt.format(str(i)+' --->', proj['username'], proj['name']))
     for project in projects:
         if (
             project['username'] == get_username()
@@ -560,13 +569,14 @@ def get_forked_project(git_repository):
             and 'forked_from_project' in project
         ):
             forked_project = project
-    if forked_project is None:
+            # check if project is forked from the right project
+            if forked_project['forked_from_project']['name'] != git_repository and not clean:
+                raise gitutils_exception.GitutilsError(
+                    const.PROJECT_FORK_NAME_ERROR)
+            break
+    if forked_project is None and not clean:
         raise gitutils_exception.GitutilsError(
                 const.PROJECT_FOUND_NOT_FORK)
-    # check if project is forked from the right project
-    if forked_project['forked_from_project']['name'] != git_repository:
-        raise gitutils_exception.GitutilsError(
-            const.PROJECT_FORK_NAME_ERROR)
     return forked_project
 
 
@@ -902,6 +912,19 @@ def get_dict_from_own_projects(own_projects):
             dict_projects[-1]['forked_from_project'] = \
                 project.attributes['forked_from_project']
     return dict_projects
+
+def get_personal_projects():
+    """
+    Retrieves the personal projects by the current user.
+    :return: List of projects containing name, path and url
+    (in a dictionary-type).
+    :rtype: dict
+    """
+    try:
+        own_projects = gl.users.list(username=get_username())[0].projects.list(owned=True)
+    except Exception as ex:
+        raise gitutils_exception.GitutilsError(ex)
+    return get_dict_from_own_projects(own_projects)
 
 def get_owned_projects():
     """

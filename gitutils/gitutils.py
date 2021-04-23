@@ -44,10 +44,18 @@ def main():
     ##################
     # INITIALIZATION #
     ##################
+    if arguments.verbosity:
+        print("\n Gitutils:")
+        fmt = '{:<20}{:<20}{}'
+        print(fmt.format('', 'Parameter', 'Value'), "\n")
+        for i, arg in enumerate(vars(arguments)):
+            print(fmt.format(i, arg, getattr(arguments, arg)))
+        print("\n")
     # retrieve repository and group names
     (repo_name, group_name, project_id) = (None, None, None)
     # initialization routine
     (repo_name, group_name, project_id) = parser.initialization(arguments)
+    
     # Command, group and repo are ok
     if arguments.command and \
         repo_name is not None and \
@@ -66,6 +74,7 @@ def main():
                         'setrole']
 
         try:
+            # consider changing this to dictionary
             if arguments.command == 'addldap':
                 role_access = gitlab_utils.get_role(arguments.role)
                 if not arguments.ldapgroup:
@@ -87,12 +96,14 @@ def main():
                     group_name=group_name,
                     git_repository_id=project_id,
                     git_repository=repo_name,
-                    no_clone=arguments.no_clone)
+                    no_clone=arguments.no_clone,
+                    verbosity=arguments.verbosity)
             elif arguments.command == 'merge':
                 merge(git_repository=repo_name,
                     git_repository_id=project_id,
                     description=arguments.description,
-                    title=arguments.title)
+                    title=arguments.title,
+                    verbosity=arguments.verbosity)
             elif arguments.command == 'setrole':
                 role_access = gitlab_utils.get_role(arguments.role)
                 set_role(role=role_access,

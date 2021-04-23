@@ -3,7 +3,7 @@ from gitutils import gitlab_utils
 import time
 import os 
 
-def fork(
+def fork(verbosity,
         fork_group_indication='',
         group_name='',
         git_repository_id=None,
@@ -25,6 +25,11 @@ def fork(
     try:
         new_project = gitlab_utils.fork_project(git_repository_id, fork_group_indication, group_name)
         time.sleep(2)
+        info_msg = 'New project forked: [%s] (id: %s) - %s' % (
+            new_project.attributes['path_with_namespace'],
+            new_project.attributes['id'],
+            new_project.attributes['http_url_to_repo'])
+        print(info_msg)
     except Exception as ex:
         raise gitutils_exception.GitutilsError(ex)
     if not no_clone:
@@ -48,9 +53,4 @@ def fork(
             print(const.GIT_UPLINK_PROBLEM % http_url_to_original_repo)
     else:
         print("\nGitutils warning: "+const.FORK_NO_CLONE)
-    info_msg = 'New project forked: [%s] (id: %s) - %s' % (
-        new_project.attributes['path_with_namespace'],
-        new_project.attributes['id'],
-        new_project.attributes['http_url_to_repo'])
-    print(info_msg)
     return None

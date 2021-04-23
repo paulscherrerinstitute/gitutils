@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import unittest
 import os
-from gitutils import gitlab_utils
-from gitutils import const
+import unittest
+
+from gitutils import const, gitlab_utils
 
 
 class TestGitutilsUnit(unittest.TestCase):

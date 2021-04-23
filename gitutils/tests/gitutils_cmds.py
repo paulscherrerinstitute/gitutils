@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from unittest import TestCase, main as unittest_main
+import argparse
 import os
 import shutil
-import argparse
 import sys
 import time
-from gitutils import gitutils_parser
-from gitutils import gitlab_utils
-from gitutils import gitutils
-from gitutils import const
+from unittest import main as unittest_main
+from unittest import TestCase
+
+from gitutils import const, gitlab_utils, gitutils, gitutils_parser
 
 
 class TestGitutils(TestCase):

@@ -1,5 +1,4 @@
-from gitutils import const
-from gitutils import gitlab_utils
+from gitutils import const, gitlab_utils
 from gitutils.spinner import Spinner
 
 

@@ -1,6 +1,4 @@
-from gitutils import const
-from gitutils import gitlab_utils
-from gitutils import gitutils_exception
+from gitutils import const, gitlab_utils, gitutils_exception
 
 
 def set_role(role, username, git_groups, project_flag):

@@ -1,8 +1,7 @@
-from gitutils import const
-from gitutils import gitlab_utils
-from gitutils import gitutils_exception
-import time
 import os
+import time
+
+from gitutils import const, gitlab_utils, gitutils_exception
 
 
 def fork(verbosity,

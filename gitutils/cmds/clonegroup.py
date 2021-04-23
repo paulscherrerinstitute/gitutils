@@ -1,8 +1,8 @@
 import os
 import subprocess
 import time
-from gitutils import const
-from gitutils import gitlab_utils
+
+from gitutils import const, gitlab_utils
 
 
 def clone_group(group_name=''):

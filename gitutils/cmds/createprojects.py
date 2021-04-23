@@ -1,6 +1,6 @@
-from gitutils import const
-from gitutils import gitlab_utils
 import time
+
+from gitutils import const, gitlab_utils
 
 
 def create_projects(group_name, project_names=[]):

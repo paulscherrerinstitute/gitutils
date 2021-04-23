@@ -1,6 +1,6 @@
 from gitutils import const
 from gitutils import gitlab_utils
-
+from gitutils import gitutils_exception
 
 def add_ldap(git_group, ldap_cn, role):
     """

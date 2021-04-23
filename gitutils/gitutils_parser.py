@@ -5,7 +5,7 @@ import sys
 import os
 from gitutils import const
 from gitutils import gitlab_utils
-
+from gitutils import gitutils_exception
 
 class Parser:
     def __init__(self):
@@ -329,6 +329,6 @@ class Parser:
             group_name = arguments.group
             project_id = 'all'
         else:
-            parser.print_help()
+            self.parser.print_help()
             sys.exit(-1)
         return (repo_name, group_name, project_id)

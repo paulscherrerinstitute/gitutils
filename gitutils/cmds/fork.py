@@ -1,5 +1,6 @@
 from gitutils import const
 from gitutils import gitlab_utils
+from gitutils import gitutils_exception
 import time
 import os
 

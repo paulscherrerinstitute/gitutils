@@ -13,7 +13,7 @@ def create_projects(group_name, project_names=[]):
     """
     total_proj_names = len(project_names)
     group_id = 0
-    # checks if group exists and create if it doesnt exists yet
+    # checks if group exists and create if it doesn't exists yet
     if not gitlab_utils.group_exists(group_name):
         # if not, creates the new group
         print(const.CREATEPROJECT_NOGROUP % (group_name, group_name))

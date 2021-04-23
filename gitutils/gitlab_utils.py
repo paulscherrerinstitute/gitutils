@@ -16,8 +16,8 @@ import subprocess
 import urllib
 import click
 import sys
-# Gitlab API Documenation: http://doc.gitlab.com/ce/api/
-# Python-Gitlab Documetation:
+# Gitlab API Documentation: http://doc.gitlab.com/ce/api/
+# Python-Gitlab Documentation:
 #       https://python-gitlab.readthedocs.io/en/stable/index.html
 
 access_token = None
@@ -38,7 +38,7 @@ def authenticate():
     global access_token
     # Try to take the access token from the .gitlab_token file
     access_token = parse_access_token()
-    # if not existant, authenticate with the user and saves it
+    # if not existent, authenticate with the user and saves it
     if access_token is None or access_token == "":
         print(const.AUTHENTICATE_REQUEST)
         access_token = get_user_password()
@@ -54,7 +54,7 @@ def authenticate():
             gl = gitlab.Gitlab(get_endpoint(), oauth_token=access_token,
                                api_version=4)
             gl.auth()
-            # if successfull, gets the login from the account
+            # if successful, gets the login from the account
             login = pwd.getpwuid(os.getuid())[0]
         except Exception:
             print(const.AUTHENTICATE_REQUEST_INVALID_TOKEN)
@@ -322,7 +322,7 @@ def create_group(group_name, description):
     :type group_name: str
     :param description: Description of the group that will be created.
     :type description: str
-    :return: Returns 0 if successful or -1 if a problem occured.
+    :return: Returns 0 if successful or -1 if a problem occurred.
     :rtype: int
     """
 
@@ -766,7 +766,7 @@ def delete_group(group_name):
     Deletes a group based on the name given as parameter.
     :param group_name: Name of the group that will be deleted.
     :type group_name: str
-    :return: Returns 0 if successful or -1 if a problem occured.
+    :return: Returns 0 if successful or -1 if a problem occurred.
     :rtype: int
     """
 
@@ -908,7 +908,7 @@ def create_merge_request(source_tuple,
     :type target_tuple: tuple
     :param merge_def: Definition of the new merge request containing title and description
     :type merge_def: tuepl
-    :return: Returns 0 if successful or -1 if a problem occured.
+    :return: Returns 0 if successful or -1 if a problem occurred.
     :rtype: int
     """
 
@@ -927,7 +927,7 @@ def create_merge_request(source_tuple,
         raise gitutils_exception.GitutilsError(ex)
 
     logging.info('Creating merge request %s (Description: %s). Source project \
-                id/branch: %s - %s. Targer project id/branch: %s - %s' % (
+                id/branch: %s - %s. Target project id/branch: %s - %s' % (
         merge_def[0],
         merge_def[1],
         source_tuple[0],

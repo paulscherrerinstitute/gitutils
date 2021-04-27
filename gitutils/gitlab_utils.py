@@ -591,8 +591,8 @@ def get_forked_project(git_repository, clean, verbosity):
     Function to get the forked project based on the git repository name and id.
     :param git_repository: Name of the project
     :type git_repository: str
-    :return: Returns the web url to the project.
-    :rtype: str
+    :return: Returns the project dict.
+    :rtype: dict
     """
     forked_project = None
     projects = get_personal_projects()
@@ -613,10 +613,6 @@ def get_forked_project(git_repository, clean, verbosity):
             and 'forked_from_project' in project
         ):
             forked_project = project
-            # check if project is forked from the right project
-            if forked_project['forked_from_project']['name'] != git_repository and not clean:
-                raise gitutils_exception.GitutilsError(
-                    const.PROJECT_FORK_NAME_ERROR)
             break
     if forked_project is None and not clean:
         raise gitutils_exception.GitutilsError(

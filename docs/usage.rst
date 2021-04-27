@@ -167,13 +167,8 @@ Merge
                               - "" : (DEFAULT) The user doesn't provide this argument, the project's group and name
                                     will be fetched from the /.git/config folder within the path where the
                                     gitutils is being called.
-                              - https://git.psi.ch/<group_name>/<project_name> : The user provides the direct
-                                    http to the git repository.
                               - <group_name>/<project_name> : The user provides a combination of group_name and
                                     project_name divided by "/".
-                              - <project_name> : The user provides the name of the project name. Gitutils will
-                                    fetch the name of the group (keep in mind, that this may cause ambiguity
-                                    problems).
         -d DESCRIPTION, --description DESCRIPTION
                               The description of the merge request that is going to be created.
 

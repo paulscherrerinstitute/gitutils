@@ -44,12 +44,20 @@ def merge(verbosity,
     source_branch = 'master'
     target_branch = 'master'
 
-    merge_request = gitlab_utils.create_merge_request(
-        (git_repository_id, source_branch),
-        (forked_project['forked_from_project']['id'], target_branch),
-        (title, final_description))
+    try:
+        forked_from_project_id = forked_project['forked_from_project']['id']
+    except:
+        raise gitutils_exception.GitutilsError(
+            const.GIT_MERGE_PROBLEM_3)
+    try:
+        merge_request = gitlab_utils.create_merge_request(
+            (git_repository_id, source_branch),
+            (forked_project['forked_from_project']['id'], target_branch),
+            (title, final_description))
 
-    if merge_request.attributes['id']:
-        print(const.GIT_MERGE_SUCCESS
-              % (merge_request.attributes['id'],
-                 merge_request.attributes['created_at']))
+        if merge_request.attributes['id']:
+            print(const.GIT_MERGE_SUCCESS
+                % (merge_request.attributes['id'],
+                    merge_request.attributes['created_at']))
+    except Exception as ex:
+        raise gitutils_exception.GitutilsError(ex)

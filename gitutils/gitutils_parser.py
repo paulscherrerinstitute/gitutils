@@ -255,19 +255,12 @@ class Parser:
             repo_name = os.path.basename(os.getcwd())
             if arguments.project:
                 project_indication = True
-                if const.ENDPOINT in arguments.project:
-                    web_url_split = arguments.project.split('/')
-                    if len(web_url_split) == 5:
-                        repo_name = web_url_split[-1]
-                        group_name = web_url_split[-2]
-                elif '/' in arguments.project:
-                    # config format: "group_name/project_name"
-                    path_with_namespace = arguments.project.split('/')
-                    if len(path_with_namespace) == 2:
-                        repo_name = path_with_namespace[1]
-                        group_name = path_with_namespace[0]
-                else:
-                    repo_name = arguments.project
+                if arguments.project.count('/') != 1:
+                    print(const.GROUP_PROJECT_BAD_FORMAT)
+                    self.parser_mr.print_help()
+                    sys.exit(-1)
+                group_name = arguments.project.split('/')[0]
+                repo_name = arguments.project.split('/')[1]
             else:
                 # Check to see the directory
                 if os.path.isfile('.git/config'):

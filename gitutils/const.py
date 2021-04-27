@@ -69,7 +69,7 @@ SEARCHFILE_PROBLEM = "Not possible to search for a file if the group or file are
 FORK_GROUP_NOT_FOUND = "The requested fork project could not be found under the specified group or check if you have permission to access such group/project."
 GROUP_NAME_PROBLEM = "The requested project was found under a different group or check if you have permission to access such group/project."
 PROJECT_URL_NOT_FOUND = "Project url not found, please check the configuration details or check if you have permission to access such group/project.."
-GROUP_PROJECT_BAD_FORMAT = "Please use the following format: <group_name>/<project_name>"
+GROUP_PROJECT_BAD_FORMAT = "To indicate the project, please use the following format: <group_name>/<project_name>"
 FULL_GROUP_PROJECT_BAD_FORMAT = "Please use the following format: https://git.psi.ch/<group_name>/<project_name>"
 GIT_CREATE_MERGE_MSG = "Creating merge request..."
 DELETING_EXISTING_FORK = "Deleting existing fork..."
@@ -109,7 +109,7 @@ ENDPOINT_HELP_MSG = "Endpoint of the git server. Default: https://git.psi.ch"
 VERBOSITY_HELP_MSG = "Increase verbosity for debugging."
 FORK_PROJECT_MESSAGE = '''(REQUIRED) Indicates the project to be forked. It must be indicated as follow:
 - <group_name>/<project_name>.'''
-MERGE_PROJECT_MESSAGE = '''Indicates the project to be forked. It can be of four different formats:
+MERGE_PROJECT_MESSAGE = '''Indicates the project to be merged. It can be of four different formats:
 - \"\" : (DEFAULT) The user doesn't provide this argument, the project's group and name
       will be fetched from the /.git/config folder within the path where the
       gitutils is being called.

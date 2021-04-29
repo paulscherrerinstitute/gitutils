@@ -4,6 +4,7 @@ import argparse
 import os
 import shutil
 import sys
+from io import StringIO
 import time
 from unittest import main as unittest_main
 from unittest import TestCase
@@ -23,6 +24,10 @@ class TestGitutils(TestCase):
     merge_request_title = 'title for merge request unit test'
     merge_request_description = 'description for merge request unit test'
     merge_request_description_ref = 'The configuration was changed by hax_l. User description: description for merge request unit test'
+    find_verify1 = 'https://git.psi.ch/archiver_config/sf_archapp/blob/master/S_DI_BAM_S10BC01-DBAM070.config#L6'
+    find_verify2 = 'https://git.psi.ch/archiver_config/sf_archapp/blob/master/S_CCS_all.config'
+    find_term1 = 'S10BC01-CVME-DBAM31'
+    find_term2 = 'S_CCS_all.config'
 
     def step0(self):
         pass
@@ -308,22 +313,30 @@ class TestGitutils(TestCase):
     # FIND #
     ########
     # //TODO verify how to test the output
-    # def test_find_without_f(self):
-    #     # CMD
-    #     sys.argv[1] = 'find'
-    #     del sys.argv[2:]
-    #     # ARG
-    #     sys.argv.append('S_DI_BAM_S10CB04-DBAMT1.config')
-    #     gitutils.main()
-
-    # def test_find_with_f(self):
-    #     # CMD
-    #     sys.argv[1] = 'find'
-    #     del sys.argv[2:]
-    #     # ARG
-    #     sys.argv.append('-f')
-    #     sys.argv.append('S_DI_BAM_S10CB04-DBAMT1.config')
-    #     gitutils.main()
+    def step9(self):
+        # CMD
+        sys.argv[1] = 'find'
+        del sys.argv[2:]
+        # ARG
+        sys.argv.append(self.__class__.find_term1)
+        save_stdout = sys.stdout
+        result = StringIO()
+        sys.stdout = result
+        gitutils.main()
+        sys.stdout = save_stdout
+        self.assertTrue(self.__class__.find_verify1 in result.getvalue())
+        # CMD
+        del sys.argv[2:]
+        del result
+        # ARG
+        sys.argv.append('-f')
+        sys.argv.append(self.__class__.find_term2)
+        save_stdout = sys.stdout
+        result = StringIO()
+        sys.stdout = result
+        gitutils.main()
+        sys.stdout = save_stdout
+        self.assertTrue(self.__class__.find_verify2 in result.getvalue())
 
     def _steps(self):
         for name in dir(self):  # dir() result is implicitly sorted

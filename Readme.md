@@ -109,7 +109,7 @@ optional arguments:
 
 ## fork
 ```bash
-usage: gitutils.py fork [-h] [-n] [-c] [project]
+usage: gitutils.py fork [-h] [-n] [-c] [-g] [project]
 
 positional arguments:
   project         (REQUIRED) Indicates the project to be forked. It must be indicated as follow:
@@ -121,6 +121,8 @@ optional arguments:
                   will be created on the server-side and no clone nor upstream will be
                   generated on the local git repository.
   -c, --clean     Flag to delete personal fork of the project.
+  -g, --group     Indicates if the fork should not be a personal project.
+
 ```
 
 > To see the fork help message use: ```> gitutils fork -h```
@@ -128,23 +130,22 @@ optional arguments:
 ## merge
 
 ```bash
-usage: gitutils merge [-h] [-t TITLE] [-p PROJECT] [-d DESCRIPTION] project
+usage: gitutils.py merge [-h] [-t TITLE] [-p PROJECT] [-d DESCRIPTION]
 
 optional arguments:
   -h, --help            show this help message and exit
   -t TITLE, --title TITLE
                          The title of the merge request that is going to be created.
   -p PROJECT, --project PROJECT
-                        Indicates the project to be forked. It can be of four different formats:
+                        Indicates the project to be merged. It can be of four different formats:
                         - "" : (DEFAULT) The user doesn't provide this argument, the project's group and name
                               will be fetched from the /.git/config folder within the path where the
                               gitutils is being called.
-                        - https://git.psi.ch/<group_name>/<project_name> : The user provides the direct
-                              http to the git repository.
                         - <group_name>/<project_name> : The user provides a combination of group_name and
                               project_name divided by "/".
   -d DESCRIPTION, --description DESCRIPTION
                         The description of the merge request that is going to be created.
+
 ```
 
 > To see the merge help message use: ```> gitutils merge -h```
@@ -242,16 +243,11 @@ optional arguments:
         ```bash
         > gitutils fork -c <group_name>/<repository_name>
         ```
-    - To fork (using the full path), clean existing fork and not clone an existing repository:
-    
-        ```bash
-        > gitutils fork -n -c https://git.psi.ch/<group_name>/<repository_name>
-        ```
 
     - To fork into a different group, use the ___-g___ to indicate which group:
     
         ```bash
-        > gitutils fork -g <destination_group> https://git.psi.ch/<group_name>/<repository_name>
+        > gitutils fork -g <destination_group> <group_name>/<repository_name>
         ```
 
 2. Implement the changes/development necessary on the forked repository.
@@ -290,11 +286,6 @@ optional arguments:
 
         ```bash
         > gitutils merge -p <group_name>/<repository_name> -t <title> -d <description>
-        ```
-    - To create a merge request indicating the full-path to the repository and without giving a description:
-
-        ```bash
-        > gitutils merge -p https://git.psi.ch/<group_name>/<repository_name> -t <title>
         ```
 
 > If ```-p``` is not indicated, ```gitutils``` fetches the group and project from the ```.git/config``` file (it assumes that the command is executed within the root directory of the git repository). Alternatively, one can use the directive `-p` to indicate directly which project should be merged.

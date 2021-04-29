@@ -4,6 +4,28 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
+[1.1.2] 2021-04-29
+
+Changed
+~~~~~~~
+- Merge allows fork from projects with different repository names. 
+- Improvements on the fork verbose mode.
+
+Added
+~~~~~
+- Find verbose mode.
+- Merge verbose mode.
+- Behavior test find command.
+
+Fixed 
+~~~~~
+- Unecessary confirmation to delete personal fork.
+- bugfix (403 forbidden) when retrieving branches inside private projects using gitutils find command.
+
+Removed
+~~~~~~~
+- Cleanup of unused functions and unit tests.
+
 [1.1.1] 2021-04-23
 
 Added

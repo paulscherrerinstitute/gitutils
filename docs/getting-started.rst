@@ -28,10 +28,6 @@ Fork Walk-through
 
             $ gitutils fork -c <group_name>/<repository_name> 
 
-    - To fork (using the full path), clean existing fork and not clone an existing repository::
-
-            $ gitutils fork  -n -c https://git.psi.ch/<group_name>/<repository_name>
-
 2. Implement the changes/development necessary on the forked repository.
 3. Add all changes, commit and push the changes to your forked repository using git command line, as in::
 

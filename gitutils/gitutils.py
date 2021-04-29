@@ -92,7 +92,7 @@ def main():
                 create_projects(
                     group_name=group_name[0], project_names=repo_name)
             elif arguments.command == 'find':
-                find(arguments.term[0], arguments.file)
+                find(arguments.term[0], arguments.file, arguments.verbosity)
             elif arguments.command == 'fork':
                 fork(fork_group_indication=arguments.group,
                      group_name=group_name,

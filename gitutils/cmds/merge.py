@@ -20,7 +20,11 @@ def merge(verbosity,
     :type title: str
     :return:
     """
+    if verbosity:
+        print(" Verbose Gitutils: ")
     git_username = gitlab_utils.get_username()
+    if verbosity:
+        print(" \t (-v) Gitutils merge username: ", git_username)
     if git_username == -1:
         raise gitutils_exception.GitutilsError(
             const.PROBLEM_CREATEGROUP_EMPTY)
@@ -31,14 +35,20 @@ def merge(verbosity,
     # If no title submitted by the user, default title
     if title is None:
         title = const.MERGE_DEFAULT_TITLE % gitlab_utils.get_username()
+    if verbosity:
+        print(" \t (-v) Gitutils merge title: ", title)
 
     if forked_project is None:
+        if verbosity:
+            print(" \t (-v) Gitutils merge forked project not found.")
         raise gitutils_exception.GitutilsError(const.GIT_MERGE_PROBLEM_2)
     print(const.GIT_CREATE_MERGE_MSG)
     final_description = const.GIT_MERGE_DESCRIPTION_MSG \
         % git_username
     if description is not None:
         final_description += ' User description: ' + description
+    if verbosity:
+        print(" \t (-v) Gitutils merge definition: ", title)
 
     # Merge will be from source and target masters branches
     source_branch = 'master'
@@ -49,7 +59,10 @@ def merge(verbosity,
     except:
         raise gitutils_exception.GitutilsError(
             const.GIT_MERGE_PROBLEM_3)
+    
     try:
+        if verbosity:
+            print(" \t (-v) Gitutils forked project details: ", forked_from_project_id)
         merge_request = gitlab_utils.create_merge_request(
             (git_repository_id, source_branch),
             (forked_project['forked_from_project']['id'], target_branch),

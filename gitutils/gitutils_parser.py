@@ -35,7 +35,7 @@ class Parser:
                                  help=const.ENDPOINT_HELP_MSG,
                                  default=const.ENDPOINT)
 
-        self.parser.add_argument('-v', dest='verbosity', action='store_true')
+        self.parser.add_argument('-v', dest='verbosity', help=const.VERBOSITY_HELP_MSG, action='store_true')
 
         subparsers = self.parser.add_subparsers(title='command',
                                                 description='valid commands',

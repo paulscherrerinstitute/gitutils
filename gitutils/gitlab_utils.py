@@ -142,29 +142,6 @@ def project_exists(proj_name):
     project = gl.projects.list(search=proj_name, all=True)
     return bool(project)
 
-
-def check_existing_remote_git(clean, git_repository_id, group_name):
-    proj = gl.projects.get(git_repository_id)
-    # verifies if such project already exists remotely under
-    # any personal project
-    projs = get_owned_projects()
-    check_exist = False
-    id_to_delete = -1
-    for own_p in projs:
-        if own_p['name'] == proj.name and own_p['username'] == group_name:
-            check_exist = True
-            id_to_delete = own_p['id']
-            break  # If we find something we can abort the loop
-    # project exists not clean -> raise error
-    if check_exist:
-        if not clean:
-            raise gitutils_exception.GitutilsError(const.FORK_PROBLEM_REMOTE)
-        # project exists and clean -> clean
-        delete_project(id_to_delete)
-    # if check_exist is false -> good to go
-    return 0
-
-
 def addldapgroup(git_group_name, group_id, ldap_group_name, role):
     # ldap group must return only one entry
     group = gl.groups.get(group_id)
@@ -192,10 +169,12 @@ def get_ldap_groups(ldap_cn):
     return gl.ldapgroups.list(all=True, search=ldap_cn)
 
 
-def check_existing_local_git(git_repository):
+def check_existing_local_git(git_repository, verbosity):
     # verify if there is an previously existing local folder
     if os.path.exists('./' + git_repository):
         print(const.DELETING_LOCAL_STORAGE)
+        if verbosity:
+            print(" \t (-v) Gitutils fork detected a local folder with the same name.")
         if not click.confirm(const.DELETE_LOCAL_CONFIRMATION, default=True):
             raise gitutils_exception.GitutilsError(
                 const.NO_PERMISSION_TO_DELETE_LOCAL_FOLDER)
@@ -414,19 +393,23 @@ def grep_file_in_project(search_term, project_id, project_name, group_name):
     ]
 
 
-def find_file_by_id(file_name, group_dict, files_only):
-    results_file = []
+def find_file_by_id(file_name, group_dict, files_only, verbosity):
     results_blob = []
-    # gets all the projects in the group
+    # gets all the projects in the group except sandbox test
     if group_dict['name'] != 'sandbox':
         projects = get_group_projects_by_group_id(group_dict['id'])
         match_files = []
+        results_file = []
         # for every project found
         for i in projects:
+            if verbosity:
+                print("\t\t Searching inside project: ",i['name'], "(id ", i['id'],").")
             # For every project's branch
             branches = i.get('branches', 0)
             if branches != 0:
                 for b in i['branches']:
+                    if verbosity:
+                        print("\t\t\t Searching inside branch: ",b.name)
                     # gets the project tree for the branch
                     project_tree = get_project_tree(i.get('id'), b.name)
                     for j in project_tree:
@@ -438,7 +421,7 @@ def find_file_by_id(file_name, group_dict, files_only):
                                 'project_name': i.get('name'),
                                 'project_id': i.get('id')
                             })
-            if len(results_file) > 0:
+            if results_file:
                 print_search_output(
                     group_dict['name'], file_name, results_file)
             # content
@@ -446,11 +429,7 @@ def find_file_by_id(file_name, group_dict, files_only):
                 project_search_results = get_project(
                     i.get('id')).search(const.BLOBS, file_name)
                 for match in project_search_results:
-                    not_add = False
-                    for entry in results_blob:
-                        if entry['filename'] == match.get('filename'):
-                            not_add = True
-                    if not not_add:
+                    try:
                         results_blob = {
                             # File name, including path
                             'filename': match.get('filename'),
@@ -459,12 +438,16 @@ def find_file_by_id(file_name, group_dict, files_only):
                             # Generation of the diret weblink to the file including the line
                             'webpath': const.ENDPOINT+"/"+group_dict['name']+"/"+i.get('name')+"/blob/"+match.get('ref')+"/"+match.get('filename')+"#L"+str(match.get('startline'))
                         }
-                if len(results_blob) > 0:
-                    if results_blob.get('webpath') not in match_files:
-                        match_files.append(results_blob.get('webpath'))
-                        print_grep_output(
-                            group_dict['name'], i['name'], i['id'], file_name, results_blob)
-
+                    except Exception as ex:
+                        print(" Gitutils warning: something wrong happened when finding the find result.")
+                if (
+                    len(results_blob) > 0
+                    and results_blob.get('webpath') not in match_files
+                ):
+                    match_files.append(results_blob.get('webpath'))
+                    print_grep_output(
+                        group_dict['name'], i['name'], i['id'], file_name, results_blob)
+    return 0
 
 def find_file(file_name, group_indication):
     results = []
@@ -686,69 +669,6 @@ def get_project_id(group_name, project_name):
             return project.attributes['id']
     raise gitutils_exception.GitutilsError(const.PROJECT_ID_NOT_FOUND)
 
-
-def get_repo_group_names(config, group_indication, clean=False):
-    """
-    Gets the project name and group name based on the argument given on the cli.
-    :param config: String given as argument that can be of different
-    formats: full path to the project, groupname/projectname or project name.
-    :type config: str
-    :return: Returns the project name, group name and a boolean indicating
-    if the results are valid.
-    :rtype: tuple
-    """
-
-    repo_name = None
-    group_name = group_indication
-    valid = False
-    if len(config) > 0:
-        project_indication = True
-    # config format: "const.ENDPOINT/group_name/project_name"
-    if get_endpoint() in config:
-        web_url = config
-        web_url_split = web_url.split('/')
-        if len(web_url_split) == 5:
-            repo_name = web_url_split[-1]
-            group_name = web_url_split[-2]
-            if len(repo_name) <= 1 or len(group_name) <= 1:
-                raise gitutils_exception.GitutilsError(
-                    const.FULL_GROUP_PROJECT_BAD_FORMAT)
-            valid = True
-            get_project_group(repo_name, clean, False, project_indication)
-        else:
-            raise gitutils_exception.GitutilsError(
-                const.FULL_GROUP_PROJECT_BAD_FORMAT)
-    elif '/' in config:
-        # config format: "group_name/project_name"
-        path_with_namespace = config.split('/')
-        if len(path_with_namespace) == 2:
-            group_name = path_with_namespace[0]
-            repo_name = path_with_namespace[1]
-            valid = True
-            project_id = get_project_id(group_name, repo_name)
-            project = gl.projects.get(project_id)
-            if group_name != project.attributes['namespace']['name']:
-                raise gitutils_exception.GitutilsError(
-                    const.FORK_GROUP_NOT_FOUND)
-            if clean:
-                own_projects = get_owned_projects()
-                for proj in own_projects:
-                    if proj['name'] == repo_name and group_indication == project.attributes['namespace']['name']:
-                        delete_project(proj['id'])
-        else:
-            raise gitutils_exception.GitutilsError(
-                const.GROUP_PROJECT_BAD_FORMAT)
-    else:
-        # config format: "project_name"
-        repo_name = config
-        group_name = get_project_group(
-            repo_name, clean, False, project_indication)
-        # warning if multiple and ERROR out - > ambiguous
-        valid = True
-    project_id = get_project_id(group_name, repo_name)
-    return (repo_name, group_name, project_id, valid)
-
-
 def is_git_repo():
     is_git_repo = subprocess.check_output(
         const.GIT_IS_REPO_PATH,
@@ -839,7 +759,7 @@ def get_group_projects_by_group_id(group_id):
         group = gl.groups.get(group_id)
         group_projects = group.projects.list(all=True)
     except Exception as ex:
-        raise gitutils_exception.GitutilsError(ex)
+        print(gitutils_exception.GitutilsWarning(ex))
     return get_dict_from_own_projects(group_projects)
 
 
@@ -946,10 +866,13 @@ def get_dict_from_own_projects(own_projects):
             'username': project.attributes['namespace']['name'],
             'id': project.attributes['id'],
         })
-        if len(get_project(project.attributes['id']).branches.list()) > 0:
-            branches = get_project(project.attributes['id']).branches.list()
-            dict_projects[-1]['branches'] = branches
-
+        try:
+            if len(get_project(project.attributes['id']).branches.list()) > 0:
+                branches = get_project(project.attributes['id']).branches.list()
+                dict_projects[-1]['branches'] = branches
+        except Exception as ex:
+            print("\nGitutils warning: Not possible to retrieve branches for this project. Skipping...")
+            
         # if it's a fork add the source project
         if 'forked_from_project' in project.attributes:
             dict_projects[-1]['forked_from_project'] = \
@@ -991,17 +914,6 @@ def delete_project(project_id):
     Deletes the project given as parameter
     :return:
     """
-    # check if the project id is owned by user
-    proj_list = get_dict_from_own_projects(gl.projects.list(owned=True))
-    check_allowed = any(
-        i['id'] == project_id and i['path'].split('/')[0] == get_username()
-        for i in proj_list
-    )
-
-    if not check_allowed:
-        print(const.NO_PERSONAL_FORK_PERMISSIONS, )
-        if not click.confirm('Do you want to continue?', default=True):
-            raise gitutils_exception.GitutilsError(const.NO_PERSONAL_FORK)
     try:
         gl.projects.delete(project_id)
     except Exception as ex:

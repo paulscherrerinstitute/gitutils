@@ -115,41 +115,6 @@ class TestGitutilsUnit(unittest.TestCase):
                                         'iocutils')
         self.assertEqual(project_id, 5930)
 
-    def test_get_repo_group_names_1(self):
-        """
-        Test get_repo_group_names with the full path
-        """
-        config = 'https://git.psi.ch/controls_highlevel_applications/iocutils'
-        (repo_name, group_name, project_id, valid) = \
-            gitlab_utils.get_repo_group_names(config, False)
-        self.assertEqual(repo_name, 'iocutils')
-        self.assertEqual(group_name, 'controls_highlevel_applications')
-        self.assertEqual(project_id, 5930)
-        self.assertEqual(valid, True)
-
-    def test_get_repo_group_names_2(self):
-        """
-        Test get_repo_group_names with the group/project path
-        """
-        config = 'controls_highlevel_applications/iocutils'
-        (repo_name, group_name, project_id, valid) = \
-            gitlab_utils.get_repo_group_names(config, False)
-        self.assertEqual(repo_name, 'iocutils')
-        self.assertEqual(group_name, 'controls_highlevel_applications')
-        self.assertEqual(project_id, 5930)
-
-    def test_get_repo_group_names_3(self):
-        """
-        Test get_repo_group_names with the project path
-        """
-
-        (repo_name, group_name, project_id, valid) = \
-            gitlab_utils.get_repo_group_names('iocutils', False)
-        self.assertEqual(repo_name, 'iocutils')
-        self.assertEqual(valid, True)
-        self.assertEqual(group_name, 'controls_highlevel_applications')
-        self.assertEqual(project_id, 5930)
-
     def test_get_group_projects(self):
         """
         Test get_group_projects

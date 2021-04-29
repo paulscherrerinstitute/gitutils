@@ -19,7 +19,7 @@ Added
 
 Fixed 
 ~~~~~
-- Unecessary confirmation to delete personal fork.
+- Unnecessary confirmation to delete personal fork.
 - bugfix (403 forbidden) when retrieving branches inside private projects using gitutils find command.
 
 Removed
@@ -171,7 +171,7 @@ Changed
 ~~~~~~~
 
 -  Username and password are now appropriately url encoded by using urllib.parse.quote.
--  Python-Gitlab method returns only 20 itens per search. Fixed by additions parameter all=True in all retrieval of projects or groups.
+-  Python-Gitlab method returns only 20 items per search. Fixed by additions parameter all=True in all retrieval of projects or groups.
 
 [1.0.1] - 2019-09-13
 --------------------

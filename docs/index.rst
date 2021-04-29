@@ -20,7 +20,7 @@ Gitutils functionalities:
       * **setrole**             Sets the role for a specific user on a specific group or project (or multiple)
 
 It is developed using `python`_ on an open-source project (`github repository`_), distributed using anaconda via the Paul Scherrer Institute channel (`anaconda channel`_) and documented here using readthedocs.
-Gitutils authenticates on the git server using the OAuth2 protocol. If the token is non-existant or not valid, gitutils will request username and password and store the token in a file located on the user's home directory called ``.gitutils_token``. The user will not be requested for username nor password until the saved token is not valid anymore.
+Gitutils authenticates on the git server using the OAuth2 protocol. If the token is non-existent or not valid, gitutils will request username and password and store the token in a file located on the user's home directory called ``.gitutils_token``. The user will not be requested for username nor password until the saved token is not valid anymore.
 
 .. _python : https://www.python.org/
 .. _github repository : https://git.psi.ch/controls_highlevel_applications/gitutils

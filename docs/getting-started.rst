@@ -43,7 +43,7 @@ Fork Walk-through
 
 Merge Walk-through
 ------------------
-1. Once all the necessary changes/development have been commited and pushed to a forked repository.
+1. Once all the necessary changes/development have been committed and pushed to a forked repository.
 2. Navigate to the home folder of your forked repository (where the ``/.git`` folder is). Issue the command to merge. Arguments:**-t**, **-d**, **-p**.
     - To create a merge request for a repository, use the following command while on a git repository folder::
 

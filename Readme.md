@@ -273,7 +273,7 @@ optional arguments:
 
 #### Gitutils merge walk-through
 
-1. Once all the necessary changes/development have been commited and pushed to a forked repository.
+1. Once all the necessary changes/development have been committed and pushed to a forked repository.
 
 2. Navigate to the home folder of your forked repository (where the ```/.git``` folder is). Issue the command to merge. Arguments:___-t___, ___-d___, ___-p___.
 
@@ -427,7 +427,7 @@ The readthedocs documentation is generated based on the files inside the ```docs
 [Detailed readthedocs documentation](https://gitutils.readthedocs.io/en/latest/index.html)
 
 ## GIT Credentials
-Gitutils authenticates on the git server using the OAuth2 protocol. If the token is non existant or not valid, gitutils will request username and password and store the token in a file located on the user's home directory (`~/.gitutils_token`). The user will not be requested for username nor password until the saved token is not valid anymore.
+Gitutils authenticates on the git server using the OAuth2 protocol. If the token is non existent or not valid, gitutils will request username and password and store the token in a file located on the user's home directory (`~/.gitutils_token`). The user will not be requested for username nor password until the saved token is not valid anymore.
 
 # Contact / Questions
 Questions or problems: Leonardo Hax Damiani - leonardo.hax@psi.ch

@@ -36,8 +36,7 @@ def main():
     arguments = parser.get_arguments()
     # verifies if there are any arguments
     if arguments.command is None:
-        parser.print_help()
-        sys.exit(-1)
+        parser.get_help()
     # sets the endpoins
     gitlab_utils.set_endpoint(arguments.endpoint)
     # Authenticate user
@@ -115,7 +114,7 @@ def main():
                          project_flag=arguments.project)
             elif arguments.command not in list_of_cmds:
                 print(const.COMMAND_NOT_FOUND)
-                parser.print_help()
+                parser.get_help()
                 exit(-1)
         except Exception as e:
             print(str(e))

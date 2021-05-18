@@ -764,10 +764,12 @@ def get_group_projects_by_group_id(group_id):
 
 # Declare the filter function
 def filter_name_pattern(projects, pattern):
+    proj = []
     return [
         proj
-        for proj in projects
-        if re.search(r''.join(pattern), proj['name'])
+        for proj in projects 
+            for pat in pattern
+                if re.search(r''.join(pat), proj['name']) 
     ]
 
 def get_group_projects(group_name):

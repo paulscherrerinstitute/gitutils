@@ -24,6 +24,10 @@ class Parser:
     def get_parser(self):
         return self.parser
 
+    def get_help(self):
+        self.parser.print_help()
+        sys.exit(-1)
+
     def get_arguments(self):
         return self.parser.parse_args()
 

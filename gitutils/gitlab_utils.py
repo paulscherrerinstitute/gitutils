@@ -3,7 +3,7 @@
 from gitutils import const
 from gitutils import gitutils_exception
 
-
+import re
 import requests
 import os
 import logging
@@ -762,6 +762,13 @@ def get_group_projects_by_group_id(group_id):
         print(gitutils_exception.GitutilsWarning(ex))
     return get_dict_from_own_projects(group_projects)
 
+# Declare the filter function
+def filter_name_pattern(projects, pattern):
+    return [
+        proj
+        for proj in projects
+        if re.search(r''.join(pattern), proj['name'])
+    ]
 
 def get_group_projects(group_name):
     """

@@ -5,7 +5,8 @@ import time
 from gitutils import const, gitlab_utils
 
 
-def clone_group(group_name=''):
+
+def clone_group(group_name='', pattern=None):
     """
     Based on the group name, it clones all existing
     projects from the specified group.
@@ -16,6 +17,10 @@ def clone_group(group_name=''):
     gitlab_utils.check_group_exists(group_name)
     # Gets all the projects from the group
     projects = gitlab_utils.get_group_projects(group_name)
+    # Filter name pattern
+    if pattern:
+        projects = gitlab_utils.filter_name_pattern(projects, pattern)
+
     # clones all the projects from group
     print(const.CLONEGROUP_WARNING)
     for i in projects:

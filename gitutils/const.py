@@ -65,6 +65,7 @@ FORK_PROBLEM_REMOTE = "Existing repo with the same name. Please indicate -c if y
 FORK_PROBLEM_GIT_FOLDER = "Fork is not recommended inside a repository folder. Please execute the fork command outside a repository folder."
 FORK_PROBLEM_PERSONAL = "Not possible to fork your own personal project."
 CLONEGROUP_PROBLEM = "Not possible to clonegroup if the group name parameter is not provided. Use 'gitutils clonegroup -h' for help."
+CLONEGROUP_PATTERN = "Initial name pattern of the repositories that will be cloned."
 SEARCHFILE_PROBLEM = "Not possible to search for a file if the group or file are not provided. Use 'gitutils search -h' for help."
 FORK_GROUP_NOT_FOUND = "The requested fork project could not be found under the specified group or check if you have permission to access such group/project."
 GROUP_NAME_PROBLEM = "The requested project was found under a different group or check if you have permission to access such group/project."

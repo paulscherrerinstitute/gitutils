@@ -769,7 +769,7 @@ def filter_name_pattern(projects, pattern):
         for pat in pattern:
             if re.search(r''.join(pat), proj['name']):
                 proj_filter.append(proj)
-    return proj
+    return proj_filter
 
 def get_group_projects(group_name, pattern=None):
     """

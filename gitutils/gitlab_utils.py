@@ -3,7 +3,7 @@
 from gitutils import const
 from gitutils import gitutils_exception
 
-
+import re
 import requests
 import os
 import logging
@@ -54,8 +54,6 @@ def authenticate():
             gl = gitlab.Gitlab(get_endpoint(), oauth_token=access_token,
                                api_version=4)
             gl.auth()
-            # if successful, gets the login from the account
-            login = pwd.getpwuid(os.getuid())[0]
         except Exception:
             print(const.AUTHENTICATE_REQUEST_INVALID_TOKEN)
             access_token = get_user_password()
@@ -64,7 +62,9 @@ def authenticate():
 
             # saves token into personal file
             save_token(access_token)
-
+        else:
+            # if successful, gets the login from the account
+            login = pwd.getpwuid(os.getuid())[0]
 
 def get_project(project_id):
     return gl.projects.get(project_id)
@@ -756,31 +756,46 @@ def get_group_projects_by_group_id(group_id):
     :rtype: list
     """
     try:
-        group = gl.groups.get(group_id)
-        group_projects = group.projects.list(all=True)
+        group_projects = gl.groups.get(group_id).projects.list(all=True)
     except Exception as ex:
         print(gitutils_exception.GitutilsWarning(ex))
-    return get_dict_from_own_projects(group_projects)
+    else:
+        return get_dict_from_own_projects(group_projects)
 
+# Declare the filter function
+def filter_name_pattern(projects, pattern):
+    proj_filter = []
+    for proj in projects:
+        for pat in pattern:
+            if re.search(r''.join(pat), proj['name']):
+                proj_filter.append(proj)
+    return proj
 
-def get_group_projects(group_name):
+def get_group_projects(group_name, pattern=None):
     """
     Retrieves all the projects of a group, which is given as parameter.
     :param group_name: Name of the group of interest.
     :type group_id: str
+    :param pattern: Pattern used to search projects
+    :type pattern: str
     :return: List of the projects (for the specified group id) containing name,
      id, path and url (in a dictionary-type).
     :rtype: list
     """
     if group_name == get_username():
         group_id = 0
-        group_projects = gl.projects.list(owned=True, all=True)
+        if pattern:
+            group_projects = gl.projects.list(owned=True, all=True, search=pattern)
+        else:
+            group_projects = gl.projects.list(owned=True, all=True)
         return get_dict_from_own_projects(group_projects)
     # Retrieve the group's projects
     group_id = get_group_id(group_name)
     try:
-        group = gl.groups.get(group_id)
-        group_projects = group.projects.list(all=True)
+        if pattern:
+            group_projects = gl.groups.get(group_id).projects.list(all=True, search=pattern)
+        else:
+            group_projects = gl.groups.get(group_id).projects.list(all=True)
     except Exception as ex:
         try:
             user = gl.users.list(username=group_name, all=True)[0]

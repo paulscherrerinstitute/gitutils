@@ -24,6 +24,10 @@ class Parser:
     def get_parser(self):
         return self.parser
 
+    def get_help(self):
+        self.parser.print_help()
+        sys.exit(-1)
+
     def get_arguments(self):
         return self.parser.parse_args()
 
@@ -62,6 +66,8 @@ class Parser:
                                                formatter_class=argparse.RawTextHelpFormatter)
         self.parser_cg.add_argument('group', nargs=1, metavar='group',
                                     help=textwrap.dedent(const.CLONEGROUP_GROUP_NAME))
+        self.parser_cg.add_argument('pattern', nargs='*', metavar='pattern', default=None,
+                                         help=textwrap.dedent(const.CLONEGROUP_PATTERN))
 
         ################
         # CREATE GROUP #

@@ -4,6 +4,16 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
+[1.1.3] 2021-05-18
+
+Added
+~~~~~
+- Clonegroup command accepts pattern to filter by name in the repositories of the specified group.
+
+Fixed
+~~~~~
+- Shows help when no command is used.
+
 [1.1.2] 2021-04-29
 
 Changed

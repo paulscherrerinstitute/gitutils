@@ -36,8 +36,7 @@ def main():
     arguments = parser.get_arguments()
     # verifies if there are any arguments
     if arguments.command is None:
-        parser.print_help()
-        sys.exit(-1)
+        parser.get_help()
     # sets the endpoins
     gitlab_utils.set_endpoint(arguments.endpoint)
     # Authenticate user
@@ -85,7 +84,8 @@ def main():
                          ldap_cn=arguments.ldapgroup,
                          role=role_access)
             elif arguments.command == 'clonegroup':
-                clone_group(group_name=group_name)
+                clone_group(group_name=group_name, 
+                            pattern=arguments.pattern)
             elif arguments.command == 'creategroups':
                 create_groups(group_names=group_name)
             elif arguments.command == 'createprojects':
@@ -114,7 +114,7 @@ def main():
                          project_flag=arguments.project)
             elif arguments.command not in list_of_cmds:
                 print(const.COMMAND_NOT_FOUND)
-                parser.print_help()
+                parser.get_help()
                 exit(-1)
         except Exception as e:
             print(str(e))

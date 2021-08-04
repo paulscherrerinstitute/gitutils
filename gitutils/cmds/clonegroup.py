@@ -5,7 +5,6 @@ import time
 from gitutils import const, gitlab_utils
 
 
-
 def clone_group(group_name='', pattern=None):
     """
     Based on the group name, it clones all existing
@@ -29,19 +28,21 @@ def clone_group(group_name='', pattern=None):
                 projs = gitlab_utils.get_group_projects(group_name, pat)
                 for p in projs:
                     projects.append(p)
-        if not projects:
-            print(const.CLONEGROUP_EMPTY)
-            return
-    # clones all the projects from group
-    print(const.CLONEGROUP_WARNING)
-    for i in projects:
-        # clones into repo
-        subprocess.call(['git', 'clone', i['http_url']])
-        # 2 sec sleep time in between:
-        # Gitlab API refuses if there's no sleep in between (too many requests)
-        # error: ssh_exchange_identification: read: Connection reset by peer
-        time.sleep(2)
-    msg = const.CLONEGROUP_FINISH
+
+    if projects: 
+        cloned_projects = []
+        for i in projects:
+            # clones into repo
+            subprocess.call(['git', 'clone', i['url']])
+            # cloned_projects.append(f'{i["name"]} (id {i["id"]})')
+            cloned_projects.append("%s (id %s)" % (i['name'], i['id']))
+            # 2 sec sleep time in between:
+            # Gitlab API refuses if there's no sleep in between (too many requests)
+            # error: ssh_exchange_identification: read: Connection reset by peer
+            time.sleep(2)
+        msg = const.CLONEGROUP_FINISH % cloned_projects
+    else:
+        msg = const.CLONEGROUP_EMPTY
     # Finishing up, message to user
     print(msg)
     return

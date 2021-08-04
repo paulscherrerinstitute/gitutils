@@ -84,7 +84,7 @@ def main():
                          ldap_cn=arguments.ldapgroup,
                          role=role_access)
             elif arguments.command == 'clonegroup':
-                clone_group(group_name=group_name, 
+                clone_group(group_name=group_name,
                             pattern=arguments.pattern)
             elif arguments.command == 'creategroups':
                 create_groups(group_names=group_name)

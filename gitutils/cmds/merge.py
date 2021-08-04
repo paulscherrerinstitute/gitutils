@@ -59,10 +59,11 @@ def merge(verbosity,
     except:
         raise gitutils_exception.GitutilsError(
             const.GIT_MERGE_PROBLEM_3)
-    
+
     try:
         if verbosity:
-            print(" \t (-v) Gitutils forked project details: ", forked_from_project_id)
+            print(" \t (-v) Gitutils forked project details: ",
+                  forked_from_project_id)
         merge_request = gitlab_utils.create_merge_request(
             (git_repository_id, source_branch),
             (forked_project['forked_from_project']['id'], target_branch),
@@ -70,7 +71,7 @@ def merge(verbosity,
 
         if merge_request.attributes['id']:
             print(const.GIT_MERGE_SUCCESS
-                % (merge_request.attributes['id'],
-                    merge_request.attributes['created_at']))
+                  % (merge_request.attributes['id'],
+                     merge_request.attributes['created_at']))
     except Exception as ex:
         raise gitutils_exception.GitutilsError(ex)

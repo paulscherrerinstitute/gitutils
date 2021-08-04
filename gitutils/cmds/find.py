@@ -19,7 +19,8 @@ def find(search_term, files_only, verbosity):
     with Spinner():
         for group in groups:
             if verbosity:
-                print("\t Searching inside group: ", groups[group]['name'], "(id ", groups[group]['id'], ").")
+                print("\t Searching inside group: ",
+                      groups[group]['name'], "(id ", groups[group]['id'], ").")
             gitlab_utils.find_file_by_id(
                 search_term, groups[group], files_only, verbosity)
     if verbosity:

@@ -7,6 +7,7 @@ from gitutils import const
 from gitutils import gitlab_utils
 from gitutils import gitutils_exception
 
+
 class Parser:
     def __init__(self):
         self.parser = argparse.ArgumentParser(
@@ -39,7 +40,8 @@ class Parser:
                                  help=const.ENDPOINT_HELP_MSG,
                                  default=const.ENDPOINT)
 
-        self.parser.add_argument('-v', dest='verbosity', help=const.VERBOSITY_HELP_MSG, action='store_true')
+        self.parser.add_argument(
+            '-v', dest='verbosity', help=const.VERBOSITY_HELP_MSG, action='store_true')
 
         subparsers = self.parser.add_subparsers(title='command',
                                                 description='valid commands',
@@ -67,7 +69,7 @@ class Parser:
         self.parser_cg.add_argument('group', nargs=1, metavar='group',
                                     help=textwrap.dedent(const.CLONEGROUP_GROUP_NAME))
         self.parser_cg.add_argument('pattern', nargs='*', metavar='pattern', default=None,
-                                         help=textwrap.dedent(const.CLONEGROUP_PATTERN))
+                                    help=textwrap.dedent(const.CLONEGROUP_PATTERN))
 
         ################
         # CREATE GROUP #

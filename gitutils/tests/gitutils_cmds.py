@@ -252,7 +252,8 @@ class TestGitutils(TestCase):
         del sys.argv[2:]
 
         sys.argv.append('-p')
-        sys.argv.append(gitlab_utils.get_username()+'/'+self.__class__.project_2)
+        sys.argv.append(gitlab_utils.get_username() +
+                        '/'+self.__class__.project_2)
         # ARG TITLE
         sys.argv.append('-t')
         sys.argv.append(self.__class__.merge_request_title)

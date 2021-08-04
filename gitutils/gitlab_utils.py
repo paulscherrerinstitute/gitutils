@@ -66,6 +66,7 @@ def authenticate():
             # if successful, gets the login from the account
             login = pwd.getpwuid(os.getuid())[0]
 
+
 def get_project(project_id):
     return gl.projects.get(project_id)
 
@@ -141,6 +142,7 @@ def get_user_id(username):
 def project_exists(proj_name):
     project = gl.projects.list(search=proj_name, all=True)
     return bool(project)
+
 
 def addldapgroup(git_group_name, group_id, ldap_group_name, role):
     # ldap group must return only one entry
@@ -403,13 +405,14 @@ def find_file_by_id(file_name, group_dict, files_only, verbosity):
         # for every project found
         for i in projects:
             if verbosity:
-                print("\t\t Searching inside project: ",i['name'], "(id ", i['id'],").")
+                print("\t\t Searching inside project: ",
+                      i['name'], "(id ", i['id'], ").")
             # For every project's branch
             branches = i.get('branches', 0)
             if branches != 0:
                 for b in i['branches']:
                     if verbosity:
-                        print("\t\t\t Searching inside branch: ",b.name)
+                        print("\t\t\t Searching inside branch: ", b.name)
                     # gets the project tree for the branch
                     project_tree = get_project_tree(i.get('id'), b.name)
                     for j in project_tree:
@@ -439,7 +442,8 @@ def find_file_by_id(file_name, group_dict, files_only, verbosity):
                             'webpath': const.ENDPOINT+"/"+group_dict['name']+"/"+i.get('name')+"/blob/"+match.get('ref')+"/"+match.get('filename')+"#L"+str(match.get('startline'))
                         }
                     except Exception as ex:
-                        print(" Gitutils warning: something wrong happened when finding the find result.")
+                        print(
+                            " Gitutils warning: something wrong happened when finding the find result.")
                 if (
                     len(results_blob) > 0
                     and results_blob.get('webpath') not in match_files
@@ -448,6 +452,7 @@ def find_file_by_id(file_name, group_dict, files_only, verbosity):
                     print_grep_output(
                         group_dict['name'], i['name'], i['id'], file_name, results_blob)
     return 0
+
 
 def find_file(file_name, group_indication):
     results = []
@@ -669,6 +674,7 @@ def get_project_id(group_name, project_name):
             return project.attributes['id']
     raise gitutils_exception.GitutilsError(const.PROJECT_ID_NOT_FOUND)
 
+
 def is_git_repo():
     is_git_repo = subprocess.check_output(
         const.GIT_IS_REPO_PATH,
@@ -771,6 +777,7 @@ def filter_name_pattern(projects, pattern):
                 proj_filter.append(proj)
     return proj_filter
 
+
 def get_group_projects(group_name, pattern=None):
     """
     Retrieves all the projects of a group, which is given as parameter.
@@ -785,7 +792,8 @@ def get_group_projects(group_name, pattern=None):
     if group_name == get_username():
         group_id = 0
         if pattern:
-            group_projects = gl.projects.list(owned=True, all=True, search=pattern)
+            group_projects = gl.projects.list(
+                owned=True, all=True, search=pattern)
         else:
             group_projects = gl.projects.list(owned=True, all=True)
         return get_dict_from_own_projects(group_projects)
@@ -793,7 +801,8 @@ def get_group_projects(group_name, pattern=None):
     group_id = get_group_id(group_name)
     try:
         if pattern:
-            group_projects = gl.groups.get(group_id).projects.list(all=True, search=pattern)
+            group_projects = gl.groups.get(
+                group_id).projects.list(all=True, search=pattern)
         else:
             group_projects = gl.groups.get(group_id).projects.list(all=True)
     except Exception as ex:
@@ -883,11 +892,13 @@ def get_dict_from_own_projects(own_projects):
         })
         try:
             if len(get_project(project.attributes['id']).branches.list()) > 0:
-                branches = get_project(project.attributes['id']).branches.list()
+                branches = get_project(
+                    project.attributes['id']).branches.list()
                 dict_projects[-1]['branches'] = branches
         except Exception as ex:
-            print("\nGitutils warning: Not possible to retrieve branches for this project. Skipping...")
-            
+            print(
+                "\nGitutils warning: Not possible to retrieve branches for this project. Skipping...")
+
         # if it's a fork add the source project
         if 'forked_from_project' in project.attributes:
             dict_projects[-1]['forked_from_project'] = \

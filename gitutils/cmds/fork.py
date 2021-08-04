@@ -28,7 +28,8 @@ def fork(verbosity,
     try:
         if verbosity:
             print(" \t (-v) Gitutils creating fork.")
-            print(" \t (-v) settings: git_repository_id : ", git_repository_id, " fork_group_indication : ", fork_group_indication, " group_name :", group_name)
+            print(" \t (-v) settings: git_repository_id : ", git_repository_id,
+                  " fork_group_indication : ", fork_group_indication, " group_name :", group_name)
 
         new_project = gitlab_utils.fork_project(
             git_repository_id, fork_group_indication, group_name)
@@ -46,7 +47,8 @@ def fork(verbosity,
             'forked_from_project']['http_url_to_repo']
         # waiting another 2 seconds before cloning - AFS gitserver issue
         if verbosity:
-            print(" \t (-v) settings: ssh_url_to_repo : ", ssh_url_to_repo, " http_url_to_original_repo : ", http_url_to_original_repo)
+            print(" \t (-v) settings: ssh_url_to_repo : ", ssh_url_to_repo,
+                  " http_url_to_original_repo : ", http_url_to_original_repo)
         time.sleep(2)
         # verify if there's a local folder and delete it
         gitlab_utils.check_existing_local_git(git_repository, verbosity)

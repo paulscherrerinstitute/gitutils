@@ -60,10 +60,12 @@ optional arguments:
 
 ## clonegroup
 ```bash
-usage: gitutils.py clonegroup [-h] group
+usage: gitutils.py clonegroup [-h] group [url] [pattern [pattern ...]]
 
 positional arguments:
   group       Group name
+  url         Url to clone the projects: http_url (https://git...) or url (git@git...)
+  pattern     Initial name pattern of the repositories that will be cloned (3 letters minimum).
 
 optional arguments:
   -h, --help  show this help message and exit

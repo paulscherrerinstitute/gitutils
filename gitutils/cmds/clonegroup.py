@@ -5,7 +5,7 @@ import time
 from gitutils import const, gitlab_utils
 
 
-def clone_group(group_name='', pattern=None):
+def clone_group(group_name, url, pattern):
     """
     Based on the group name, it clones all existing
     projects from the specified group.
@@ -33,7 +33,7 @@ def clone_group(group_name='', pattern=None):
         cloned_projects = []
         for i in projects:
             # clones into repo
-            subprocess.call(['git', 'clone', i['url']])
+            subprocess.call(['git', 'clone', i[url]])
             # cloned_projects.append(f'{i["name"]} (id {i["id"]})')
             cloned_projects.append("%s (id %s)" % (i['name'], i['id']))
             # 2 sec sleep time in between:

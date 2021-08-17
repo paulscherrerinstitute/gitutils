@@ -66,8 +66,11 @@ class Parser:
         self.parser_cg = subparsers.add_parser('clonegroup',
                                                help=const.CLONEGROUP_HELP_MSG,
                                                formatter_class=argparse.RawTextHelpFormatter)
-        self.parser_cg.add_argument('group', nargs=1, metavar='group',
+        self.parser_cg.add_argument('group', nargs=1, metavar='group', default='',
                                     help=textwrap.dedent(const.CLONEGROUP_GROUP_NAME))
+        self.parser_cg.add_argument('url', nargs='?', metavar='url', default='http_url',
+                                    choices=['url', 'http_url'],
+                                    help=textwrap.dedent(const.CLONEGROUP_MODE))
         self.parser_cg.add_argument('pattern', nargs='*', metavar='pattern', default=None,
                                     help=textwrap.dedent(const.CLONEGROUP_PATTERN))
 

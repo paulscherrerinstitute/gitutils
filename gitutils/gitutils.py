@@ -85,6 +85,7 @@ def main():
                          role=role_access)
             elif arguments.command == 'clonegroup':
                 clone_group(group_name=group_name,
+                            url=arguments.url,
                             pattern=arguments.pattern)
             elif arguments.command == 'creategroups':
                 create_groups(group_names=group_name)

@@ -4,6 +4,16 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
+[1.1.4] 2021-08-17
+
+Added
+~~~~~
+- Clonegroup's new parameter to define which url should be used for cloning the projects. http_url or url 
+
+Removed
+~~~~~~~
+- Find tests from the behavior tests because of the time that it consumes.
+
 [1.1.3] 2021-05-18
 
 Added

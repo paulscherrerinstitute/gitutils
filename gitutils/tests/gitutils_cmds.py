@@ -227,6 +227,8 @@ class TestGitutils(TestCase):
         del sys.argv[2:]
         # ARG
         sys.argv.append(str(self.__class__.group_name))
+        # url
+        sys.argv.append('url')
         # calls main to create group
         gitutils.main()
         time.sleep(2)
@@ -309,35 +311,6 @@ class TestGitutils(TestCase):
         # removal of test group
         gitlab_utils.remove_group(
             gitlab_utils.get_group_id(self.__class__.group_name))
-
-    ########
-    # FIND #
-    ########
-    # //TODO verify how to test the output
-    def step9(self):
-        # CMD
-        sys.argv[1] = 'find'
-        del sys.argv[2:]
-        # ARG
-        sys.argv.append(self.__class__.find_term1)
-        save_stdout = sys.stdout
-        result = StringIO()
-        sys.stdout = result
-        gitutils.main()
-        sys.stdout = save_stdout
-        self.assertTrue(self.__class__.find_verify1 in result.getvalue())
-        # CMD
-        del sys.argv[2:]
-        del result
-        # ARG
-        sys.argv.append('-f')
-        sys.argv.append(self.__class__.find_term2)
-        save_stdout = sys.stdout
-        result = StringIO()
-        sys.stdout = result
-        gitutils.main()
-        sys.stdout = save_stdout
-        self.assertTrue(self.__class__.find_verify2 in result.getvalue())
 
     def _steps(self):
         for name in dir(self):  # dir() result is implicitly sorted

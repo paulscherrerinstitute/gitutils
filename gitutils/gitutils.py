@@ -106,7 +106,9 @@ def main():
                       git_repository_id=project_id,
                       description=arguments.description,
                       title=arguments.title,
-                      verbosity=arguments.verbosity)
+                      verbosity=arguments.verbosity,
+                      source_branch=arguments.source_branch,
+                      target_branch=arguments.original_branch)
             elif arguments.command == 'setrole':
                 role_access = gitlab_utils.get_role(arguments.role)
                 set_role(role=role_access,

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import sys, os
+import sys
+import os
 
 sys.path.insert(0, os.path.abspath('.'))
 
@@ -18,9 +19,9 @@ add_function_parentheses = True
 #modindex_common_prefix = []
 
 project = u'Gitutils'
-copyright = u'2019, Leonardo hax Damiani'
+copyright = u'Paul Scherrer Institute'
 
-version = '1.0.19'
+version = '1.1.5'
 release = ''
 
 # -- Options for HTML output ---------------------------------------------------
@@ -48,9 +49,9 @@ code_add_python_path = ["../gitutils/*.py"]
 
 
 def setup(app):
-     from sphinx.util.texescape import tex_replacements
-     tex_replacements += [(u'♮', u'$\\natural$'),
-                          (u'ē', u'\=e'),
-                          (u'♩', u'\quarternote'),
-                          (u'↑', u'$\\uparrow$'),
-                          ]
+    from sphinx.util.texescape import tex_replacements
+    tex_replacements += [(u'♮', u'$\\natural$'),
+                         (u'ē', u'\=e'),
+                         (u'♩', u'\quarternote'),
+                         (u'↑', u'$\\uparrow$'),
+                         ]

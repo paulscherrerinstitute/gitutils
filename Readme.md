@@ -1,17 +1,19 @@
 [![Conda](https://img.shields.io/conda/pn/paulscherrerinstitute/gitutils?color=success)](https://anaconda.org/paulscherrerinstitute/gitutils) [![Documentation Status](https://readthedocs.org/projects/gitutils/badge/?version=latest)](https://gitutils.readthedocs.io/en/latest) [![GitHub](https://img.shields.io/github/license/paulscherrerinstitute/gitutils)](https://github.com/paulscherrerinstitute/gitutils/blob/master/LICENSE) ![GitHub Release Date](https://img.shields.io/github/release-date/paulscherrerinstitute/gitutils) ![conda_publish](https://github.com/paulscherrerinstitute/gitutils/workflows/conda_publish/badge.svg)![Lint](https://github.com/paulscherrerinstitute/gitutils/workflows/Lint/badge.svg)
 
-
 # Overview
+
 Gitutils is a python tool to facilitate the server-side operations when developing software that uses git repositories. It allows users to create forks and merge requests directly from the command line interface.
 
 [Detailed readthedocs documentation](https://gitutils.readthedocs.io/en/latest/index.html)
 
 Please note that Gitutils depends on the Oauth2 authentication via the GITLAB EE API v4. Because of this, gitlab accounts with the two-factor authentication (2FA) activated are not allowed to use the Oauth2 authentication and,therefore, the gitutils token can't be generated.
+
 > for more information: https://docs.gitlab.com/ee/user/profile/account/two_factor_authentication.html and https://docs.gitlab.com/ee/api/oauth2.html#resource-owner-password-credentials-flow
 
 # Usage
 
 ## gitutils
+
 ```bash
 usage: gitutils.py [-h] [-e ENDPOINT]
                    {addldap,clonegroup,creategroups,createprojects,find,fork,login,merge,setrole}
@@ -40,9 +42,10 @@ command:
     setrole             Sets the role for a specific user on a specific group or project (or multiple)
 ```
 
-> To see the gitutils help message use: ```> gitutils -h```. If not specified otherwise the default endpoint is ```https://git.psi.ch```.
+> To see the gitutils help message use: `> gitutils -h`. If not specified otherwise the default endpoint is `https://git.psi.ch`.
 
 ## addldap
+
 ```bash
 usage: gitutils.py addldap [-h] group ldapgroup [role]
 
@@ -54,11 +57,11 @@ positional arguments:
 optional arguments:
   -h, --help  show this help message and exit
 ```
-> To see the addldap help message use: ```> gitutils addldap -h```
 
-
+> To see the addldap help message use: `> gitutils addldap -h`
 
 ## clonegroup
+
 ```bash
 usage: gitutils.py clonegroup [-h] group [url] [pattern [pattern ...]]
 
@@ -70,7 +73,6 @@ positional arguments:
 optional arguments:
   -h, --help  show this help message and exit
 ```
-
 
 ## creategroups
 
@@ -85,6 +87,7 @@ optional arguments:
 ```
 
 ## createprojects
+
 ```bash
 usage: gitutils.py createprojects [-h] group name [name ...]
 
@@ -97,6 +100,7 @@ optional arguments:
 ```
 
 ## find
+
 ```bash
 usage: gitutils find [-h] term
 
@@ -107,9 +111,10 @@ optional arguments:
   -h, --help  show this help message and exit
 ```
 
-> To see the clonegroup help message use: ```> gitutils find -h```
+> To see the clonegroup help message use: `> gitutils find -h`
 
 ## fork
+
 ```bash
 usage: gitutils.py fork [-h] [-n] [-c] [-g] [project]
 
@@ -127,12 +132,12 @@ optional arguments:
 
 ```
 
-> To see the fork help message use: ```> gitutils fork -h```
+> To see the fork help message use: `> gitutils fork -h`
 
 ## merge
 
 ```bash
-usage: gitutils.py merge [-h] [-t TITLE] [-p PROJECT] [-d DESCRIPTION]
+usage: gitutils.py merge [-h] [-t TITLE] [-p PROJECT] [-d DESCRIPTION] [-s SOURCE_BRANCH] [-o ORIGINAL_BRANCH]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -147,10 +152,13 @@ optional arguments:
                               project_name divided by "/".
   -d DESCRIPTION, --description DESCRIPTION
                         The description of the merge request that is going to be created.
-
+  -s SOURCE_BRANCH, --source_branch SOURCE_BRANCH
+                        The source branch of the merge request.
+  -o ORIGINAL_BRANCH, --original_branch ORIGINAL_BRANCH
+                        The destination branch of the merge request.
 ```
 
-> To see the merge help message use: ```> gitutils merge -h```
+> To see the merge help message use: `> gitutils merge -h`
 
 ## setrole
 
@@ -167,100 +175,103 @@ optional arguments:
   -p, --project  If indicated, the setrole gives the access on a project level (and not on the default group level).
 ```
 
-> To see the merge help message use: ```> gitutils setrole -h```
+> To see the merge help message use: `> gitutils setrole -h`
 
 ## Examples
 
 ### LOGIN
 
-1. The login command creates the token file and stores it for further usage. 
-    - To fetch the token and create/update, use the following command:
+1.  The login command creates the token file and stores it for further usage. - To fetch the token and create/update, use the following command:
 
-        ```bash
-        > gitutils login
-        ```
-> After the username and password are provided the token is fetched and saved on the local home directory in ~/.gitutils_token. As a verification, a list of owned projects will be fetched to validate the token.
+            ```bash
+            > gitutils login
+            ```
+
+    > After the username and password are provided the token is fetched and saved on the local home directory in ~/.gitutils_token. As a verification, a list of owned projects will be fetched to validate the token.
 
 ### CLONEGROUP
 
 1. The clonegroup command clones all the existing projects from a specified group.
-    - To clone all projects of ```group_name```:
 
-        ```bash
-        > gitutils clonegroup <group_name>
-        ```
-        
-    > This will clone each repo into its specific folder, depending on the amount of projects this command might take a while. Additionally, a 2 seconds sleep time had to be added in between clones in order not to be blocked by Gitlab API.
+   - To clone all projects of `group_name`:
+
+     ```bash
+     > gitutils clonegroup <group_name>
+     ```
+
+   > This will clone each repo into its specific folder, depending on the amount of projects this command might take a while. Additionally, a 2 seconds sleep time had to be added in between clones in order not to be blocked by Gitlab API.
 
 ### FIND
 
 1. The find command will do a general search for all projects and groups.
-    - To search for ```term```:
 
-        ```bash
-        > gitutils find <term>
-        ```
-        > Keep in mind that depending the number of groups and projects, this task can take some minutes...
+   - To search for `term`:
 
-    - The output will display the group and the enumerated matching cases according to this example:
+     ```bash
+     > gitutils find <term>
+     ```
 
-        ```bash
-        Gitutils searching for term " S10CB04-CVME-DBAMT1 "...
-        Group:  archiver_config 
-            1 )   S10CB04-CVME-DBAMT1  :
+     > Keep in mind that depending the number of groups and projects, this task can take some minutes...
 
-            Weblink: https://git.psi.ch/archiver_config/sf_archapp/blob/master/S_DI_BAM_S10CB04-DBAMT1.config#L6
+   - The output will display the group and the enumerated matching cases according to this example:
 
-                    #  BAM vme ioc cpu/memory usage
-                    #
-                    S10CB04-CVME-DBAMT1:MEM_USED                    Monitor 1 60
-                    S10CB04-CVME-DBAMT1:MEM_FREE                    Monitor 1 60
-                    S10CB04-CVME-DBAMT1:IOC_CPU_LOAD                Monitor 1 60
-                    S10CB04-CVME-DBAMT1:UPTIME                      Monitor 1 60
-                    S10CB04-CVME-DBAMT1:STATUS                      Monitor 1 60
-                    #
-                    S10CB04-CVME-DBAMT2:MEM_USED                    Monitor 1 60
-        ```
+     ```bash
+     Gitutils searching for term " S10CB04-CVME-DBAMT1 "...
+     Group:  archiver_config
+         1 )   S10CB04-CVME-DBAMT1  :
 
+         Weblink: https://git.psi.ch/archiver_config/sf_archapp/blob/master/S_DI_BAM_S10CB04-DBAMT1.config#L6
+
+                 #  BAM vme ioc cpu/memory usage
+                 #
+                 S10CB04-CVME-DBAMT1:MEM_USED                    Monitor 1 60
+                 S10CB04-CVME-DBAMT1:MEM_FREE                    Monitor 1 60
+                 S10CB04-CVME-DBAMT1:IOC_CPU_LOAD                Monitor 1 60
+                 S10CB04-CVME-DBAMT1:UPTIME                      Monitor 1 60
+                 S10CB04-CVME-DBAMT1:STATUS                      Monitor 1 60
+                 #
+                 S10CB04-CVME-DBAMT2:MEM_USED                    Monitor 1 60
+     ```
 
 ### FORK
 
 #### Gitutils fork walk-through
 
-1. Define a project to fork and issue the command. Once a repository is forked, it also creates a local clone and an upstream link to the reference repository. Arguments: ___-n___, ___-c___ and project. Examples:
-    - To fork and clone into a repository, use the following command:
+1. Define a project to fork and issue the command. Once a repository is forked, it also creates a local clone and an upstream link to the reference repository. Arguments: **_-n_**, **_-c_** and project. Examples:
 
-        ```bash
-        > gitutils fork <group_name>/<repository_name>
-        ```
+   - To fork and clone into a repository, use the following command:
 
-    - To fork and not clone, add the directive ___-n___ :
+     ```bash
+     > gitutils fork <group_name>/<repository_name>
+     ```
 
-        ```bash
-        > gitutils fork -n <group_name>/<repository_name>
-        ```
+   - To fork and not clone, add the directive **_-n_** :
 
-    - To delete existing fork and create a clean fork of a repository, use the following command:
+     ```bash
+     > gitutils fork -n <group_name>/<repository_name>
+     ```
 
-        ```bash
-        > gitutils fork -c <group_name>/<repository_name>
-        ```
+   - To delete existing fork and create a clean fork of a repository, use the following command:
 
-    - To fork into a different group, use the ___-g___ to indicate which group:
-    
-        ```bash
-        > gitutils fork -g <destination_group> <group_name>/<repository_name>
-        ```
+     ```bash
+     > gitutils fork -c <group_name>/<repository_name>
+     ```
+
+   - To fork into a different group, use the **_-g_** to indicate which group:
+
+     ```bash
+     > gitutils fork -g <destination_group> <group_name>/<repository_name>
+     ```
 
 2. Implement the changes/development necessary on the forked repository.
 
 3. Add all changes, commit and push the changes to your forked repository.
 
-    ```bash
-    > git add .
-    > git commit -m <commit_message>
-    > git push
-    ```
+   ```bash
+   > git add .
+   > git commit -m <commit_message>
+   > git push
+   ```
 
 > Remark: When a successful fork happens, it already creates the upstream link. This is done automatically. Therefore, to synchronize your fork with the current state of the original repository and deal with possible merge conflicts, do the following:
 
@@ -277,52 +288,56 @@ optional arguments:
 
 1. Once all the necessary changes/development have been committed and pushed to a forked repository.
 
-2. Navigate to the home folder of your forked repository (where the ```/.git``` folder is). Issue the command to merge. Arguments:___-t___, ___-d___, ___-p___.
+2. Navigate to the home folder of your forked repository (where the `/.git` folder is). Issue the command to merge. Arguments:**_-t_**, **_-d_**, **_-p_**.
 
-    - To create a merge request for a repository, use the following command while on a git repository folder:
+   - To create a merge request for a repository, use the following command while on a git repository folder:
 
-        ```bash
-        > gitutils merge -t <title> -d <description>
-        ```
-    - To create a merge request for a repository by using the argument ```-p``` to indicate the project:
+     ```bash
+     > gitutils merge -t <title> -d <description>
+     ```
 
-        ```bash
-        > gitutils merge -p <group_name>/<repository_name> -t <title> -d <description>
-        ```
+   - To create a merge request for a repository by using the argument `-p` to indicate the project:
 
-> If ```-p``` is not indicated, ```gitutils``` fetches the group and project from the ```.git/config``` file (it assumes that the command is executed within the root directory of the git repository). Alternatively, one can use the directive `-p` to indicate directly which project should be merged.
+     ```bash
+     > gitutils merge -p <group_name>/<repository_name> -t <title> -d <description>
+     ```
+
+> If `-p` is not indicated, `gitutils` fetches the group and project from the `.git/config` file (it assumes that the command is executed within the root directory of the git repository). Alternatively, one can use the directive `-p` to indicate directly which project should be merged.
 
 > If title and description are not provided, gitutils uses a default title and description indicating the user who is creating the merge request.
 
 ### Full walk-through example
 
- 1. Fork and clone a repository:
+1.  Fork and clone a repository:
+
     ```bash
     > gitutils fork <group_name>/<repository_name>
     ```
 
- 2. Change the current working directory to your local project ```cd <repository_name>```.
+2.  Change the current working directory to your local project `cd <repository_name>`.
 
- 3. Do the changes and/or development necessary.
+3.  Do the changes and/or development necessary.
 
- 4. Stage your changes to commit by adding them:
+4.  Stage your changes to commit by adding them:
 
     ```bash
     > git add .
     ```
 
- 5. Commit your changes with a descriptive commit_message:
+5.  Commit your changes with a descriptive commit_message:
 
     ```bash
     > git commit -m <commit_message>
     ```
 
- 6. Push changes to the forked repository:
+6.  Push changes to the forked repository:
+
     ```bash
     > git push
     ```
 
- 7. Once you're ready to create the merge request, fetch and merge changes from original repository:
+7.  Once you're ready to create the merge request, fetch and merge changes from original repository:
+
     ```bash
     > git fetch upstream
     ```
@@ -332,15 +347,17 @@ optional arguments:
     ```bash
     > git merge upstream/master
     ```
+
     > This brings your fork's 'master' branch into sync with the upstream repository without losing your changes.
 
     > You might have to deal with existing conflicts between your changes and the original repo changes. Decide if you want to keep only your branch's changes, keep only the other branch's changes, or make a brand new change, which may incorporate changes from both branches. If this is the case, go back to step 4 after solving the merge conflicts (add, commit and push the resolved merge conflicts files).
 
- 8. Finally, create a merge request:
+8.  Finally, create a merge request:
 
     ```bash
     > gitutils merge -p <group_name>/<repository_name> -t <title> -d <description>
     ```
+
     if you are located on the repository folder, simply:
 
     ```bash
@@ -350,11 +367,13 @@ optional arguments:
 # Development & extra details
 
 Checkout the project:
+
 ```bash
 > git clone git@git.psi.ch:controls_highlevel_applications/gitutils.git
 ```
 
 ## Tests
+
 Unit and functional tests are available on the folder `tests`
 
 ### Unit tests
@@ -366,6 +385,7 @@ To run the unit tests:
 ```
 
 ### Functional tests
+
 To run the functional tests:
 
 ```bash
@@ -373,6 +393,7 @@ To run the functional tests:
 ```
 
 ### New features/changes
+
 To practically test changes and new implementations:
 
 ```bash
@@ -381,7 +402,7 @@ To practically test changes and new implementations:
 
 ## Building the conda package
 
-First, login into ```gfa-lc6-64```, source the right anaconda environment by executing the command:
+First, login into `gfa-lc6-64`, source the right anaconda environment by executing the command:
 
 ```bash
 > source /opt/gfa/python
@@ -408,6 +429,7 @@ If you need to build for different python versions, use the command (where X.X i
 ```
 
 ## Installation
+
 The package has to be installed as root on gfalcd.psi.ch .
 
 ```
@@ -417,20 +439,20 @@ The package has to be installed as root on gfalcd.psi.ch .
 
 As this will change the global Python distribution, make sure that only the gitutils package gets updated.
 
-
 ## Built With
 
-* [Python-Gitlab](https://python-gitlab.readthedocs.io/en/stable/index.html) - A library for command-line interaction with gitlab servers.
+- [Python-Gitlab](https://python-gitlab.readthedocs.io/en/stable/index.html) - A library for command-line interaction with gitlab servers.
 
 ## Official documentation
 
-The readthedocs documentation is generated based on the files inside the ```docs``` folder in the github repository. 
+The readthedocs documentation is generated based on the files inside the `docs` folder in the github repository.
 
 [Detailed readthedocs documentation](https://gitutils.readthedocs.io/en/latest/index.html)
 
 ## GIT Credentials
+
 Gitutils authenticates on the git server using the OAuth2 protocol. If the token is non existent or not valid, gitutils will request username and password and store the token in a file located on the user's home directory (`~/.gitutils_token`). The user will not be requested for username nor password until the saved token is not valid anymore.
 
 # Contact / Questions
-Questions or problems: Leonardo Hax Damiani - leonardo.hax@psi.ch
 
+Questions or problems: Leonardo Hax Damiani - leonardo.hax@psi.ch

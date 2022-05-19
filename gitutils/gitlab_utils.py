@@ -321,8 +321,9 @@ def print_search_output(group_indication, file_name, results):
         # For each result
         for idx, i in enumerate(results):
             # states the file name
-            print(const.bcolors.BOLD, str(idx+1), ") ",
-                  const.bcolors.OKGREEN, file_name, const.bcolors.ENDC, ":\n")
+            print(const.bcolors.BOLD, idx + 1, ") ", const.bcolors.OKGREEN,
+                  file_name, const.bcolors.ENDC, ":\n")
+
             # group
             print("\t\t Group: "+group_indication)
             # project (project id)
@@ -342,7 +343,8 @@ def print_search_output(group_indication, file_name, results):
               (const.bcolors.FAIL, file_name, const.bcolors.ENDC))
 
 
-def print_grep_output(group_name, project_name, project_id, search_term, result):
+def print_grep_output(
+        group_name, project_name, project_id, search_term, result):
     # States the search_term
     print("\nGroup: ", group_name, "\n", const.bcolors.BOLD,
           const.bcolors.OKGREEN, search_term, const.bcolors.ENDC, ":\n")
@@ -450,7 +452,10 @@ def find_file_by_id(file_name, group_dict, files_only, verbosity):
                 ):
                     match_files.append(results_blob.get('webpath'))
                     print_grep_output(
-                        group_dict['name'], i['name'], i['id'], file_name, results_blob)
+                        group_dict['name'],
+                        i['name'],
+                        i['id'],
+                        file_name, results_blob)
     return 0
 
 
@@ -513,13 +518,14 @@ def check_key(dict_to_search, key):
 def get_project_group_simplified(project_name):
     projects_list = gl.projects.list(search=project_name, all=True)
     list_of_groups = []
+    groupFound = None
     for project in projects_list:
         if project_name == project.attributes['name']:
             project_path = project.attributes['path_with_namespace']
             # verify if it's a personal project
             groupFound = project_path.split('/')[0]
             list_of_groups.append(groupFound)
-    if len(list_of_groups) == 1:
+    if len(list_of_groups) == 1 and groupFound is not None:
         return groupFound
     elif len(list_of_groups) >= 2:
         # if there is a personal group
@@ -566,7 +572,7 @@ def get_project_group(project_name, clean, merge, project_indication):
     elif len(list_of_groups) >= 2:
         # if there is a personal group
         if get_username() in list_of_groups:
-            print("Gitutils warning: "+const.GROUP_NOT_SPECIFIED_ASSUME_USER)
+            print(f"Gitutils warning: {const.GROUP_NOT_SPECIFIED_ASSUME_USER}")
             return get_username()
         raise gitutils_exception.GitutilsError(
             const.MULTIPLE_PROJECTS % (list_of_groups))
@@ -592,12 +598,16 @@ def get_forked_project(git_repository, clean, verbosity):
             if git_repository != proj['name']:
                 print(fmt.format(i, proj['username'], proj['name']))
             else:
-                print(fmt.format(str(i)+' --->',
-                      proj['username'], proj['name']))
+                print(
+                    fmt.format(
+                        f'{str(i)} --->', proj['username'],
+                        proj['name']))
     for project in projects:
+        if project['username'] == get_username():
+            print(project['name'], git_repository, project['path'])
         if (
             project['username'] == get_username()
-            and project['name'] == git_repository
+            and (project['name'] == git_repository or project['path'] == f"{project['username']}/{git_repository}")
             and 'forked_from_project' in project
         ):
             forked_project = project
@@ -625,8 +635,7 @@ def get_branch(project_id):
 
     branch = project.branches.get('master')
     if branch.attributes['name']:
-        logging.info('Master branch found within project id %s. '
-                     % project_id)
+        logging.info(f'Master branch found within project id {project_id}. ')
         return 'master'
     raise gitutils_exception.GitutilsError(
         const.GIT_UNABLE_TO_FIND_MASTER_BRANCH %
@@ -666,11 +675,10 @@ def get_project_id(group_name, project_name):
     """
     projects_list = gl.projects.list(search=project_name, all=True)
     for project in projects_list:
-        if project.attributes['name'] == project_name and group_name == project.attributes['path_with_namespace'].split(
-                '/')[0]:
-            logging.info('Found the project id ( %s - %s ) : %s' % (
-                group_name, project_name,
-                project.attributes['id']))
+        if (project.attributes['name'] == project_name and group_name == project.attributes['path_with_namespace'].split(
+                '/')[0]) or project.attributes['path_with_namespace'] == f"{group_name}/{project_name}":
+            logging.info(
+                f"Found the project id ( {group_name} - {project_name} ) : {project.attributes['id']}")
             return project.attributes['id']
     raise gitutils_exception.GitutilsError(const.PROJECT_ID_NOT_FOUND)
 
@@ -699,7 +707,7 @@ def delete_group(group_name):
     except Exception as ex:
         print(ex)
         returnCode = -1
-    logging.info('Deleted group: %s' % group_name)
+    logging.info(f'Deleted group: {group_name}')
     return returnCode
 
 
@@ -748,7 +756,7 @@ def get_group_id(group_name):
         except Exception as ex:
             raise gitutils_exception.GitutilsError("Group not found.")
     if group_id != -1:
-        logging.info('Group name: %s (id %s)' % (group_name, group_id))
+        logging.info(f'Group name: {group_name} (id {group_id})')
     return group_id
 
 
@@ -769,12 +777,14 @@ def get_group_projects_by_group_id(group_id):
         return get_dict_from_own_projects(group_projects)
 
 # Declare the filter function
+
+
 def filter_name_pattern(projects, pattern):
     proj_filter = []
     for proj in projects:
-        for pat in pattern:
-            if re.search(r''.join(pat), proj['name']):
-                proj_filter.append(proj)
+        proj_filter.extend(proj for pat in pattern if re.search(
+            r''.join(pat), proj['name']))
+
     return proj_filter
 
 
@@ -855,8 +865,8 @@ def create_merge_request(source_tuple,
     project = gl.projects.get(source_tuple[0], lazy=True)
     try:
         mr = project.mergerequests.create({
-            'source_branch': 'master',
-            'target_branch': 'master',
+            'source_branch': source_tuple[1],
+            'target_branch': target_tuple[1],
             'title': merge_def[0],
             'description': merge_def[1],
             'target_project_id': target_tuple[0],
@@ -871,9 +881,9 @@ def create_merge_request(source_tuple,
         merge_def[0],
         merge_def[1],
         source_tuple[0],
-        'master',
+        source_tuple[1],
         target_tuple[0],
-        'master'))
+        target_tuple[1]))
     return mr
 
 

@@ -7,7 +7,10 @@ def merge(verbosity,
           git_repository='',
           git_repository_id='',
           description='',
-          title=''):
+          title='',
+          source_branch='',
+          target_branch=''
+          ):
     """
     Creates a merge request to merge a forked repository.
     :param git_group_id: Id of the group to be pulled from.
@@ -46,13 +49,9 @@ def merge(verbosity,
     final_description = const.GIT_MERGE_DESCRIPTION_MSG \
         % git_username
     if description is not None:
-        final_description += ' User description: ' + description
+        final_description += f' User description: {description}'
     if verbosity:
         print(" \t (-v) Gitutils merge definition: ", title)
-
-    # Merge will be from source and target masters branches
-    source_branch = 'master'
-    target_branch = 'master'
 
     try:
         forked_from_project_id = forked_project['forked_from_project']['id']

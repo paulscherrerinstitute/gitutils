@@ -4,6 +4,12 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
+[UNRELEASED] 2022-05-19
+
+Added
+~~~~~~~
+- Merge cmd new parameters source_branch and destination_branch, allows to work not only with master branches but with a user's specified branch. (default: master)
+
 [1.1.4] 2021-08-17
 
 Added

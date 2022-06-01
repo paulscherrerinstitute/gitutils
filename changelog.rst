@@ -4,7 +4,7 @@ Changelog
 All notable changes to gitutils projecct will be documented in this
 file.
 
-[UNRELEASED] 2022-05-19
+[1.1.5] 2022-06.01
 
 Added
 ~~~~~~~

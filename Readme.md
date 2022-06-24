@@ -144,7 +144,7 @@ optional arguments:
   -t TITLE, --title TITLE
                          The title of the merge request that is going to be created.
   -p PROJECT, --project PROJECT
-                        Indicates the project to be merged. It can be of four different formats:
+                        Indicates the project to be merged. It should follow the format below:
                         - "" : (DEFAULT) The user doesn't provide this argument, the project's group and name
                               will be fetched from the /.git/config folder within the path where the
                               gitutils is being called.
